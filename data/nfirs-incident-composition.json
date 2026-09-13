@@ -1,0 +1,49 @@
+{
+  "title": "NFIRS incidents by incident type series",
+  "source": "ohpah-research Supabase, table nfirs_basicincident, project casmwfxrxlysqizxahcw",
+  "pulled": "2026-09-13",
+  "scope": {
+    "state": "FL",
+    "note": "FLORIDA ONLY. A count of distinct states over the whole table returns 1. Do not describe this as a national record.",
+    "distinct_fdids": 396,
+    "first_incident": "2020-01-01",
+    "last_incident": "2025-12-31"
+  },
+  "row_accounting": {
+    "total_rows": 18251138,
+    "rows_with_numeric_inc_type": 18251127,
+    "rows_dropped": 11,
+    "note": "NOTHING is excluded from the total. 11 rows carry a non numeric inc_type and so fall out of the percentage denominator only. An earlier draft claimed 2,379 exclusions; that figure came from pg_stat_user_tables.n_live_tup, which is an ESTIMATE and not a count. Never derive a statistic from n_live_tup."
+  },
+  "query": "select left(inc_type,1) as series, count(*) from nfirs_basicincident where inc_type ~ '^[0-9]' group by 1 order by 1",
+  "denominator": 18251127,
+  "by_series": [
+    { "series": "3", "label": "Rescue and EMS",        "count": 13217940, "pct": 72.42 },
+    { "series": "6", "label": "Good intent",           "count": 2002982,  "pct": 10.97 },
+    { "series": "5", "label": "Service call",          "count": 1310445,  "pct": 7.18 },
+    { "series": "7", "label": "False alarm",           "count": 1110157,  "pct": 6.08 },
+    { "series": "1", "label": "Fire",                  "count": 289121,   "pct": 1.58 },
+    { "series": "4", "label": "Hazardous condition",   "count": 272337,   "pct": 1.49 },
+    { "series": "9", "label": "Special incident",      "count": 25409,    "pct": 0.14 },
+    { "series": "8", "label": "Severe weather",        "count": 13861,    "pct": 0.08 },
+    { "series": "2", "label": "Overpressure, no fire", "count": 8875,     "pct": 0.05 }
+  ],
+  "specific_types": {
+    "building_fire_111": 47286,
+    "structure_fire_11x": 82503,
+    "ems_calls_321_plus_311": 11147905
+  },
+  "derived": {
+    "false_alarms_over_all_fires": 3.84,
+    "building_fire_share_pct": 0.26,
+    "building_fire_one_in": 386
+  },
+  "rejected_finding": {
+    "claim_tested": "NFIRS firefighter injury reporting is inaccurate",
+    "incidents_claiming_ff_injury": 7527,
+    "total_ff_injuries_claimed": 12600,
+    "total_ff_deaths_claimed": 12,
+    "casualty_modules_filed": 12418,
+    "conclusion": "98.6 percent agreement between the basic module injury counts and the filed casualty modules. This is the OPPOSITE of an under reporting story. Do not use it as one."
+  }
+}

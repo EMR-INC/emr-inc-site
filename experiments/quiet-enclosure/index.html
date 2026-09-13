@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiet Enclosure — EMR Inc.</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* Anthropic Brand Colors */
+        :root {
+            --anthropic-dark: #141413;
+            --anthropic-light: #faf9f5;
+            --anthropic-mid-gray: #b0aea5;
+            --anthropic-light-gray: #e8e6dc;
+            --anthropic-orange: #d97757;
+            --anthropic-blue: #6a9bcc;
+            --anthropic-green: #788c5d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--anthropic-light) 0%, #f5f3ee 100%);
+            min-height: 100vh;
+            color: var(--anthropic-dark);
+        }
+
+        .container { display: flex; min-height: 100vh; padding: 20px; gap: 20px; }
+
+        .sidebar {
+            width: 320px; flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 24px; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(20, 20, 19, 0.1);
+            overflow-y: auto; overflow-x: hidden;
+        }
+
+        .sidebar h1 {
+            font-family: 'Lora', serif; font-size: 24px; font-weight: 500;
+            color: var(--anthropic-dark); margin-bottom: 8px;
+        }
+
+        .sidebar .subtitle {
+            color: var(--anthropic-mid-gray); font-size: 14px;
+            margin-bottom: 32px; line-height: 1.4;
+        }
+
+        .control-section { margin-bottom: 32px; }
+
+        .control-section h3 {
+            font-size: 16px; font-weight: 600; color: var(--anthropic-dark);
+            margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+        }
+
+        .control-section h3::before {
+            content: '•'; color: var(--anthropic-orange); font-weight: bold;
+        }
+
+        .seed-input {
+            width: 100%; background: var(--anthropic-light); padding: 12px;
+            border-radius: 8px; font-family: 'Courier New', monospace; font-size: 14px;
+            margin-bottom: 12px; border: 1px solid var(--anthropic-light-gray);
+            text-align: center;
+        }
+
+        .seed-input:focus {
+            outline: none; border-color: var(--anthropic-orange);
+            box-shadow: 0 0 0 2px rgba(217, 119, 87, 0.1); background: white;
+        }
+
+        .seed-controls {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;
+        }
+
+        .regen-button { margin-bottom: 0; }
+
+        .control-group { margin-bottom: 20px; }
+
+        .control-group label {
+            display: block; font-size: 14px; font-weight: 500;
+            color: var(--anthropic-dark); margin-bottom: 8px;
+        }
+
+        .control-group .hint {
+            display: block; font-size: 11px; font-weight: 400;
+            color: var(--anthropic-mid-gray); margin-top: -4px; margin-bottom: 8px;
+            line-height: 1.35;
+        }
+
+        .slider-container { display: flex; align-items: center; gap: 12px; }
+
+        .slider-container input[type="range"] {
+            flex: 1; height: 4px; background: var(--anthropic-light-gray);
+            border-radius: 2px; outline: none; -webkit-appearance: none;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 16px; height: 16px;
+            background: var(--anthropic-orange); border-radius: 50%;
+            cursor: pointer; transition: all 0.2s ease;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1); background: #c86641;
+        }
+
+        .slider-container input[type="range"]::-moz-range-thumb {
+            width: 16px; height: 16px; background: var(--anthropic-orange);
+            border-radius: 50%; border: none; cursor: pointer; transition: all 0.2s ease;
+        }
+
+        .value-display {
+            font-family: 'Courier New', monospace; font-size: 12px;
+            color: var(--anthropic-mid-gray); min-width: 60px; text-align: right;
+        }
+
+        .swatch-row { display: flex; gap: 6px; margin-bottom: 8px; }
+
+        .swatch {
+            flex: 1; height: 28px; border-radius: 4px;
+            border: 1px solid var(--anthropic-light-gray);
+        }
+
+        .palette-note {
+            font-size: 11px; color: var(--anthropic-mid-gray); line-height: 1.45;
+        }
+
+        .button {
+            background: var(--anthropic-orange); color: white; border: none;
+            padding: 10px 16px; border-radius: 6px; font-size: 14px; font-weight: 500;
+            cursor: pointer; transition: all 0.2s ease; width: 100%;
+        }
+
+        .button:hover { background: #c86641; transform: translateY(-1px); }
+        .button:active { transform: translateY(0); }
+        .button.secondary { background: var(--anthropic-blue); }
+        .button.secondary:hover { background: #5a8bb8; }
+        .button.tertiary { background: var(--anthropic-green); }
+        .button.tertiary:hover { background: #6b7b52; }
+
+        .button-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        .button-row .button { flex: 1; }
+
+        .canvas-area {
+            flex: 1; display: flex; align-items: center; justify-content: center; min-width: 0;
+        }
+
+        #canvas-container {
+            width: 100%; max-width: 1000px; border-radius: 12px; overflow: hidden;
+            box-shadow: 0 20px 40px rgba(20, 20, 19, 0.1); background: white;
+        }
+
+        #canvas-container canvas {
+            display: block; width: 100% !important; height: auto !important;
+        }
+
+        .loading {
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; color: var(--anthropic-mid-gray); padding: 80px 0;
+        }
+
+        .readout {
+            font-family: 'Courier New', monospace; font-size: 12px;
+            color: var(--anthropic-mid-gray); line-height: 1.6;
+            border-top: 1px solid var(--anthropic-light-gray); padding-top: 12px;
+        }
+
+        .readout b { color: var(--anthropic-dark); font-weight: 600; }
+
+        @media (max-width: 600px) {
+            .container { flex-direction: column; }
+            .sidebar { width: 100%; }
+            .canvas-area { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Control Sidebar -->
+        <div class="sidebar">
+            <h1>Quiet Enclosure</h1>
+            <div class="subtitle">
+                A commons converted to a holding, observed while it happens.
+                Generative study for EMR Inc.
+            </div>
+
+            <!-- Seed Section -->
+            <div class="control-section">
+                <h3>Seed</h3>
+                <input type="number" id="seed-input" class="seed-input" value="12345" onchange="updateSeed()">
+                <div class="seed-controls">
+                    <button class="button secondary" onclick="previousSeed()">← Prev</button>
+                    <button class="button secondary" onclick="nextSeed()">Next →</button>
+                </div>
+                <button class="button tertiary regen-button" onclick="randomSeedAndUpdate()">↻ Random</button>
+            </div>
+
+            <!-- Parameters Section -->
+            <div class="control-section">
+                <h3>Parameters</h3>
+
+                <div class="control-group">
+                    <label>Records</label>
+                    <span class="hint">Population of the field. Each one is nothing alone.</span>
+                    <div class="slider-container">
+                        <input type="range" id="records" min="800" max="12000" step="200" value="5200" oninput="updateParam('records', this.value)">
+                        <span class="value-display" id="records-value">5200</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Enclosures</label>
+                    <span class="hint">How many parcels advance across it.</span>
+                    <div class="slider-container">
+                        <input type="range" id="enclosures" min="1" max="24" step="1" value="9" oninput="updateParam('enclosures', this.value)">
+                        <span class="value-display" id="enclosures-value">9</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Commons Retained</label>
+                    <span class="hint">Proportion that stays open inside enclosed ground. At 0.00 everything goes dark.</span>
+                    <div class="slider-container">
+                        <input type="range" id="retained" min="0" max="1" step="0.01" value="0.24" oninput="updateParam('retained', this.value)">
+                        <span class="value-display" id="retained-value">0.24</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Closure Rate</label>
+                    <span class="hint">How fast the fronts travel. Slow is the point.</span>
+                    <div class="slider-container">
+                        <input type="range" id="closureRate" min="0.2" max="3" step="0.05" value="1" oninput="updateParam('closureRate', this.value)">
+                        <span class="value-display" id="closureRate-value">1.00</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Drift Scale</label>
+                    <span class="hint">Grain of the flow the records follow.</span>
+                    <div class="slider-container">
+                        <input type="range" id="driftScale" min="0.0008" max="0.006" step="0.0002" value="0.0022" oninput="updateParam('driftScale', this.value)">
+                        <span class="value-display" id="driftScale-value">0.0022</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Drift Force</label>
+                    <span class="hint">Velocity of accumulation.</span>
+                    <div class="slider-container">
+                        <input type="range" id="driftForce" min="0.2" max="2.5" step="0.1" value="1.1" oninput="updateParam('driftForce', this.value)">
+                        <span class="value-display" id="driftForce-value">1.1</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Burial</label>
+                    <span class="hint">Rate the enclosed ground darkens over what was there.</span>
+                    <div class="slider-container">
+                        <input type="range" id="burial" min="1" max="14" step="0.5" value="4.5" oninput="updateParam('burial', this.value)">
+                        <span class="value-display" id="burial-value">4.5</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Frontier Decay</label>
+                    <span class="hint">Life of the flare at the moment of closure.</span>
+                    <div class="slider-container">
+                        <input type="range" id="frontierDecay" min="6" max="90" step="2" value="34" oninput="updateParam('frontierDecay', this.value)">
+                        <span class="value-display" id="frontierDecay-value">34</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Palette Section -->
+            <div class="control-section">
+                <h3>Palette</h3>
+                <div class="swatch-row">
+                    <div class="swatch" style="background:#12243F" title="navy/700 ground"></div>
+                    <div class="swatch" style="background:#0A1017" title="ink/900 enclosed"></div>
+                    <div class="swatch" style="background:#F6F3EC" title="ivory/50 open record"></div>
+                    <div class="swatch" style="background:#F2A33C" title="beam/500 frontier"></div>
+                    <div class="swatch" style="background:#5A6B7D" title="steel/400 fence"></div>
+                </div>
+                <div class="palette-note">
+                    Fixed to EMR <code>design_system.md</code>. The accent appears only at the
+                    frontier. Spending it anywhere else destroys its meaning, so it is not
+                    adjustable here.
+                </div>
+            </div>
+
+            <!-- Actions Section -->
+            <div class="control-section">
+                <h3>Actions</h3>
+                <div class="button-row">
+                    <button class="button" onclick="initializeSystem()">Regenerate</button>
+                    <button class="button" onclick="resetParameters()">Reset</button>
+                </div>
+                <div class="button-row">
+                    <button class="button secondary" onclick="downloadPNG()">Download PNG</button>
+                </div>
+                <div class="readout" id="readout">
+                    open <b><span id="ro-open">0</span></b> ·
+                    enclosed <b><span id="ro-closed">0</span></b> ·
+                    retained <b><span id="ro-prot">0</span></b>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Canvas Area -->
+        <div class="canvas-area">
+            <div id="canvas-container">
+                <div class="loading">Initializing generative art...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════════════
+        // QUIET ENCLOSURE
+        // A commons converted to a holding. See PHILOSOPHY.md.
+        //
+        // Palette is bound to EMR design_system.md (System A) and is not a free
+        // choice. beam/500 marks the frontier and appears nowhere else.
+        // ═══════════════════════════════════════════════════════════════════════
+
+        const C = {
+            navy:  [0x12, 0x24, 0x3F],
+            ink:   [0x0A, 0x10, 0x17],
+            ivory: [0xF6, 0xF3, 0xEC],
+            beam:  [0xF2, 0xA3, 0x3C],
+            steel: [0x5A, 0x6B, 0x7D]
+        };
+
+        // The invisible armature. atan2(300, 384) = 38.0 degrees, the angle of the
+        // brand beam. Never drawn, never labelled. Enclosure seeds are placed on a
+        // lattice sheared to it, so parcels share a structural bias the eye reads
+        // as intent without being able to locate it.
+        const BEAM_ANGLE = Math.atan2(300, 384);
+
+        let params = {
+            seed: 12345,
+            records: 5200,
+            enclosures: 9,
+            retained: 0.24,
+            closureRate: 1.0,
+            driftScale: 0.0022,
+            driftForce: 1.1,
+            burial: 4.5,
+            frontierDecay: 34
+        };
+
+        let defaultParams = {...params};
+
+        const SIZE = 1200;
+        const SETTLE_FRAMES = 1100;   // the piece resolves, then stops
+        const GRACE_FRAMES  = 150;    // density accrues before anything is taken
+        const LUT_STEPS     = 240;    // angular resolution of a parcel boundary
+
+        let records = [];
+        let parcels = [];
+        let tick = 0;
+        let counts = { open: 0, closed: 0, prot: 0 };
+        let maskThreshold = -1;
+
+        // The retained commons mask, sampled independently of the drift field.
+        function maskNoise(x, y) {
+            return noise(x * 0.0016 + 991, y * 0.0016 + 991);
+        }
+
+        // p5's noise() is not uniformly distributed. It concentrates around 0.5,
+        // so `noise() < 0.24` retains roughly 1% of the field, not 24%. Comparing
+        // against the raw parameter produces a control that lies about itself.
+        // Instead, sample the actual field and take the true quantile, so the
+        // proportion on screen is the proportion asked for.
+        function deriveMaskThreshold(retained) {
+            if (retained <= 0) return -1;   // nothing retained
+            if (retained >= 1) return 2;    // nothing enclosed
+            const N = 110;
+            const samples = new Float32Array(N * N);
+            let k = 0;
+            for (let i = 0; i < N; i++) {
+                for (let j = 0; j < N; j++) {
+                    samples[k++] = maskNoise((i + 0.5) * SIZE / N, (j + 0.5) * SIZE / N);
+                }
+            }
+            samples.sort();
+            return samples[Math.min(samples.length - 1, Math.floor(retained * samples.length))];
+        }
+
+        // ── Record ─────────────────────────────────────────────────────────────
+        // Individually insignificant. The luminous density map is the only thing
+        // that matters and it has to be earned over hundreds of frames.
+        class Record {
+            constructor() { this.reset(true); }
+
+            reset(scatter) {
+                this.x = random(SIZE);
+                this.y = random(SIZE);
+                this.px = this.x;
+                this.py = this.y;
+                this.closed = false;
+                this.flare = 0;
+                this.age = 0;
+                this.span = floor(random(120, 460));
+                // Independent mask. Not an escape hatch, a statement of proportion.
+                // Compared against an empirically derived threshold, never against
+                // params.retained directly: p5 noise is not uniform, so a raw
+                // comparison silently retains ~1% when it claims 24%.
+                this.protectedRecord = maskNoise(this.x, this.y) < maskThreshold;
+                if (!scatter) this.age = 0;
+            }
+
+            step() {
+                if (this.closed) return;
+                const a = noise(this.x * params.driftScale,
+                                this.y * params.driftScale,
+                                tick * 0.0009) * TWO_PI * 2.0;
+                this.px = this.x;
+                this.py = this.y;
+                this.x += Math.cos(a) * params.driftForce;
+                this.y += Math.sin(a) * params.driftForce;
+                this.age++;
+
+                if (this.x < 0 || this.x > SIZE || this.y < 0 || this.y > SIZE || this.age > this.span) {
+                    this.reset(true);
+                }
+            }
+
+            // A trail segment is only legible because its alpha is low. Raising it
+            // turns an accumulation into a scribble.
+            // Stroke state is set ONCE by the caller, not here: calling stroke()
+            // per record rebuilds p5 render state thousands of times a frame and
+            // costs about 6x the frame budget.
+            drawTrail() {
+                const dx = this.x - this.px, dy = this.y - this.py;
+                if (dx * dx + dy * dy > 576) return; // suppress respawn streaks (24px)
+                line(this.px, this.py, this.x, this.y);
+            }
+        }
+
+        // ── Parcel ─────────────────────────────────────────────────────────────
+        // Star shaped, noise perturbed, eased growth. Reads as surveyed ground
+        // rather than as a circle.
+        class Parcel {
+            constructor(x, y, i) {
+                this.x = x;
+                this.y = y;
+                this.sig = i * 37.13 + 5.5;                  // its own noise signature
+                this.maxR = random(190, 420);
+                this.rate = random(0.55, 1.35);
+                this.delay = floor(random(0, 340));
+                this.lut = new Float32Array(LUT_STEPS);
+                this.r = 0;
+                this.lutR = 0;   // radius the LUT was last built at
+            }
+
+            grow() {
+                const t = max(0, (tick - GRACE_FRAMES - this.delay));
+                const g = 1 - Math.exp(-t * 0.0016 * this.rate * params.closureRate);
+                this.r = this.maxR * g;
+                // Rebuild the radius LUT on an interval, not per record. Querying
+                // noise per record instead of per angle is the difference between
+                // 60fps and 8. The shape scales with r between rebuilds, and the
+                // boundary moves far less than a pixel across 4 frames.
+                if (tick % 4 !== 0 && this.lutR > 0) {
+                    const k = this.r / this.lutR;
+                    for (let i = 0; i < LUT_STEPS; i++) this.lut[i] *= k;
+                    this.lutR = this.r;
+                    return;
+                }
+                this.lutR = this.r;
+                for (let i = 0; i < LUT_STEPS; i++) {
+                    const th = (i / LUT_STEPS) * TWO_PI;
+                    const n = noise(Math.cos(th) * 0.9 + this.sig,
+                                    Math.sin(th) * 0.9 + this.sig);
+                    this.lut[i] = this.r * (0.70 + n * 0.52);
+                }
+            }
+
+            contains(px, py) {
+                const dx = px - this.x, dy = py - this.y;
+                const d2 = dx * dx + dy * dy;
+                if (d2 > (this.r * 1.25) * (this.r * 1.25)) return false; // cheap reject
+                let th = Math.atan2(dy, dx);
+                if (th < 0) th += TWO_PI;
+                const idx = (th / TWO_PI * LUT_STEPS) | 0;
+                const rr = this.lut[idx];
+                return d2 < rr * rr;
+            }
+
+            render() {
+                if (this.r < 1) return;
+                // The burial wash. Laid down once per frame at an alpha no single
+                // frame can be blamed for.
+                noStroke();
+                fill(C.ink[0], C.ink[1], C.ink[2], params.burial);
+                this.shape();
+                // The fence. Thin, cool, unemphatic: this is paperwork, not violence.
+                noFill();
+                stroke(C.steel[0], C.steel[1], C.steel[2], 26);
+                strokeWeight(1);
+                this.shape();
+            }
+
+            shape() {
+                beginShape();
+                for (let i = 0; i < LUT_STEPS; i += 2) {
+                    const th = (i / LUT_STEPS) * TWO_PI;
+                    vertex(this.x + Math.cos(th) * this.lut[i],
+                           this.y + Math.sin(th) * this.lut[i]);
+                }
+                endShape(CLOSE);
+            }
+        }
+
+        // ── Setup ──────────────────────────────────────────────────────────────
+        function setup() {
+            const cnv = createCanvas(SIZE, SIZE);
+            cnv.parent('canvas-container');
+            const l = document.querySelector('.loading');
+            if (l) l.style.display = 'none';
+            initializeSystem();
+        }
+
+        function initializeSystem() {
+            randomSeed(params.seed);
+            noiseSeed(params.seed);
+            tick = 0;
+
+            maskThreshold = deriveMaskThreshold(params.retained);
+
+            records = [];
+            for (let i = 0; i < params.records; i++) records.push(new Record());
+
+            // Seeds placed on a lattice sheared to BEAM_ANGLE, then jittered.
+            parcels = [];
+            const step = SIZE / 4.1;
+            const cells = [];
+            for (let u = -3; u <= 4; u++) {
+                for (let v = -3; v <= 4; v++) {
+                    const x = SIZE / 2 + (u * step) * Math.cos(BEAM_ANGLE) - (v * step) * Math.sin(BEAM_ANGLE);
+                    const y = SIZE / 2 + (u * step) * Math.sin(BEAM_ANGLE) + (v * step) * Math.cos(BEAM_ANGLE);
+                    if (x > -60 && x < SIZE + 60 && y > -60 && y < SIZE + 60) cells.push([x, y]);
+                }
+            }
+            // Seeded shuffle so the same seed always picks the same cells.
+            for (let i = cells.length - 1; i > 0; i--) {
+                const j = floor(random(i + 1));
+                [cells[i], cells[j]] = [cells[j], cells[i]];
+            }
+            const n = min(params.enclosures, cells.length);
+            for (let i = 0; i < n; i++) {
+                parcels.push(new Parcel(cells[i][0] + random(-70, 70),
+                                        cells[i][1] + random(-70, 70), i));
+            }
+
+            background(C.navy[0], C.navy[1], C.navy[2]);
+            loop();
+        }
+
+        // ── Draw ───────────────────────────────────────────────────────────────
+        // Order is load bearing:
+        //   1 open trails   2 burial + fence   3 retained trails on top   4 frontier
+        function draw() {
+            tick++;
+
+            let open = 0, closed = 0, prot = 0;
+
+            // 1. The commons accumulating. Stroke set once for the whole pass.
+            stroke(C.ivory[0], C.ivory[1], C.ivory[2], 17);
+            strokeWeight(0.9);
+            for (const r of records) {
+                if (r.closed) { closed++; continue; }
+                r.step();
+                open++;
+                if (r.protectedRecord) { prot++; continue; }
+                r.drawTrail();
+            }
+
+            // 2. Enclosure advances and buries.
+            for (const p of parcels) { p.grow(); p.render(); }
+
+            // 3. Retained commons drawn above the wash, so it persists as bright
+            //    veins running through dark ground.
+            stroke(C.ivory[0], C.ivory[1], C.ivory[2], 26);
+            strokeWeight(1.1);
+            for (const r of records) {
+                if (!r.closed && r.protectedRecord) r.drawTrail();
+            }
+
+            // 4. Closure, and the only place the accent is spent.
+            // Tested every other frame: a front advancing under 1px per frame
+            // cannot outrun this, and it halves the atan2 load.
+            if (tick > GRACE_FRAMES && tick % 2 === 0) {
+                for (const r of records) {
+                    if (r.closed || r.protectedRecord) continue;
+                    for (const p of parcels) {
+                        if (p.contains(r.x, r.y)) {
+                            r.closed = true;
+                            r.flare = params.frontierDecay;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            noStroke();
+            for (const r of records) {
+                if (r.flare > 0) {
+                    const a = (r.flare / params.frontierDecay);
+                    fill(C.beam[0], C.beam[1], C.beam[2], 200 * a * a);
+                    circle(r.x, r.y, 1.6 + 2.2 * a);
+                    r.flare--;
+                }
+            }
+
+            counts = { open, closed, prot };
+            if (tick % 12 === 0) updateReadout();
+
+            if (tick > SETTLE_FRAMES) noLoop(); // it resolves, then it is done
+        }
+
+        function updateReadout() {
+            document.getElementById('ro-open').textContent = counts.open;
+            document.getElementById('ro-closed').textContent = counts.closed;
+            document.getElementById('ro-prot').textContent = counts.prot;
+        }
+
+        // ── UI ─────────────────────────────────────────────────────────────────
+        const DECIMALS = { retained: 2, closureRate: 2, driftScale: 4, driftForce: 1, burial: 1, frontierDecay: 0 };
+
+        function updateParam(name, value) {
+            const v = parseFloat(value);
+            params[name] = v;
+            const d = DECIMALS[name];
+            document.getElementById(name + '-value').textContent =
+                (d === undefined) ? v : v.toFixed(d);
+            initializeSystem();
+        }
+
+        function downloadPNG() {
+            saveCanvas('quiet-enclosure-' + params.seed, 'png');
+        }
+
+        // ── Seed controls ──────────────────────────────────────────────────────
+        function updateSeedDisplay() {
+            document.getElementById('seed-input').value = params.seed;
+        }
+
+        function updateSeed() {
+            const input = document.getElementById('seed-input');
+            const newSeed = parseInt(input.value);
+            if (newSeed && newSeed > 0) {
+                params.seed = newSeed;
+                initializeSystem();
+            } else {
+                updateSeedDisplay();
+            }
+        }
+
+        function previousSeed() {
+            params.seed = Math.max(1, params.seed - 1);
+            updateSeedDisplay();
+            initializeSystem();
+        }
+
+        function nextSeed() {
+            params.seed = params.seed + 1;
+            updateSeedDisplay();
+            initializeSystem();
+        }
+
+        function randomSeedAndUpdate() {
+            params.seed = Math.floor(Math.random() * 999999) + 1;
+            updateSeedDisplay();
+            initializeSystem();
+        }
+
+        function resetParameters() {
+            params = {...defaultParams};
+            for (const k of ['records','enclosures','retained','closureRate','driftScale','driftForce','burial','frontierDecay']) {
+                document.getElementById(k).value = params[k];
+                const d = DECIMALS[k];
+                document.getElementById(k + '-value').textContent =
+                    (d === undefined) ? params[k] : params[k].toFixed(d);
+            }
+            updateSeedDisplay();
+            initializeSystem();
+        }
+
+        window.addEventListener('load', updateSeedDisplay);
+    </script>
+</body>
+</html>

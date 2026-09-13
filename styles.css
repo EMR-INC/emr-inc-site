@@ -1,0 +1,896 @@
+/* ==========================================================================
+   EMR INC.  ·  emr-inc.net
+   Implementation of EMR-INC/OHPAH-DESIGN · design_system.md v1.1 (2026-08-27)
+   "Every surface reads this file first. Numbers only."
+
+   Tracking values in design_system.md are expressed as hundredths of an em,
+   so a stated -2.4 resolves to -0.024em and a stated +24 resolves to +0.24em.
+   This is the only reading under which display tracking lands inside the
+   -2% to -5% band that docs/bold_layout_system.md requires.
+
+   This file deliberately does NOT implement the Spotlight 1-bit system.
+   surfaces/README.md: "Do not reconcile the two."
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. TOKENS
+   -------------------------------------------------------------------------- */
+
+:root {
+  /* COLOR */
+  --ink-900:    #0A1017;
+  --navy-700:   #12243F;
+  --navy-500:   #1E3A5F;
+  --steel-400:  #5A6B7D;
+  --steel-150:  #C9D2DA;
+  --ivory-50:   #F6F3EC;
+  --white:      #FFFFFF;
+  --beam-500:   #F2A33C;
+  --beam-700:   #C97C1C;
+
+  /* SPACING · 8pt base */
+  --s-4:   4px;
+  --s-8:   8px;
+  --s-16: 16px;
+  --s-24: 24px;
+  --s-40: 40px;
+  --s-64: 64px;
+  --s-96: 96px;
+  --s-144: 144px;
+
+  /* STRUCTURE */
+  --container: 1200px;
+  --gutter:    24px;
+  --section-y: 96px;
+  --nav-h:     72px;
+
+  /* RADIUS · 999 nowhere */
+  --r-control:   4px;
+  --r-container: 6px;
+  --r-chip:      3px;
+}
+
+/* --------------------------------------------------------------------------
+   2. RESET
+   -------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--ivory-50);
+  color: var(--navy-700);
+  font-family: "DM Sans", system-ui, -apple-system, sans-serif;
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 26px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img, svg { display: block; max-width: 100%; }
+
+/* --------------------------------------------------------------------------
+   3. TYPE  ·  design_system.md TYPE table, verbatim
+   Archivo never sets a paragraph. Plex Mono carries every measurement
+   and nothing else. 15px floor.
+   -------------------------------------------------------------------------- */
+
+.t-display-lg,
+.t-display,
+.t-h2 {
+  font-family: "Archivo", system-ui, sans-serif;
+  margin: 0;
+}
+
+.t-display-lg { font-weight: 700; font-size: 88px; line-height: 82px; letter-spacing: -0.030em; }
+.t-display    { font-weight: 700; font-size: 64px; line-height: 60px; letter-spacing: -0.024em; }
+.t-h2         { font-weight: 600; font-size: 32px; line-height: 38px; letter-spacing: -0.010em; }
+
+.t-h3 {
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-weight: 600; font-size: 22px; line-height: 28px;
+  margin: 0;
+}
+
+.t-body  { font-size: 17px; line-height: 26px; margin: 0; }
+.t-small { font-size: 15px; line-height: 22px; margin: 0; }
+
+.t-micro {
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-weight: 500; font-size: 11px; line-height: 16px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  margin: 0;
+}
+
+/* Plex Mono. Measurements only. */
+.t-data,
+.t-data-lg,
+.t-label {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}
+
+.t-data    { font-weight: 500; font-size: 15px; line-height: 20px; letter-spacing: 0.04em; }
+.t-data-lg { font-weight: 600; font-size: 44px; line-height: 44px; letter-spacing: -0.010em; }
+.t-label   {
+  font-weight: 500; font-size: 11px; line-height: 14px;
+  letter-spacing: 0.24em; text-transform: uppercase;
+}
+
+/* Max line length 68 characters. */
+.measure { max-width: 68ch; }
+
+/* --------------------------------------------------------------------------
+   4. LAYOUT
+   -------------------------------------------------------------------------- */
+
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section { padding-block: var(--section-y); }
+
+.field-navy  { background: var(--navy-700); color: var(--ivory-50); }
+.field-ink   { background: var(--ink-900);  color: var(--ivory-50); }
+.field-ivory { background: var(--ivory-50); color: var(--navy-700); }
+.field-white { background: var(--white);    color: var(--navy-700); }
+
+/* Grouping: 8 or 16 inside, 40 or more between.
+   Forbidden: 24 on both sides of a boundary. */
+.stack-8  > * + * { margin-top: var(--s-8);  }
+.stack-16 > * + * { margin-top: var(--s-16); }
+.stack-24 > * + * { margin-top: var(--s-24); }
+.stack-40 > * + * { margin-top: var(--s-40); }
+.stack-64 > * + * { margin-top: var(--s-64); }
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-40);
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--s-64);
+}
+
+.rule {
+  height: 1px;
+  border: 0;
+  background: var(--steel-150);
+  margin: 0;
+}
+.field-navy .rule,
+.field-ink  .rule { background: rgba(201, 210, 218, 0.22); }
+
+/* --------------------------------------------------------------------------
+   5. NAV  ·  72px navy/700, 1px beam/500 rule at base
+   -------------------------------------------------------------------------- */
+
+/* Navy, per design_system.md COMPONENTS ("Nav 72px navy/700") and per the
+   corkboard revision (2026-09-13). The white nav was a logged deviation whose
+   justification had already been voided; the returned design resolved the
+   open decision back to the system value. The 1px beam/500 rule at the base
+   is retained. */
+.nav {
+  position: sticky; top: 0; z-index: 40;
+  height: var(--nav-h);
+  background: var(--navy-700);
+  border-bottom: 1px solid var(--beam-500);
+}
+
+.nav__inner {
+  height: 100%;
+  display: flex; align-items: center;
+}
+
+/* No wordmark in the nav (removed 2026-09-13 at the user's direction): the
+   links alone occupy the bar, spread evenly across the full width. */
+.nav__links {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: var(--s-16);
+}
+
+.nav__link {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-weight: 500; font-size: 11px; line-height: 14px;
+  letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--steel-150);
+  text-decoration: none;
+  padding: var(--s-16) var(--s-8);
+  transition: color 120ms ease;
+}
+.nav__link:hover         { color: var(--white); }
+.nav__link[aria-current] { color: var(--white); }
+
+/* --------------------------------------------------------------------------
+   5b. THE BOARD  ·  corkboard revision, ported from Claude design 2026-09-13
+   Three logged deviations from design_system.md, all deliberate:
+     1. Texture. The cork ground is the one textured surface on the site.
+     2. Elevation. Posters carry 0 18px 40px rgba(10,16,23,0.45), heavier than
+        either system shadow, because they are objects pinned over a ground
+        rather than fields in a page.
+     3. Rotation. Posters sit at -1.6 / 1.9 / -2.4 / 2.2 degrees.
+   Everything ON a poster is still the system: a poster declares one field-*
+   class and the existing field-scoped component variants apply unchanged.
+   NOT ported from the returned design: the eyedropped Expect Fire palette
+   (#C75B3C family, sampled from a screenshot, unverified) and the red
+   accordion markers (#8C1C13, off-system). Both resolve to system tokens.
+   -------------------------------------------------------------------------- */
+
+.board {
+  /* A tall poster rotated 2 degrees swings its corners well past the
+     viewport on narrow screens (about 30px at 375). Clip, as the handoff
+     did on its page wrapper; nothing legitimate escapes the board edge. */
+  overflow-x: hidden;
+  background-color: #B4834F;               /* holds while cork.jpg loads */
+  background-image: url("assets/cork.jpg");
+  background-repeat: repeat;
+  background-size: 480px auto;
+  padding: var(--s-64) var(--gutter) var(--s-96);
+  box-shadow: inset 0 12px 32px rgba(10, 16, 23, 0.38),
+              inset 0 -12px 32px rgba(10, 16, 23, 0.38);
+}
+
+.board__slot {
+  position: relative;
+  max-width: 1100px;
+  margin: 0 auto 140px;
+}
+.board__slot:last-child { margin-bottom: 0; }
+
+.poster {
+  position: relative; z-index: 2;
+  border-radius: var(--r-container);
+  padding: var(--s-64) var(--s-40);
+  box-shadow: 0 18px 40px rgba(10, 16, 23, 0.45);
+}
+.poster--r1 { transform: rotate(-1.6deg); }
+.poster--r2 { transform: rotate(1.9deg); }
+.poster--r3 { transform: rotate(-2.4deg); }
+.poster--r4 { transform: rotate(2.2deg); }
+
+/* Pins are children of the poster so they rotate with it. translate lifts
+   them half out of the top edge; the poster does not clip. */
+.pin {
+  position: absolute; top: 24px;
+  width: 30px; height: auto;
+  z-index: 4;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 3px rgba(10, 16, 23, 0.42));
+}
+.pin--left  { left: 34px;  transform: translate(-50%, -45%); }
+.pin--right { right: 34px; transform: translate(50%, -45%); }
+
+/* ---- the stat plate (poster 4). Navy plate on the white poster, and the
+   place where the 38 degree beam re-entered the page: a static 2px beam/500
+   line clipped by the plate, terminating near the number. One beam per
+   surface, and this is the one. ---- */
+.plate {
+  position: relative;
+  background: var(--navy-700);
+  color: var(--ivory-50);
+  border-radius: var(--r-container);
+  padding: 56px var(--s-40);
+  max-width: 720px;
+  overflow: hidden;
+}
+.plate > * { position: relative; }
+.plate__beam {
+  position: absolute;
+  left: -120px; bottom: 64px;
+  width: 216px; height: 2px;
+  background: var(--beam-500);
+  transform: rotate(-38deg);
+  transform-origin: left bottom;
+}
+.plate__num {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: clamp(52px, 8vw, 96px);
+  line-height: 1;
+  letter-spacing: -0.010em;
+  margin: 0;
+}
+
+/* ---- poster 2: the platform feature band and its two companion cards ---- */
+.feature {
+  background: var(--navy-500);
+  border: 1px solid rgba(201, 210, 218, 0.24);
+  border-radius: var(--r-container);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  overflow: hidden;
+  transition: border-color 120ms ease;
+}
+.feature:hover { border-color: var(--steel-150); }
+.feature__copy { padding: var(--s-40); }
+.feature__art { display: flex; align-items: center; }
+.feature__art img {
+  width: 100%; height: auto; object-fit: contain;
+  -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 14%, rgba(0,0,0,1) 86%, rgba(0,0,0,0) 100%);
+  mask-image: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 14%, rgba(0,0,0,1) 86%, rgba(0,0,0,0) 100%);
+}
+
+/* The navy-poster card variants (.card--white, .card--panel) live at the END
+   of section 9, not here. They tie on specificity with .field-navy .card, so
+   only source order keeps them alive; declared here, before section 9, they
+   lose silently. Same trap shape as btn--line on a light field. */
+
+/* ---- poster 3: the metric accordions. Native details/summary, no JS. ---- */
+.acc { border-top: 1px solid var(--steel-150); padding: var(--s-16) 0; }
+.acc:last-of-type { border-bottom: 1px solid var(--steel-150); }
+.acc summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex; align-items: baseline; gap: var(--s-16);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-weight: 500; font-size: 15px; line-height: 20px; letter-spacing: 0.04em;
+  color: var(--navy-700);
+}
+.acc summary::-webkit-details-marker { display: none; }
+.acc__mark {
+  position: relative;
+  width: 12px; height: 12px; flex: 0 0 12px;
+  align-self: center;
+  transition: transform 120ms ease;
+}
+.acc__mark::before,
+.acc__mark::after {
+  content: "";
+  position: absolute;
+  background: var(--navy-700);
+}
+.acc__mark::before { top: 5px; left: 0; width: 12px; height: 1px; }
+.acc__mark::after  { top: 0; left: 5px; width: 1px; height: 12px; }
+.acc[open] > summary .acc__mark { transform: rotate(45deg); }
+.acc__title { flex: 1; }
+.acc__tag {
+  color: var(--steel-400);
+  font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase;
+}
+.acc__body { margin: var(--s-16) 0 0 28px; max-width: 56ch; }
+
+/* ---- poster 4: the numbered position list. Rows in one container, not
+   three cards; the returned composition. ---- */
+.poslist {
+  background: var(--white);
+  border: 1px solid var(--steel-150);
+  border-radius: var(--r-container);
+}
+.pos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--s-16) var(--s-40);
+  padding: var(--s-24) var(--s-24) var(--s-24) 0;
+  transition: background 120ms ease;
+}
+.pos:hover { background: var(--ivory-50); }
+.pos + .pos { border-top: 1px solid var(--steel-150); }
+.pos__head { display: flex; gap: var(--s-24); }
+.pos__num {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-weight: 600; font-size: 15px; line-height: 28px; letter-spacing: 0.04em;
+  color: var(--steel-400);
+  margin: 0;
+  flex: 0 0 64px;
+  text-align: right;
+}
+
+/* Alignment utility for grids whose columns should bottom-align (the hero). */
+.grid-2--end { align-items: end; }
+
+/* --------------------------------------------------------------------------
+   6. THE BEAM
+   "A 2px beam/500 line entering a navy field at 38 degrees, unbroken,
+    ending at a data point." Once per surface. Never on ivory.
+   Geometry: 640 x 500 gives atan(500/640) = 38.0 degrees exactly.
+   -------------------------------------------------------------------------- */
+
+.beam__anchor { position: relative; display: inline-block; }
+
+.beam {
+  position: absolute;
+  left: 100%;            /* bottom left corner of the box sits on the glyph edge */
+  bottom: 38%;
+  width: 384px; height: 300px;   /* atan(300/384) = 38.0 degrees */
+  max-width: none;               /* the global svg reset would clamp this and skew the angle */
+  pointer-events: none;
+  overflow: visible;
+}
+
+.beam__line {
+  stroke: var(--beam-500);
+  stroke-width: 2;
+  fill: none;
+  stroke-dasharray: 488;   /* hypotenuse of 384 x 300, rounded up */
+  stroke-dashoffset: 488;
+  animation: beam-draw 900ms cubic-bezier(0.22, 1, 0.36, 1) 200ms forwards;
+}
+
+@keyframes beam-draw { to { stroke-dashoffset: 0; } }
+
+/* --------------------------------------------------------------------------
+   7. HERO
+   -------------------------------------------------------------------------- */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding-block: var(--s-144) var(--s-96);
+}
+
+/* Interior pages get a shorter head than the landing page. The home hero is
+   the statement and earns 144px of air above it; a section head is a label and
+   does not. Same field, same type, less room. */
+.hero--short { padding-block: var(--s-96) var(--s-64); }
+
+.hero__inner { position: relative; z-index: 2; }
+
+/* CURRENTLY UNUSED. The numeral + beam treatment left the landing page on
+   2026-09-13 when the standards-gap section was cut. It is kept because it is
+   the design system's one hero-number treatment and the pages still to be
+   built will want it, not because anything renders it today. If you are
+   hunting dead CSS, this is deliberate; check the other pages before removing. */
+.hero__numeral {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 320px;
+  line-height: 0.82;
+  letter-spacing: -0.030em;
+  color: var(--ivory-50);
+  margin: 0;
+}
+
+.hero__support {
+  font-family: "Archivo", system-ui, sans-serif;
+  font-weight: 600; font-size: 32px; line-height: 38px;
+  letter-spacing: -0.010em;
+  color: var(--ivory-50);
+  max-width: 24ch;
+  margin: 0;
+}
+
+.hero__detail { color: var(--steel-150); }
+
+/* --------------------------------------------------------------------------
+   8. CONTROLS  ·  height 48, radius 4, touch target 48 x 48
+   -------------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 48px;
+  padding: 0 var(--s-24);
+  border-radius: var(--r-control);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-weight: 500; font-size: 13px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: opacity 120ms ease, border-color 120ms ease;
+}
+
+.btn--solid {
+  background: var(--navy-700);
+  color: var(--ivory-50);
+  border-color: var(--navy-700);
+}
+.btn--solid:hover { opacity: 0.88; }
+
+/* Expect Fire brand accent — the ONE off-system palette on the site, ported
+   from the corkboard handoff at the user's direction (2026-09-13). Scoped to
+   the Expect Fire card only: this button, the wordmark span, and the card's
+   hover border. Do not let #C75B3C leak anywhere else. */
+.btn--fire {
+  background: #C75B3C;
+  color: var(--white);
+  border-color: #C75B3C;
+}
+.btn--fire:hover { background: #A8462B; border-color: #A8462B; }
+
+.wordmark-fire span { color: #C75B3C; }
+
+.btn--line {
+  background: transparent;
+  color: var(--ivory-50);
+  border-color: rgba(201, 210, 218, 0.42);
+}
+.btn--line:hover { border-color: var(--ivory-50); }
+
+.btn--line-dark {
+  background: transparent;
+  color: var(--navy-700);
+  border-color: var(--steel-150);
+}
+.btn--line-dark:hover { border-color: var(--navy-700); }
+
+/* Buttons separated by 8. */
+.btn-row { display: flex; flex-wrap: wrap; gap: var(--s-8); }
+
+:where(a, button, input, textarea):focus-visible {
+  outline: 2px solid var(--beam-500);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   9. CARDS  ·  radius 6 containers. No shadow, no gradient, no glow.
+   -------------------------------------------------------------------------- */
+
+.card {
+  border: 1px solid var(--steel-150);
+  border-radius: var(--r-container);
+  padding: var(--s-40);
+  background: var(--white);
+  transition: border-color 120ms ease;
+  display: flex;
+  flex-direction: column;
+}
+.card:hover { border-color: var(--steel-400); }
+
+.field-navy .card,
+.field-ink  .card {
+  background: transparent;
+  border-color: rgba(201, 210, 218, 0.22);
+}
+.field-navy .card:hover,
+.field-ink  .card:hover { border-color: rgba(201, 210, 218, 0.48); }
+
+.card__spacer { flex: 1 1 auto; min-height: var(--s-40); }
+
+.card__link {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-weight: 500; font-size: 13px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  text-decoration: none;
+  color: var(--navy-700);
+  border-bottom: 1px solid var(--steel-150);
+  padding-bottom: var(--s-4);
+  align-self: flex-start;
+  transition: border-color 120ms ease;
+}
+.card__link:hover { border-color: var(--navy-700); }
+
+.field-navy .card__link,
+.field-ink  .card__link {
+  color: var(--ivory-50);
+  border-color: rgba(201, 210, 218, 0.42);
+}
+.field-navy .card__link:hover,
+.field-ink  .card__link:hover { border-color: var(--ivory-50); }
+
+/* Corkboard poster 2 variants. These MUST stay below the .field-navy .card
+   overrides above: they tie on specificity, so source order is what makes
+   them win. Section 5b points here. */
+.field-navy .card--white {
+  background: var(--white);
+  border-color: var(--steel-150);
+  color: var(--navy-700);
+}
+.field-navy .card--white:hover { border-color: var(--steel-400); }
+.field-navy .card--white .card__link { color: var(--navy-700); border-color: var(--steel-150); }
+.field-navy .card--white .card__link:hover { border-color: var(--navy-700); }
+.field-navy .card--panel { background: var(--navy-500); border-color: rgba(201, 210, 218, 0.24); }
+/* Expect Fire card hover picks up the brand accent (see .btn--fire note). */
+.field-navy .card--white.card--fire:hover { border-color: #C75B3C; }
+
+/* --------------------------------------------------------------------------
+   10. DATA ROW  ·  44px rows
+   -------------------------------------------------------------------------- */
+
+.rows { border-top: 1px solid var(--steel-150); }
+.field-navy .rows, .field-ink .rows { border-top-color: rgba(201, 210, 218, 0.22); }
+
+.row {
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: var(--s-24);
+  align-items: baseline;
+  padding-block: var(--s-16);
+  border-bottom: 1px solid var(--steel-150);
+}
+.field-navy .row, .field-ink .row { border-bottom-color: rgba(201, 210, 218, 0.22); }
+
+.row__key   { color: var(--steel-400); }
+.field-navy .row__key, .field-ink .row__key { color: var(--steel-150); }
+
+/* --------------------------------------------------------------------------
+   10b. DATA ART  ·  unresolved cause of ignition
+   One inline SVG, two panels, no JavaScript and no charting library. The figure
+   has to survive being saved as a single file and handed to someone else, so
+   every value is a literal coordinate in the markup and every colour resolves
+   from the tokens in section 1. Nothing is computed at runtime.
+
+   Geometry lives in the SVG viewBox (960 x 470) and is fixed there. This
+   stylesheet carries ink only: fill, stroke, type. If a number has to move it
+   moves in index.html next to the data, never here.
+
+   Colours double as `fill` (for SVG shapes) and `background` (for the HTML
+   legend swatches) so one declaration serves both and they cannot drift apart.
+   -------------------------------------------------------------------------- */
+
+.viz { margin: 0; }
+
+/* width 100% + height auto against a viewBox is what makes this responsive
+   with no media query. The aspect ratio is locked by the viewBox itself. */
+.viz__svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+/* ---- the four cause segments. ONE accent, and it marks the invalid code. ---- */
+.seg-undet   { fill: var(--navy-700);  background: var(--navy-700); }
+.seg-open    { fill: var(--steel-400); background: var(--steel-400); }
+.seg-invalid { fill: var(--beam-500);  background: var(--beam-500); }
+/* Real, and sub pixel at this scale. Deliberately not enlarged to be seen.
+   steel/150 so that if it ever is wide enough to read, it reads as absence. */
+.seg-blank   { fill: var(--steel-150); background: var(--steel-150); }
+
+/* ---- panel 1 : stacked bars ---- */
+.viz-grid line { stroke: var(--steel-150); stroke-width: 1; }
+/* Zero is the baseline the bars are measured from, so it outranks the interior
+   gridlines. Everything else is scaffolding. */
+.viz-zero { stroke: var(--steel-400) !important; }
+
+.viz-eyebrow {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.12em;
+  fill: var(--steel-400);
+}
+
+.viz-cat {
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 15px; font-weight: 500;
+  fill: var(--navy-700);
+  text-anchor: end;
+}
+.viz-cat--sub {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px; font-weight: 400;
+  fill: var(--steel-400);
+}
+
+.viz-total {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 18px; font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  fill: var(--navy-700);
+}
+
+.viz-tick text, .viz-tick {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.06em;
+  fill: var(--steel-400);
+  text-anchor: middle;
+}
+
+/* ---- panel 2 : the slope ---- */
+.viz-slope-axis { stroke: var(--steel-150); stroke-width: 1; }
+
+.slope-undet { stroke: var(--navy-700);  stroke-width: 2.5; }
+.slope-open  { stroke: var(--steel-400); stroke-width: 2.5; }
+.dot-undet   { fill: var(--navy-700); }
+.dot-open    { fill: var(--steel-400); }
+
+/* An annotation, not a data mark, so it is dashed steel rather than amber.
+   Amber means "invalid code" in panel 1 and must not pick up a second meaning
+   twelve centimetres lower down. */
+.viz-cross {
+  fill: none;
+  stroke: var(--steel-400);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+}
+
+.viz-pt {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 13px; font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  fill: var(--navy-700);
+}
+.viz-pt--end { text-anchor: end; }
+
+.viz-slope-label {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.12em;
+  fill: var(--steel-400);
+  text-anchor: middle;
+}
+
+/* ---- legend + caption ---- */
+.viz__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8) var(--s-24);
+  padding-top: var(--s-24);
+}
+.viz__key {
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+  margin: 0;
+  font-size: 13px;
+  color: var(--navy-700);
+}
+.viz__key .swatch {
+  flex: none;
+  width: 12px; height: 12px;
+  border-radius: 2px;
+}
+.viz__code {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--steel-400);
+  border: 1px solid var(--steel-150);
+  border-radius: 3px;
+  padding: 0 5px;
+}
+
+.viz__caption { color: var(--steel-400); padding-top: var(--s-16); }
+
+@media (max-width: 768px) {
+  /* A 960 unit viewBox scaled into a 335px phone makes the 11px labels about
+     4px tall. Rather than maintain the figure at two sizes, it keeps a minimum
+     width and its own wrapper scrolls. Scaling the text up in user units is the
+     obvious alternative and it is wrong: the type would no longer match the bar
+     geometry it is measured against. The wrapper exists so that only the figure
+     scrolls and the legend and caption below it still wrap normally. */
+  .viz__scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .viz__svg { min-width: 660px; }
+}
+
+/* --------------------------------------------------------------------------
+   11. NOTICE  ·  not a banner, not a badge, not a ribbon.
+   A left rule and text. Nothing else.
+   -------------------------------------------------------------------------- */
+
+.notice {
+  border-left: 2px solid var(--steel-400);
+  padding-left: var(--s-16);
+  color: var(--steel-400);
+}
+.field-navy .notice,
+.field-ink  .notice {
+  border-left-color: rgba(201, 210, 218, 0.42);
+  color: var(--steel-150);
+}
+
+/* --------------------------------------------------------------------------
+   12. FOOTER
+   -------------------------------------------------------------------------- */
+
+/* Corkboard revision: the footer absorbed the Company section. Logo plus
+   contact links on the left, the corporate data rows on the right, then the
+   base link row. Sits on field-navy so the section 10 row variants apply. */
+.footer { padding-block: var(--s-96) var(--s-40); }
+
+.footer__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--s-64);
+  align-items: start;
+}
+
+.footer__logo { width: 100%; max-width: 420px; height: auto; }
+
+.footer__contact {
+  display: flex; flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-24);
+}
+.footer__contact-link {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-weight: 500; font-size: 17px; line-height: 26px; letter-spacing: 0.04em;
+  color: var(--ivory-50);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(201, 210, 218, 0.35);
+  padding-bottom: 2px;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.footer__contact-link:hover { color: var(--beam-500); border-color: var(--beam-500); }
+
+.footer__base {
+  margin-top: var(--s-96);
+  padding-top: var(--s-8);
+  border-top: 1px solid rgba(201, 210, 218, 0.22);
+}
+
+/* Same even spread as the nav (2026-09-13). */
+.footer__links {
+  display: flex; flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
+  gap: var(--s-4) var(--s-16);
+}
+.footer__link {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-weight: 500; font-size: 11px; line-height: 14px;
+  letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--steel-150); text-decoration: none;
+  transition: color 120ms ease;
+}
+.footer__link:hover { color: var(--ivory-50); }
+
+/* --------------------------------------------------------------------------
+   13. MOTION  ·  scroll reveal 400ms, 12px rise, 60ms stagger
+   -------------------------------------------------------------------------- */
+
+/* Scoped to .js, which is set on <html> before first paint. Without scripting
+   every .reveal stays at its resting state and the page reads normally. An
+   unscoped `opacity: 0` here blanks the whole document when JS is off. */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 400ms ease, transform 400ms ease;
+}
+.js .reveal.is-in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .beam__line { animation: none; stroke-dashoffset: 0; }
+  .js .reveal { opacity: 1; transform: none; transition: none; }
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+
+/* --------------------------------------------------------------------------
+   14. BREAKPOINTS  ·  480 · 768 · 1024 · 1280
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 1024px) {
+  .hero__numeral { font-size: 240px; }
+  .beam { width: 256px; height: 200px; }
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  :root { --section-y: 56px; }
+  .t-display-lg { font-size: 56px; line-height: 54px; }
+  .t-display    { font-size: 44px; line-height: 44px; }
+  .t-h2         { font-size: 26px; line-height: 32px; }
+  .hero { padding-block: var(--s-64); }
+  .hero__numeral { font-size: 168px; }
+  .hero__support { font-size: 24px; line-height: 30px; max-width: none; }
+
+  /* The beam is a desktop surface element. Below 768 there is no clear field
+     for it to cross, and SINGLE_REGISTER is absolute that nothing overlaps
+     anything. Absent beats overlapping. */
+  .beam { display: none; }
+
+  .grid-3, .grid-2 { grid-template-columns: 1fr; gap: var(--s-40); }
+  .row { grid-template-columns: 1fr; gap: var(--s-4); }
+
+  .board { padding: var(--s-40) var(--s-16) var(--s-64); }
+  .board__slot { margin-bottom: var(--s-96); }
+  .poster { padding: var(--s-40) var(--s-24); }
+  .plate { padding: var(--s-40) var(--s-24); }
+  .pos { padding: var(--s-24); }
+  .pos__num { flex-basis: 24px; text-align: left; }
+  .footer__base { margin-top: var(--s-64); }
+
+  /* Two rows rather than a wrapped single row. */
+  .nav { height: auto; position: static; }
+  .nav__inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--s-8);
+    padding-block: var(--s-16);
+  }
+  .nav__links { gap: var(--s-16); flex-wrap: wrap; }
+  .nav__link { font-size: 10px; letter-spacing: 0.16em; padding: var(--s-4) 0; }
+}
+
+@media (max-width: 480px) {
+  .hero__numeral { font-size: 128px; }
+}

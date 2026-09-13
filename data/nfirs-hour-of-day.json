@@ -1,0 +1,43 @@
+{
+  "title": "NFIRS incidents by hour of alarm",
+  "source": "ohpah-research Supabase, table nfirs_basicincident, project casmwfxrxlysqizxahcw",
+  "pulled": "2026-09-13",
+  "query": "substring(alarm from 9 for 2) as hour, count(*) where alarm ~ '^[0-9]{12}$'",
+  "note": "NFIRS alarm field is MMDDYYYYHHMM, so the hour is characters 9-10. NOTHING is excluded: the table holds 18251138 rows and all 18251138 parse to a valid hour. An earlier version of this file claimed 18253517 rows with 2379 excluded; that 18253517 came from pg_stat_user_tables.n_live_tup, which is an ESTIMATE and not a count. Never derive a statistic from n_live_tup.",
+  "scope": {
+    "state": "FL",
+    "note": "FLORIDA ONLY. A count of distinct states over the whole table returns 1. Do not describe this as a national record.",
+    "distinct_fdids": 396
+  },
+  "coverage_years": [2020, 2021, 2022, 2023, 2024, 2025],
+  "total_incidents": 18251138,
+  "peak": { "hour": 11, "count": 1066222 },
+  "trough": { "hour": 4, "count": 334405 },
+  "peak_trough_ratio": 3.19,
+  "by_hour": [
+    { "hour": 0,  "count": 481250 },
+    { "hour": 1,  "count": 420943 },
+    { "hour": 2,  "count": 379996 },
+    { "hour": 3,  "count": 348701 },
+    { "hour": 4,  "count": 334405 },
+    { "hour": 5,  "count": 365768 },
+    { "hour": 6,  "count": 453433 },
+    { "hour": 7,  "count": 620375 },
+    { "hour": 8,  "count": 813339 },
+    { "hour": 9,  "count": 953553 },
+    { "hour": 10, "count": 1036838 },
+    { "hour": 11, "count": 1066222 },
+    { "hour": 12, "count": 1059359 },
+    { "hour": 13, "count": 1057381 },
+    { "hour": 14, "count": 1047287 },
+    { "hour": 15, "count": 1033739 },
+    { "hour": 16, "count": 1018192 },
+    { "hour": 17, "count": 1007934 },
+    { "hour": 18, "count": 990077 },
+    { "hour": 19, "count": 929475 },
+    { "hour": 20, "count": 856337 },
+    { "hour": 21, "count": 756272 },
+    { "hour": 22, "count": 659315 },
+    { "hour": 23, "count": 560947 }
+  ]
+}
