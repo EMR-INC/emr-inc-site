@@ -1,102 +1,72 @@
 # Moving emr-inc.net off Wix
 
-This moves the site to Vercel, DNS to Cloudflare, and then the domain registration
-to Cloudflare. Gmail keeps running the whole time.
+The site, DNS and registration all move to Vercel. Gmail (Google Workspace)
+keeps running the whole time. This file records what was done and what's left.
 
-## Where things stand (checked 2026-09-25)
+## Starting point (2026-09-25)
 
-| | Today |
+| | Before |
 |---|---|
 | Site | Wix, Premium plan, served from `185.230.63.x` |
 | DNS | Wix (`ns2.wixdns.net`, `ns3.wixdns.net`) |
-| Registrar | Almost certainly Wix. Wix hosts the zone and has DNSSEC on, and the domain is not set up in Wix as an outside ("connected") domain. To confirm, open Wix > Domains: a **Transfer away from Wix** option means Wix is the registrar. |
-| DNSSEC | **On**, at Wix (key tag 38644) |
+| Registrar | Wix |
+| DNSSEC | On, at Wix |
 | Email | Google Workspace: 5 MX records plus an SPF TXT record |
 | Other | `command-center.emr-inc.net` points to a Lovable app. `en.emr-inc.net` is a Wix language subdomain. |
 
-`dns/emr-inc.net.cloudflare.zone` is an exact copy of the Wix zone.
+`dns/emr-inc.net.cloudflare.zone` is an exact copy of that Wix zone. It's kept
+as the reference for every record that has to survive the move. (It was first
+written for a Cloudflare import, and the plan changed to Vercel afterwards.)
 
-The steps below come in an order that matters. Two of them will take the domain
-offline, email included, if you do them out of order. Both are marked ⚠.
+Wix does not let you change the nameservers on a domain it registered. The only
+way to move DNS off Wix is to transfer the registration. That's why the order
+below matters.
 
----
+## Steps
 
-## Phase 1: Get the new site live on Vercel (no DNS changes)
+1. ✅ **Site on Vercel.** Project `emr-inc-site`, deployed from this repo.
+   Framework: Other, no build step.
+2. ✅ **Point the site while DNS is still at Wix.** In the Wix DNS editor:
+   - the apex `A` record now points to `76.76.21.21`
+   - `www` is a `CNAME` to `cname.vercel-dns.com`
+   - MX and TXT were left alone
 
-1. In Vercel, **Add New > Project** and import `emergency-medical-resolutions/emr-inc-site`.
-   Framework preset: **Other**. Leave the build command and output directory empty.
-   It's a static site, and `vercel.json` handles clean URLs.
-2. Open the `*.vercel.app` URL and click through every page.
-3. **Before cutover, fix the missing pages.** The nav links to `call-sign.html`,
-   `contact.html` and `open-data.html`, and none of them exist yet, so each one is a 404.
-4. Make a list of the current Wix page URLs (for example `/about` and `/contact`).
-   Any that are indexed or shared need a redirect in `vercel.json` so the old links
-   keep working.
-5. Before you cancel Wix, export anything stored in Wix apps. **Forms** submissions,
-   **Bookings** and **Invoices** stay behind when you leave.
+   `emr-inc.net` and `www.emr-inc.net` are added to the Vercel project, and
+   `www` redirects to the apex.
+3. ✅ **DNSSEC off at Wix.** Domains → ⋯ → Edit contact info → Privacy and
+   DNSSEC protection → Show more → Turn off protection.
+4. ✅ **Records pre-loaded in Vercel DNS.**
+   - 5 Google MX records
+   - SPF and Google site-verification TXT records
+   - `command-center` A record and `_lovable.command-center` TXT record
 
-## Phase 2: Move DNS to Cloudflare (site stays on Wix; email untouched)
+   All checked against `ns1.vercel-dns.com`. Vercel adds the apex and `www`
+   records itself, because the domain is attached to the project.
+5. ⏳ **Registrar transfer, Wix → Vercel.**
+   - At Wix, choose **Transfer away from Wix** to get the auth code.
+   - In Vercel, go to **Domains → Transfer In**.
+   - Approve the confirmation email. The transfer takes up to 5 days, and
+     approving Wix's release email makes it faster.
+6. ☐ **After the transfer completes:**
+   - Confirm the domain uses Vercel's nameservers.
+   - Confirm the apex, `www`, the MX records and `command-center` all resolve.
+   - Send a test email.
+7. ☐ **Cancel Wix Premium.** Only after step 6. Before cancelling, export
+   anything you need from Wix Forms, Bookings and Invoices.
 
-6. Create a free Cloudflare account, choose **Add a domain**, enter `emr-inc.net`, and pick the Free plan.
-7. Cloudflare scans for records and will miss some. Delete whatever it found, then go to
-   **DNS > Records > Import and Export** and import `dns/emr-inc.net.cloudflare.zone`.
-   **Clear "Proxy imported records"**, because every record must be grey-cloud (DNS only).
-8. Compare the Cloudflare record list with the zone file line by line: 5 MX records,
-   2 root TXT records, 3 A records, the www CNAME, the en CNAME, and the two command-center records.
-9. ⚠ **Turn DNSSEC off at Wix first.** Go to Wix > Domains > emr-inc.net > Advanced > DNSSEC and turn it off.
-   Then wait at least **24 hours**. If the nameservers change while DNSSEC is on,
-   resolvers reject every answer Cloudflare gives, and the site and **all email** go
-   dark until the fix propagates.
-   To check it's cleared, enter `emr-inc.net` at <https://dnsviz.net> or
-   <https://dnschecker.org/ds-record-lookup.php>. The DS record should be gone.
-10. At Wix > Domains > emr-inc.net > **Change nameservers**, enter the two
-    `*.ns.cloudflare.com` nameservers that Cloudflare assigned to the domain.
-11. Wait for Cloudflare to show the zone as **Active**. That usually takes minutes, and can take up to 24 hours.
-12. Test: send an email to and from an @emr-inc.net address, and load the site, which is still on Wix.
+## Still to do on the site
 
-## Phase 3: Point the site at Vercel
-
-13. In the Vercel project, open **Settings > Domains** and add `emr-inc.net` and `www.emr-inc.net`.
-    Make one of them the primary and have the other redirect to it.
-14. In Cloudflare DNS, replace **only** the website records, using the values Vercel shows.
-    Vercel's defaults are listed below, but use Vercel's values if they differ:
-    - Delete the three `@` A records that point to `185.230.63.x`. Add `@ A 76.76.21.21`.
-    - Change `www` to `CNAME cname.vercel-dns.com`.
-    - Delete the `en` CNAME. It only existed for Wix.
-    - Keep them grey-cloud (DNS only) so Vercel can issue the SSL certificate.
-    - **Leave the MX, TXT and command-center records alone.**
-15. Wait for Vercel to show both domains as valid and issue the certificate. Then load
-    `https://emr-inc.net` and `https://www.emr-inc.net`.
-16. In Cloudflare, go to **DNS > Settings > DNSSEC** and **Enable**. Cloudflare then shows a DS record.
-    Add it at the registrar: at Wix for now, and it's automatic once the domain moves in phase 4.
-
-## Phase 4: Move the registration to Cloudflare Registrar
-
-17. At Wix > Domains: turn off auto-renew, **unlock the domain** (disable transfer lock),
-    and request the **authorization (EPP) code**.
-    Make sure the domain contact email reaches you, because the transfer approval goes there.
-18. In Cloudflare, go to **Domain Registration > Transfer Domains**, select emr-inc.net,
-    enter the code, and pay for one year. Cloudflare charges the wholesale price, and the year is added to your current expiry date.
-19. Approve the transfer email. Transfers take up to 5 days, and Wix can release it sooner.
-    DNS doesn't change during the transfer, because it's already on Cloudflare.
-20. ⚠ **Cancel the Wix Premium plan only after the transfer shows as complete.**
-    If the domain was bundled free with the plan, cancelling early can put it at risk.
-
----
-
-## Recommended while you're in there (optional)
-
-Google Workspace currently has SPF but no **DKIM** or **DMARC**, so mail from
-@emr-inc.net is more likely to land in spam. Once the domain is on Cloudflare:
-
-- DKIM: Google Admin > Apps > Google Workspace > Gmail > **Authenticate email**. Generate the key
-  and add the `google._domainkey` TXT record it gives you, then click **Start authentication**.
-- DMARC: add `_dmarc TXT "v=DMARC1; p=none; rua=mailto:<your address>"`. After a few
-  weeks of clean reports, tighten it to `p=quarantine`.
+- `open-data.html` and `call-sign.html` are linked from the nav and footer but
+  don't exist yet.
+- Workspace has SPF but no DKIM or DMARC.
+  - **DKIM:** Google Admin → Gmail → Authenticate email. Add the
+    `google._domainkey` TXT record in Vercel DNS.
+  - **DMARC:** start with `_dmarc TXT "v=DMARC1; p=none; rua=mailto:<you>"`.
 
 ## If something goes wrong
 
-- **Email stopped:** In Cloudflare, check that the 5 MX records are there and grey-cloud.
-  If the problem started right after the nameserver change, check whether a DS record is still published (step 9).
-- **Site down after phase 3:** Put the three Wix A records and the `www → cdn3.wixdns.net`
-  CNAME back. That rolls the site back to Wix while it's still paid for.
+- **Email stopped after the transfer:** check the 5 MX records under Vercel →
+  Domains → emr-inc.net → DNS Records, then compare them against
+  `dns/emr-inc.net.cloudflare.zone`.
+- **Site down:** check that both domains show as valid under the project's
+  **Settings → Domains**.
