@@ -1,0 +1,34 @@
+; emr-inc.net: the zone as Wix serves it today, for import into Cloudflare.
+;
+; Pulled from the Wix Domain DNS API on 2026-09-25. Every record below is an exact
+; copy, so moving the nameservers to Cloudflare changes nothing on its own:
+; the site stays on Wix and Gmail keeps working. The site moves to Vercel later,
+; as a separate step (MIGRATION.md, phase 3), by editing two records.
+;
+; Import: Cloudflare dashboard > emr-inc.net > DNS > Records > Import and Export.
+; Clear "Proxy imported DNS records" before importing. Every record here must be
+; DNS only (grey cloud).
+;
+; NS and SOA are left out on purpose: Cloudflare writes its own.
+
+$ORIGIN emr-inc.net.
+
+; --- Website (Wix today; replaced in phase 3) ---------------------------------
+@                   3600  IN  A      185.230.63.107
+@                   3600  IN  A      185.230.63.171
+@                   3600  IN  A      185.230.63.186
+www                 3600  IN  CNAME  cdn3.wixdns.net.
+en                  3600  IN  CNAME  cdn1.wixdns.net.
+
+; --- Gmail / Google Workspace (never change these) -----------------------------
+@                   3600  IN  MX     10 aspmx.l.google.com.
+@                   3600  IN  MX     20 alt1.aspmx.l.google.com.
+@                   3600  IN  MX     30 alt2.aspmx.l.google.com.
+@                   3600  IN  MX     40 alt3.aspmx.l.google.com.
+@                   3600  IN  MX     50 alt4.aspmx.l.google.com.
+@                   3600  IN  TXT    "v=spf1 include:_spf.google.com ~all"
+@                   3600  IN  TXT    "google-site-verification=Tu__gnQrU7GJU3EfuZmhTZiPC7gca9o6cPvnA9mgNng"
+
+; --- command-center (Lovable app) ---------------------------------------------
+command-center      600   IN  A      185.158.133.1
+_lovable.command-center 600 IN TXT   "lovable_verify=a190b356d3e037f319bc1064421f369bdd96892d2b413330a5105c1a03797b1d"
