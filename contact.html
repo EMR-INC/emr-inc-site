@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>document.documentElement.className += ' js';</script>
+<title>Contact &middot; EMR Inc.</title>
+<meta name="description" content="Contact EMR Inc. about OHPAH, CALL/SIGN, Expect Victims or Expect Fire.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=DM+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- NAV + FOOTER are duplicated from index.html rather than included, because
+     this is a static site with no template step. If a third page arrives, add
+     the include instead of copying this a third time. -->
+<nav class="nav">
+  <div class="container nav__inner">
+    <div class="nav__links">
+      <a class="nav__link" href="research.html">Research</a>
+      <a class="nav__link" href="https://expectvictims.com">Expect Victims</a>
+      <a class="nav__link" href="https://expectfire.com">Expect Fire</a>
+      <a class="nav__link" href="call-sign.html">CALL/SIGN: DASHBOARD</a>
+      <a class="nav__link" href="contact.html">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HEAD ---------------------------------------------------------------
+     Same short hero as research.html. The form itself is the Google Form
+     "EMR Inc. Contact" (owner michael.harvey@emr-inc.net); responses land in
+     that form, not on this site. To change the questions, edit the form, not
+     this page.
+     ------------------------------------------------------------------------ -->
+<header class="hero hero--short field-navy">
+  <div class="container stack-24">
+    <p class="t-label" style="color: var(--steel-150);">Contact</p>
+    <h1 class="t-display" style="max-width: 20ch;">Talk to us.</h1>
+    <p class="t-body measure" style="color: var(--steel-150);">
+      Locals, members, researchers and reporters: use the form below and it
+      comes straight to us. If you would rather write, email
+      <a href="mailto:michael.harvey@emr-inc.net" style="color: inherit;">michael.harvey@emr-inc.net</a>.
+    </p>
+  </div>
+</header>
+
+<section class="section field-white">
+  <div class="container stack-24">
+    <iframe class="form-embed"
+            src="https://docs.google.com/forms/d/1FXXOZsZu6endmH4xCkZWJ3StrX3s7w-r0k2CAmFuuow/viewform?embedded=true"
+            title="EMR Inc. contact form"
+            loading="lazy">Loading&hellip;</iframe>
+    <div class="btn-row">
+      <a class="btn btn--line-dark" href="https://docs.google.com/forms/d/1FXXOZsZu6endmH4xCkZWJ3StrX3s7w-r0k2CAmFuuow/viewform" target="_blank" rel="noopener">Open the form in a new tab</a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer duplicated by hand from index.html (corkboard revision, navy,
+     Company section absorbed). If a third real page arrives, add an include
+     step instead of copying this a third time. -->
+<footer class="footer field-navy">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="stack-24">
+        <h2 style="margin: 0;">
+          <img class="footer__logo" src="assets/emr-inc-logo.png" alt="EMR Inc.">
+        </h2>
+        <p class="t-body measure" style="color: var(--steel-150);">
+          Emergency Medical Resolutions Inc. We sell through the workplace organization:
+          IAFF locals, not departments and not employers. The local is the buyer because
+          the local represents the member whose record it is.
+        </p>
+        <p class="t-label" style="color: var(--steel-400); margin-top: var(--s-16);">Contact</p>
+        <div class="footer__contact">
+          <a class="footer__contact-link" href="mailto:michael.harvey@emr-inc.net">michael.harvey@emr-inc.net</a>
+          <!-- Only @ohpah.app is verified ours (checked 2026-09-13). The
+               handoff's @expectvictims does not exist and @expectfire belongs
+               to an unrelated account; both dropped. -->
+          <a class="footer__contact-link" href="https://instagram.com/ohpah.app">OHPAH.app on Instagram</a>
+          <a class="footer__contact-link" href="https://expectvictims.com">expectvictims.com</a>
+          <a class="footer__contact-link" href="https://expectfire.com">expectfire.com</a>
+          <a class="footer__contact-link" href="contact.html">Contact page</a>
+        </div>
+      </div>
+      <div class="rows">
+        <div class="row">
+          <p class="t-data row__key">Incorporated</p>
+          <p class="t-body">Delaware C corp, August 19, 2025</p>
+        </div>
+        <div class="row">
+          <p class="t-data row__key">Registration</p>
+          <p class="t-body">Foreign corporation registration in Florida, complete</p>
+        </div>
+        <div class="row">
+          <p class="t-data row__key">Built by</p>
+          <p class="t-body">Firefighters across multiple career departments</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__base stack-16">
+      <div class="footer__links">
+        <a class="footer__link" href="open-data.html">Open data</a>
+        <a class="footer__link" href="research.html">Research</a>
+        <a class="footer__link" href="https://expectvictims.com">Expect Victims</a>
+        <a class="footer__link" href="https://expectfire.com">Expect Fire</a>
+        <a class="footer__link" href="call-sign.html">CALL/SIGN: DASHBOARD</a>
+        <a class="footer__link" href="contact.html">Contact</a>
+      </div>
+      <p class="t-data" style="color: var(--steel-400);">
+        EMR Inc. &nbsp;&middot;&nbsp; emr-inc.net &nbsp;&middot;&nbsp; Delaware C corp &nbsp;&middot;&nbsp; File No. 10300393
+      </p>
+    </div>
+  </div>
+</footer>
+
+<script src="reveal.js"></script>
+</body>
+</html>
