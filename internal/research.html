@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- Internal page, served only to signed-in @emr-inc.net accounts (see
+     middleware.js). base href keeps every relative link and asset path
+     resolving from the site root now that the file lives one level down. -->
+<base href="/">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>document.documentElement.className += ' js';</script>
+<title>Research (internal) &middot; EMR Inc.</title>
+<meta name="description" content="Measurements EMR Inc. has taken against open public safety records. Florida NFIRS, 2020 to 2025.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=DM+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- NAV + FOOTER are duplicated from index.html rather than included, because
+     this is a static site with no template step. If a third page arrives, add
+     the include instead of copying this a third time. -->
+<nav class="nav">
+  <div class="container nav__inner">
+    <div class="nav__links">
+      <a class="nav__link" href="research.html">Research</a>
+      <a class="nav__link" href="https://expectvictims.com">Expect Victims</a>
+      <a class="nav__link" href="https://expectfire.com">Expect Fire</a>
+      <a class="nav__link" href="call-sign.html">CALL/SIGN: DASHBOARD</a>
+      <a class="nav__link" href="contact.html">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HEAD ---------------------------------------------------------------
+     Deliberately shorter than the home hero. This page is the evidence shelf,
+     not a second pitch: the argument is made on the landing page, the
+     measurement is kept here.
+     ------------------------------------------------------------------------ -->
+<header class="hero hero--short field-navy">
+  <div class="container stack-24">
+    <p class="t-label" style="color: var(--steel-150);">Research &nbsp;&middot;&nbsp; Internal &nbsp;&middot;&nbsp; <a href="api/auth/logout" style="color: inherit;">Sign out</a></p>
+    <h1 class="t-display" style="max-width: 20ch;">What the open record actually says.</h1>
+    <p class="t-body measure" style="color: var(--steel-150);">
+      Every figure on this page is a count we ran ourselves against public
+      records. Where a number came to us second hand and we have not opened the
+      primary source, it is not on this page.
+    </p>
+  </div>
+</header>
+
+<!-- FINDING 01 : UNRESOLVED CAUSE OF IGNITION -------------------------------
+     Moved here from the landing page 2026-09-13. Every figure is a real count
+     from nfirs_fireincident joined to nfirs_basicincident, pulled 2026-09-13.
+     Exact SQL and the ETL guard live in the research report
+     ohpah-ops/reports/2026-09-nfirs-documentation-quality.md.
+
+     FOUR THINGS THAT MUST NOT DRIFT:
+       1. This is FLORIDA, 396 departments, 2020-2025. It is not national.
+       2. The 23.34% / 23.26% figures are the share of reports THAT HAVE A FIRE
+          MODULE whose cause of ignition is unresolved. The 56.20% figure is a
+          DIFFERENT denominator: it also counts the 35,416 structure fires filed
+          with no Fire Module at all. Never merge the two or quote one as the
+          other.
+       3. `0` is NOT a valid NFIRS cause_ign value. The specification admits 1
+          through 5 and U. Those 2,291 rows are miscoding, not a category.
+       4. Segments sum to the printed total exactly. The blank segment is real
+          but under one pixel wide at this scale; do not enlarge it to make it
+          visible, and do not drop it to make the arithmetic tidy.
+     Do not round these figures and do not restate them from memory.
+     ------------------------------------------------------------------------ -->
+<section class="section field-white">
+  <div class="container stack-40">
+
+    <div class="stack-16 reveal">
+      <p class="t-label" style="color: var(--steel-400);">Finding 01 &nbsp;&middot;&nbsp; Florida NFIRS &nbsp;&middot;&nbsp; 2020 to 2025</p>
+      <h2 class="t-display">Same blind spot. Opposite reasons.</h2>
+    </div>
+
+    <div class="grid-2">
+      <p class="t-body measure reveal">
+        Every Florida fire report that carries a Fire Module, 2020 through 2025,
+        scored on whether it actually states a cause of ignition. Just under a
+        quarter do not. The rate barely moves between all fires and structure
+        fires alone, which is what makes it a property of the reporting rather
+        than of one kind of call.
+      </p>
+      <p class="t-body measure reveal">
+        The reason flips. Across all fires the largest unresolved group is closed
+        as undetermined: somebody looked and gave up. On structure fires the
+        largest group is still open, filed as under investigation and never
+        returned to. One is a conclusion. The other is a report nobody came back
+        to finish.
+      </p>
+    </div>
+
+    <figure class="viz reveal">
+      <div class="viz__scroll">
+      <svg class="viz__svg" viewBox="0 0 960 470" role="img"
+           aria-labelledby="viz-title viz-desc"
+           xmlns="http://www.w3.org/2000/svg">
+        <title id="viz-title">Unresolved cause of ignition in Florida fire reports, 2020 to 2025</title>
+        <desc id="viz-desc">Across all 172,564 Florida Fire Modules, cause of
+          ignition is unresolved on 23.34 percent: 14.54 percent undetermined
+          after investigation, 7.45 percent still under investigation, 1.33
+          percent carrying an invalid code, 0.02 percent blank. Across the 47,087
+          structure fire modules the total is almost identical at 23.26 percent,
+          but the composition inverts: 9.12 percent undetermined, 12.39 percent
+          still under investigation, 1.71 percent invalid, 0.04 percent blank.
+          Undetermined falls and under investigation rises, and the two series
+          cross.</desc>
+
+        <!-- ---------- PANEL 1 : how much is missing ---------- -->
+        <text x="0" y="30" class="viz-eyebrow">HOW MUCH HAS NO CAUSE</text>
+
+        <!-- gridlines + ticks, 0 to 25 percent across x 240 to 880 -->
+        <g class="viz-grid">
+          <line x1="240" y1="72" x2="240" y2="236" class="viz-zero"/>
+          <line x1="368" y1="72" x2="368" y2="236"/>
+          <line x1="496" y1="72" x2="496" y2="236"/>
+          <line x1="624" y1="72" x2="624" y2="236"/>
+          <line x1="752" y1="72" x2="752" y2="236"/>
+          <line x1="880" y1="72" x2="880" y2="236"/>
+        </g>
+        <g class="viz-tick">
+          <text x="240" y="256">0%</text>
+          <text x="368" y="256">5%</text>
+          <text x="496" y="256">10%</text>
+          <text x="624" y="256">15%</text>
+          <text x="752" y="256">20%</text>
+          <text x="880" y="256">25%</text>
+        </g>
+
+        <!-- row 1 : all fire modules -->
+        <text x="232" y="112" class="viz-cat">All fire modules</text>
+        <text x="232" y="130" class="viz-cat viz-cat--sub">172,564</text>
+        <rect x="240"    y="96" width="372.22" height="44" class="seg-undet"/>
+        <rect x="612.22" y="96" width="190.72" height="44" class="seg-open"/>
+        <rect x="802.94" y="96" width="34.05"  height="44" class="seg-invalid"/>
+        <rect x="836.99" y="96" width="0.51"   height="44" class="seg-blank"/>
+        <text x="853" y="124" class="viz-total">23.34%</text>
+
+        <!-- row 2 : structure fires only -->
+        <text x="232" y="192" class="viz-cat">Structure fires only</text>
+        <text x="232" y="210" class="viz-cat viz-cat--sub">47,087</text>
+        <rect x="240"    y="176" width="233.47" height="44" class="seg-undet"/>
+        <rect x="473.47" y="176" width="317.18" height="44" class="seg-open"/>
+        <rect x="790.66" y="176" width="43.78"  height="44" class="seg-invalid"/>
+        <rect x="834.43" y="176" width="1.02"   height="44" class="seg-blank"/>
+        <text x="851" y="204" class="viz-total">23.26%</text>
+
+        <!-- ---------- PANEL 2 : why it is missing ---------- -->
+        <!-- y=282 sits between the 0-25% tick row (256) and the slope panel top
+             (288). At 316 it landed level with the left-hand data point and read
+             as a label on it rather than as this panel's heading. -->
+        <text x="0" y="282" class="viz-eyebrow">AND WHY  ·  THE TWO REASONS TRADE PLACES</text>
+
+        <line x1="330" y1="288" x2="330" y2="436" class="viz-slope-axis"/>
+        <line x1="800" y1="288" x2="800" y2="436" class="viz-slope-axis"/>
+
+        <!-- Undetermined after investigation : falls -->
+        <line x1="330" y1="303.68" x2="800" y2="347.04" class="slope-undet"/>
+        <circle cx="330" cy="303.68" r="5" class="dot-undet"/>
+        <circle cx="800" cy="347.04" r="5" class="dot-undet"/>
+        <text x="318" y="300" class="viz-pt viz-pt--end">14.54%</text>
+        <text x="812" y="351" class="viz-pt">9.12%</text>
+
+        <!-- Still under investigation : rises -->
+        <line x1="330" y1="360.40" x2="800" y2="320.88" class="slope-open"/>
+        <circle cx="330" cy="360.40" r="5" class="dot-open"/>
+        <circle cx="800" cy="320.88" r="5" class="dot-open"/>
+        <text x="318" y="378" class="viz-pt viz-pt--end">7.45%</text>
+        <text x="812" y="316" class="viz-pt">12.39%</text>
+
+        <!-- the crossing, marked because it is the point -->
+        <circle cx="651.6" cy="333.35" r="13" class="viz-cross"/>
+
+        <text x="330" y="456" class="viz-slope-label">ALL FIRES</text>
+        <text x="800" y="456" class="viz-slope-label viz-slope-label--end">STRUCTURE FIRES</text>
+      </svg>
+      </div>
+
+      <div class="viz__legend">
+        <p class="viz__key"><span class="swatch seg-undet"></span>Undetermined after investigation <span class="viz__code">U</span></p>
+        <p class="viz__key"><span class="swatch seg-open"></span>Still under investigation <span class="viz__code">5</span></p>
+        <p class="viz__key"><span class="swatch seg-invalid"></span>Not a valid NFIRS code <span class="viz__code">0</span></p>
+      </div>
+
+      <figcaption class="viz__caption t-small">
+        Bars run from a true zero against a fixed 25 percent ceiling, so the two
+        totals ending two pixels apart is the result. A fourth segment, a blank
+        field, is present in both bars at 0.02 and 0.04 percent and is under one
+        pixel wide at this scale. Amber marks reports coded <span class="viz__code">0</span>,
+        which the NFIRS specification does not define.
+      </figcaption>
+    </figure>
+
+    <div class="rows">
+      <div class="row reveal">
+        <p class="row__key">Fire modules examined</p>
+        <p class="row__val t-data-lg">172,564</p>
+      </div>
+      <div class="row reveal">
+        <p class="row__key">Unresolved cause &nbsp;·&nbsp; all fires</p>
+        <p class="row__val t-data-lg">23.34%</p>
+      </div>
+      <div class="row reveal">
+        <p class="row__key">Unresolved cause &nbsp;·&nbsp; structure fires</p>
+        <p class="row__val t-data-lg">23.26%</p>
+      </div>
+      <div class="row reveal">
+        <p class="row__key">Reports carrying an invalid cause code</p>
+        <p class="row__val t-data-lg">2,291</p>
+      </div>
+      <div class="row reveal">
+        <p class="row__key">Structure fires with no cause stated &nbsp;·&nbsp; including reports filed with no Fire Module at all</p>
+        <p class="row__val t-data-lg">56.20%</p>
+      </div>
+    </div>
+
+    <p class="t-small measure" style="color: var(--steel-400);">
+      Source: NFIRS Fire Module records filed by Florida fire departments,
+      January 1, 2020 through December 31, 2025, held in the EMR Inc. research
+      database. Florida only. The percentages above are the share of reports that
+      carry a Fire Module whose cause of ignition field reads 5 (under
+      investigation), U (undetermined after investigation), 0 (not a value the
+      NFIRS specification defines), or blank. The 56.20% figure uses a wider
+      denominator: it additionally counts the 35,416 Florida structure fires
+      filed with no Fire Module at all, where the cause field does not exist to
+      be filled. The Fire Module is required for incident types 100 through 173.
+      These are counts of what was filed. They are not rates, they are not
+      adjusted for population, and they say nothing about any individual
+      department.
+    </p>
+
+  </div>
+</section>
+
+<!-- METHOD ----------------------------------------------------------------- -->
+<section class="section field-ivory">
+  <div class="container stack-40">
+
+    <div class="stack-16 reveal">
+      <p class="t-label" style="color: var(--steel-400);">Method</p>
+      <h2 class="t-h2 measure">How these numbers are produced.</h2>
+    </div>
+
+    <div class="rows reveal">
+      <div class="row">
+        <p class="t-data row__key">Source</p>
+        <p class="t-body">
+          NFIRS module records filed by Florida fire departments and obtained as
+          public records. No department supplies us with data privately and no
+          figure here comes from a customer account.
+        </p>
+      </div>
+      <div class="row">
+        <p class="t-data row__key">Counted, not modelled</p>
+        <p class="t-body">
+          These are counts of what was filed. They are not rates, they are not
+          adjusted for population, and no figure here is imputed, weighted, or
+          projected.
+        </p>
+      </div>
+      <div class="row">
+        <p class="t-data row__key">Checked against a load error</p>
+        <p class="t-body">
+          A missing field looks identical to a partly loaded database, so every
+          completeness figure is broken out by filing year before it is
+          published. A gap in the data would appear as a year near zero. None
+          does.
+        </p>
+      </div>
+      <div class="row">
+        <p class="t-data row__key">Published when it fails</p>
+        <p class="t-body">
+          We have tested claims that did not hold and dropped them. Firefighter
+          injury under reporting was one: casualty records agreed with the
+          incident records they belong to, so we do not make that argument.
+        </p>
+      </div>
+    </div>
+
+    <div class="notice reveal">
+      <p class="t-small">
+        Florida only. Nothing on this page is a national figure, a rate, or a
+        statement about any individual department.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- Footer duplicated by hand from index.html (corkboard revision, navy,
+     Company section absorbed). If a third real page arrives, add an include
+     step instead of copying this a third time. -->
+<footer class="footer field-navy">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="stack-24">
+        <h2 style="margin: 0;">
+          <img class="footer__logo" src="assets/emr-inc-logo.png" alt="EMR Inc.">
+        </h2>
+        <p class="t-body measure" style="color: var(--steel-150);">
+          Emergency Medical Resolutions Inc. We sell through the workplace organization:
+          IAFF locals, not departments and not employers. The local is the buyer because
+          the local represents the member whose record it is.
+        </p>
+        <p class="t-label" style="color: var(--steel-400); margin-top: var(--s-16);">Contact</p>
+        <div class="footer__contact">
+          <a class="footer__contact-link" href="mailto:michael.harvey@emr-inc.net">michael.harvey@emr-inc.net</a>
+          <!-- Only @ohpah.app is verified ours (checked 2026-09-13). The
+               handoff's @expectvictims does not exist and @expectfire belongs
+               to an unrelated account; both dropped. -->
+          <a class="footer__contact-link" href="https://instagram.com/ohpah.app">OHPAH.app on Instagram</a>
+          <a class="footer__contact-link" href="https://expectvictims.com">expectvictims.com</a>
+          <a class="footer__contact-link" href="https://expectfire.com">expectfire.com</a>
+          <a class="footer__contact-link" href="contact.html">Contact page</a>
+        </div>
+      </div>
+      <div class="rows">
+        <div class="row">
+          <p class="t-data row__key">Incorporated</p>
+          <p class="t-body">Delaware C corp, August 19, 2025</p>
+        </div>
+        <div class="row">
+          <p class="t-data row__key">Registration</p>
+          <p class="t-body">Foreign corporation registration in Florida, complete</p>
+        </div>
+        <div class="row">
+          <p class="t-data row__key">Built by</p>
+          <p class="t-body">Firefighters across multiple career departments</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__base stack-16">
+      <div class="footer__links">
+        <a class="footer__link" href="open-data.html">Open data</a>
+        <a class="footer__link" href="research.html">Research</a>
+        <a class="footer__link" href="https://expectvictims.com">Expect Victims</a>
+        <a class="footer__link" href="https://expectfire.com">Expect Fire</a>
+        <a class="footer__link" href="call-sign.html">CALL/SIGN: DASHBOARD</a>
+        <a class="footer__link" href="contact.html">Contact</a>
+      </div>
+      <p class="t-data" style="color: var(--steel-400);">
+        EMR Inc. &nbsp;&middot;&nbsp; emr-inc.net &nbsp;&middot;&nbsp; Delaware C corp &nbsp;&middot;&nbsp; File No. 10300393
+      </p>
+    </div>
+  </div>
+</footer>
+
+<script src="reveal.js"></script>
+</body>
+</html>

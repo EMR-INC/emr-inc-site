@@ -56,9 +56,9 @@ def inline_assets(text):
 PAGES = {
     "index.html": (
         "emr-inc-standalone.html",
-        ["The civil service has a data problem.", "56.20%", "82,503"],
+        ["Emergency services has a data problem.", "56.20%", "82,503"],
     ),
-    "research.html": (
+    "internal/research.html": (
         "emr-inc-research-standalone.html",
         ["23.34%", "23.26%", "172,564", "47,087", "2,291", "56.20%", "35,416"],
     ),
@@ -80,6 +80,11 @@ def build(src_name, out_name, must_survive):
         html,
         count=1,
     )
+
+    # --- 1b. drop <base href> ----------------------------------------------
+    # The internal page sets it so its root-relative paths work one folder
+    # down. Opened from disk it would point every link at the filesystem root.
+    html = re.sub(r'[ \t]*<base href="/">\n?', "", html, count=1)
 
     # --- 2. strip scripts ----------------------------------------------------
     # The head script only sets a `.js` class. Every hidden-then-revealed rule
