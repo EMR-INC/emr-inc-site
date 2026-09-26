@@ -894,3 +894,20 @@ img, svg { display: block; max-width: 100%; }
 @media (max-width: 480px) {
   .hero__numeral { font-size: 128px; }
 }
+
+/* --------------------------------------------------------------------------
+   CONTACT FORM  ·  embedded Google Form on contact.html
+   The iframe cannot size itself to the form, so it gets a fixed height that
+   fits the whole form without an inner scrollbar at desktop width; phones
+   scroll inside it. Adjust if questions are added to the form.
+   -------------------------------------------------------------------------- */
+
+.form-embed {
+  display: block;
+  width: 100%;
+  max-width: 760px;
+  height: 1200px;
+  border: 1px solid var(--steel-150);
+  border-radius: var(--r-control);
+  background: var(--white);
+}
