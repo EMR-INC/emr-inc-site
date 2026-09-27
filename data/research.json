@@ -1,105 +1,105 @@
 {
   "schema_version": 1,
   "edition": "rolling seven days",
-  "generated_at_utc": "2026-09-27T06:16:18Z",
+  "generated_at_utc": "2026-09-27T06:55:10Z",
   "source": {
-    "title": "OHPAH - Raw Radio Traffic",
-    "kind": "read-only Google Sheet",
+    "title": "OHPAH Research dispatch corpus",
+    "kind": "aggregate-only public endpoint",
     "published_fields": "aggregate counts only"
   },
   "window": {
-    "start_et": "2026-09-19T11:57:31-04:00",
-    "end_et": "2026-09-26T11:57:31-04:00",
+    "start_et": "2026-09-20T02:19:13-04:00",
+    "end_et": "2026-09-27T02:19:13-04:00",
     "hours": 168
   },
   "metrics": {
-    "total_alert_candidates": 3042,
-    "mean_per_24_hours": 434.6,
-    "night_share_pct": 14.5
+    "total_alert_candidates": 2740,
+    "mean_per_24_hours": 391.4,
+    "night_share_pct": 15.6
   },
   "daily": [
     {
-      "date": "2026-09-19",
-      "label": "Sep 19",
-      "count": 314
-    },
-    {
       "date": "2026-09-20",
       "label": "Sep 20",
-      "count": 396
+      "count": 323
     },
     {
       "date": "2026-09-21",
       "label": "Sep 21",
-      "count": 409
+      "count": 367
     },
     {
       "date": "2026-09-22",
       "label": "Sep 22",
-      "count": 464
+      "count": 435
     },
     {
       "date": "2026-09-23",
       "label": "Sep 23",
-      "count": 423
+      "count": 412
     },
     {
       "date": "2026-09-24",
       "label": "Sep 24",
-      "count": 474
+      "count": 444
     },
     {
       "date": "2026-09-25",
       "label": "Sep 25",
-      "count": 407
+      "count": 372
     },
     {
       "date": "2026-09-26",
       "label": "Sep 26",
-      "count": 155
+      "count": 364
+    },
+    {
+      "date": "2026-09-27",
+      "label": "Sep 27",
+      "count": 23
     }
   ],
   "call_types": [
     {
       "label": "MEDICAL",
-      "count": 2249
-    },
-    {
-      "label": "MVC",
-      "count": 547
+      "count": 2324
     },
     {
       "label": "FIRE",
-      "count": 246
+      "count": 222
+    },
+    {
+      "label": "MVC",
+      "count": 194
     }
   ],
   "quality": {
-    "phi_flagged_rows_excluded": 1501,
-    "dedupe_window_seconds": 180,
-    "candidate_definition": "Dispatch-channel rows with a recognized apparatus identifier and broad emergency type."
+    "structured_rows_read": 3464,
+    "dedupe_window_seconds": 600,
+    "candidate_definition": "Structured dispatch rows with a recognized apparatus identifier and broad emergency type."
   },
   "method": [
     {
-      "label": "Source workbook",
-      "text": "Read-only rows from the OHPAH Raw Radio Traffic workbook. The public artifact contains aggregates only; transcripts, addresses, and source rows are never written to this repository."
+      "label": "Source corpus",
+      "text": "Server-side structured rows from the live OHPAH Research dispatch corpus. The public response contains aggregates only."
     },
     {
       "label": "Candidate rule",
-      "text": "A row counts only when it comes from a station-alerting or dispatch channel and contains both a recognized apparatus identifier and a broad emergency type."
+      "text": "A row counts only when it contains both a recognized apparatus identifier and a broad fire, medical, or motor-vehicle type."
     },
     {
       "label": "Privacy boundary",
-      "text": "Rows flagged for possible PHI are excluded before analysis. The committed snapshot contains counts and time bins only."
+      "text": "The query never selects transcript, address, row identifier, audio, or person-level fields; only aggregate counts leave the worker."
     },
     {
       "label": "Publish check",
-      "text": "The job fails closed when the source schema changes, no candidates are found, required output fields are missing, or generated HTML does not contain the same snapshot."
+      "text": "The endpoint and website publisher fail closed when the source is unavailable, no candidates are found, required fields are missing, or totals do not reconcile."
     }
   ],
   "limitations": [
-    "Florida radio systems represented in the source workbook only.",
+    "Florida radio systems represented in the OHPAH Research corpus only.",
     "Transcript-derived alert candidates are not verified CAD incidents or confirmed unit responses.",
-    "Repeated transmissions are grouped conservatively within a three-minute window.",
-    "No transcript, address, source-row link, or person-level record is published."
+    "Repeated transmissions with the same talkgroup, unit, and broad type are grouped within a ten-minute window.",
+    "No transcript, address, source-row link, row identifier, or person-level record is published."
   ]
 }
