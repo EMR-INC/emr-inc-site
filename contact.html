@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>document.documentElement.className += ' js';</script>
+<title>Contact &middot; EMR Inc.</title>
+<meta name="description" content="Reach EMR Inc. Inquiries route to Michael Harvey. We sell through IAFF locals, so tell us which local you are with.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=DM+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- NAV + FOOTER are copied from index.html and research.html rather than
+     included, because this is a static site with no template step. research.html
+     left a note saying that a third page should bring an include instead of a
+     third copy. This is that third page, and the note is now a real debt: three
+     copies of a nav will drift. Deliberately not paid here, because adding a
+     build step is a larger change than one page, and build-standalone.py already
+     establishes that generated output is a separate concern from source.
+     ------------------------------------------------------------------------ -->
+<nav class="nav">
+  <div class="container nav__inner">
+    <div class="nav__links">
+      <a class="nav__link" href="research.html">Research</a>
+      <a class="nav__link" href="https://expectvictims.com">Expect Victims</a>
+      <a class="nav__link" href="https://expectfire.com">Expect Fire</a>
+      <a class="nav__link" href="call-sign.html">CALL/SIGN: DASHBOARD</a>
+      <a class="nav__link" href="contact.html">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HEAD ---------------------------------------------------------------
+     Short head, same as research.html. A contact page is the one page where the
+     visitor has already decided; restating the pitch here would only stand
+     between them and the form.
+     ------------------------------------------------------------------------ -->
+<header class="hero hero--short field-navy">
+  <div class="container stack-24">
+    <p class="t-label" style="color: var(--steel-150);">Contact</p>
+    <h1 class="t-display" style="max-width: 22ch;">Tell us what you need to see.</h1>
+    <p class="t-body measure" style="color: var(--steel-150);">
+      Everything below reaches Michael Harvey directly. If you are with a union,
+      say which local: we sell through the workplace organization rather than
+      through departments, so the local is who we end up talking to anyway.
+    </p>
+  </div>
+</header>
+
+<!-- INQUIRY FORM ------------------------------------------------------------
+     The embed target is a Google Form whose responses land in the EMR Contact
+     Form Intake sheet in the Data Room, which an Apps Script trigger then syncs
+     into the Contacts tab of the EMR Contact CRM. That chain is why this is an
+     embed and not a hand-rolled <form>: a native form would need a backend to
+     post to, and posting straight at Google's formResponse endpoint breaks
+     every time a question changes.
+
+     REPLACE THE src BELOW BEFORE THIS GOES LIVE.
+     The published form URL is not the same as the editor URL and cannot be
+     derived from it. Open the form, click Send, choose the < > tab, and copy
+     the src out of the iframe snippet Google gives you. It looks like
+     https://docs.google.com/forms/d/e/1FAIpQLS.../viewform?embedded=true
+     The editor link (forms/d/1FXXOZsZu6.../edit) will not render for a visitor.
+     ------------------------------------------------------------------------ -->
+<section class="section field-white">
+  <div class="container stack-40">
+
+    <div class="stack-16 reveal">
+      <p class="t-label" style="color: var(--steel-400);">Inquiry form</p>
+      <h2 class="t-h2">Six questions, most of them optional.</h2>
+      <p class="t-body measure">
+        Name and email are the only ones we need. The rest exists so the reply
+        can be useful the first time instead of asking you the same things back.
+      </p>
+    </div>
+
+    <div class="embed reveal">
+      <iframe
+        class="embed__frame"
+        src="https://docs.google.com/forms/d/e/REPLACE_WITH_PUBLISHED_FORM_ID/viewform?embedded=true"
+        title="EMR Inc. contact form"
+        loading="lazy">
+        Loading the form. If it does not appear, email
+        <a href="mailto:michael.harvey@emr-inc.net">michael.harvey@emr-inc.net</a>.
+      </iframe>
+    </div>
+
+    <div class="notice reveal">
+      <p class="t-small">
+        What happens to what you send: it becomes a contact record in our CRM,
+        used to answer you and to keep track of the conversation. The consent box
+        at the end of the form is the only thing that lets us contact you about
+        anything other than your own inquiry. Leave it unchecked and we will
+        still reply.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- DIRECT ------------------------------------------------------------------
+     A form is a wall for anyone who would rather just write, and for anyone
+     whose station blocks embedded Google content. Both get a plain address.
+     ------------------------------------------------------------------------ -->
+<section class="section field-ivory">
+  <div class="container">
+    <div class="grid-2">
+
+      <div class="stack-16 reveal">
+        <p class="t-label" style="color: var(--steel-400);">Direct</p>
+        <h2 class="t-h3">Or skip the form.</h2>
+        <p class="t-body measure">
+          If the embed above is blocked on your network, or you would rather not
+          fill in boxes, write to us. It reaches the same inbox.
+        </p>
+        <!-- .footer__contact-link is ivory-50, which is correct on the navy
+             footer and invisible here. This field needs the dark control, with
+             the address repeated in plain text so it can still be read and
+             copied by anyone who will not click a mailto. -->
+        <div class="btn-row">
+          <a class="btn btn--line-dark" href="mailto:michael.harvey@emr-inc.net">Email us</a>
+        </div>
+        <p class="t-data" style="color: var(--steel-400);">michael.harvey@emr-inc.net</p>
+      </div>
+
+      <div class="rows reveal">
+        <div class="row">
+          <p class="t-data row__key">Who we sell to</p>
+          <p class="t-body">IAFF locals, not departments and not employers</p>
+        </div>
+        <div class="row">
+          <!-- No inline anchor here on purpose: styles.css sets no rule for a
+               bare <a>, so one would render in browser-default blue, which is
+               not a colour in the system. Navigation to Research is in the nav. -->
+          <p class="t-data row__key">Research enquiries</p>
+          <p class="t-body">See the research page first, then write</p>
+        </div>
+        <div class="row">
+          <p class="t-data row__key">Incorporated</p>
+          <p class="t-body">Delaware C corp, August 19, 2025</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer class="footer field-navy">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="stack-24">
+        <h2 style="margin: 0;">
+          <img class="footer__logo" src="assets/emr-inc-logo.png" alt="EMR Inc.">
+        </h2>
+        <p class="t-body measure" style="color: var(--steel-150);">
+          Emergency Medical Resolutions Inc. We sell through the workplace organization:
+          IAFF locals, not departments and not employers. The local is the buyer because
+          the local represents the member whose record it is.
+        </p>
+        <p class="t-label" style="color: var(--steel-400); margin-top: var(--s-16);">Contact</p>
+        <div class="footer__contact">
+          <a class="footer__contact-link" href="mailto:michael.harvey@emr-inc.net">michael.harvey@emr-inc.net</a>
+          <a class="footer__contact-link" href="https://instagram.com/ohpah.app">OHPAH.app on Instagram</a>
+          <a class="footer__contact-link" href="https://expectvictims.com">expectvictims.com</a>
+          <a class="footer__contact-link" href="https://expectfire.com">expectfire.com</a>
+        </div>
+      </div>
+      <div class="rows">
+        <div class="row">
+          <p class="t-data row__key">Incorporated</p>
+          <p class="t-body">Delaware C corp, August 19, 2025</p>
+        </div>
+        <div class="row">
+          <p class="t-data row__key">Registration</p>
+          <p class="t-body">Foreign corporation registration in Florida, complete</p>
+        </div>
+        <div class="row">
+          <p class="t-data row__key">Built by</p>
+          <p class="t-body">Firefighters across multiple career departments</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__base stack-16">
+      <div class="footer__links">
+        <a class="footer__link" href="open-data.html">Open data</a>
+        <a class="footer__link" href="research.html">Research</a>
+        <a class="footer__link" href="https://expectvictims.com">Expect Victims</a>
+        <a class="footer__link" href="https://expectfire.com">Expect Fire</a>
+        <a class="footer__link" href="call-sign.html">CALL/SIGN: DASHBOARD</a>
+        <a class="footer__link" href="contact.html">Contact</a>
+      </div>
+      <p class="t-data" style="color: var(--steel-400);">
+        EMR Inc. &nbsp;&middot;&nbsp; emr-inc.net &nbsp;&middot;&nbsp; Delaware C corp &nbsp;&middot;&nbsp; File No. 10300393
+      </p>
+    </div>
+  </div>
+</footer>
+
+<script src="reveal.js"></script>
+</body>
+</html>
