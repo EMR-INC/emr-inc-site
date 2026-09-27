@@ -56,7 +56,7 @@ def inline_assets(text):
 PAGES = {
     "index.html": (
         "emr-inc-standalone.html",
-        ["Emergency services has a data problem.", "56.20%", "82,503"],
+        ["Emergency Services has a data problem.", "56.20%", "82,503"],
     ),
     "internal/research.html": (
         "emr-inc-research-standalone.html",
