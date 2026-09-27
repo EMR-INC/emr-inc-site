@@ -801,6 +801,19 @@ img, svg { display: block; max-width: 100%; }
 }
 .footer__contact-link:hover { color: var(--beam-500); border-color: var(--beam-500); }
 
+.footer__mascot {
+  display: block;
+  width: min(220px, 52vw);
+  margin-top: var(--s-40);
+  border-radius: var(--r-container);
+  overflow: hidden;
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+.footer__mascot img { display: block; width: 100%; height: auto; }
+.footer__mascot:hover { transform: translateY(-4px); opacity: 0.88; }
+.footer__mascot:focus-visible { outline: 3px solid var(--beam-500); outline-offset: 4px; }
+.footer__mascot + .footer__base { margin-top: var(--s-24); }
+
 .footer__base {
   margin-top: var(--s-96);
   padding-top: var(--s-8);
