@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script>document.documentElement.className += ' js';</script>
 <title>Open data &middot; EMR Inc.</title>
-<meta name="description" content="Dispatch records EMR Inc. publishes as a plain CSV. Every call captured on the monitored talkgroups, with the radio transcripts left out.">
+<meta name="description" content="Dispatch records EMR Inc. publishes as a plain CSV. Every call captured on the monitored talkgroups, located to the street, with the radio transcripts left out.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=DM+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -17,11 +17,16 @@
      this is a static site with no template step.
 
      ⚠️ THE FILE THIS PAGE OFFERS IS data/dispatch-events.csv, BUILT BY
-     data/build-open-data.py FROM THE SPOTLIGHT WORKBOOK. It is not hand
+     data/build-open-data.py FROM THE DISPATCH EVENTS TABLE. It is not hand
      edited. Re-run the script after any refresh of the source, and update the
      row count and the capture date below to match what the script prints. The
      withheld-column list in the script and the list on this page have to say
-     the same thing, or the page is a false statement about the file. -->
+     the same thing, or the page is a false statement about the file.
+
+     THE SAME GOES FOR THE STREET FIGURES. The script prints "street resolved
+     on N of M rows"; the street column row and the "How the street column is
+     built" section below both quote it. If the source refreshes and those
+     numbers move, they move here too. -->
 <nav class="nav">
   <div class="container nav__inner">
     <div class="nav__links">
@@ -69,7 +74,7 @@
       </div>
       <div class="row">
         <p class="t-data row__key">Columns</p>
-        <p class="t-body">11</p>
+        <p class="t-body">12</p>
       </div>
       <div class="row">
         <p class="t-data row__key">Captured</p>
@@ -78,6 +83,10 @@
       <div class="row">
         <p class="t-data row__key">Format</p>
         <p class="t-body">CSV, UTF-8, comma separated, about 1.3 MB</p>
+      </div>
+      <div class="row">
+        <p class="t-data row__key">Location</p>
+        <p class="t-body">Street only. House numbers and coordinates are not in the file.</p>
       </div>
       <div class="row">
         <p class="t-data row__key">Source</p>
@@ -128,6 +137,15 @@
           <p class="t-data row__key">incident_key</p>
           <p class="t-body">Groups the transmissions belonging to one incident</p>
         </div>
+        <div class="row">
+          <p class="t-data row__key">street</p>
+          <p class="t-body">
+            The street or intersection, with every number removed. 4,030
+            calls carried a location and 2,869 of them reduced to a street.
+            The column is blank on the other 1,161, and on every call that
+            carried no location at all.
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -138,7 +156,7 @@
     <h2 class="t-h2 measure">What is left out, and why.</h2>
     <p class="t-body measure">
       Openness is the argument, so the subtractions are listed rather than made
-      quietly. Five fields exist in our working copy and are not in this file.
+      quietly. Five things exist in our working copy and are not in this file.
     </p>
 
     <div class="rows">
@@ -166,11 +184,12 @@
         </p>
       </div>
       <div class="row">
-        <p class="t-data row__key">Location</p>
+        <p class="t-data row__key">House numbers and coordinates</p>
         <p class="t-body">
-          Addresses and coordinates. A street number next to a medical nature
-          and a timestamp describes a specific person's worst day. The
-          dispatch record can be open without that.
+          The street is published. The number on it is not, and neither are
+          the latitude and longitude, which would give the number back. A
+          house number next to a medical nature and a timestamp describes one
+          specific person's worst day. A street does not.
         </p>
       </div>
       <div class="row">
@@ -185,6 +204,82 @@
       record, and it will disagree with one. And <code>call_type</code> is
       free text taken off the air, so it is uneven: the same nature appears
       under several spellings, and some rows carry none at all.
+    </p>
+  </div>
+</section>
+
+<!-- HOW THE STREET COLUMN IS BUILT -----------------------------------------
+     This section exists because the street column is the one place on the page
+     where we removed something and kept the rest, rather than publishing or
+     withholding a field whole. Anyone deciding whether to trust the file is
+     entitled to the rule, not a reassurance. The four bullets are the four
+     stages in street() in data/build-open-data.py, in order. If that function
+     changes, this changes with it.
+     --------------------------------------------------------------------- -->
+<section class="section field-white">
+  <div class="container stack-40">
+    <div class="stack-24">
+      <h2 class="t-h2 measure">How the street column is built.</h2>
+      <p class="t-body measure">
+        A dispatch address arrives as a spoken phrase, transcribed. There is no
+        structured house-number field to drop, so the number has to be taken
+        out of a sentence. The rule that does it runs in four stages, and it is
+        built to fail closed: when it cannot satisfy itself that what remains
+        is a street, it writes nothing rather than guessing.
+      </p>
+    </div>
+
+    <div class="rows">
+      <div class="row">
+        <p class="t-data row__key">Unit first</p>
+        <p class="t-body">
+          Apartment, unit, suite, room and floor are the most precise part of
+          the phrase, so everything from the designator to the end of the
+          string goes before anything else is looked at.
+        </p>
+      </div>
+      <div class="row">
+        <p class="t-data row__key">Then the number</p>
+        <p class="t-body">
+          The leading house number is removed, repeatedly: a transcription can
+          carry two of them, as in <code>110 57 Artists Avenue</code>. A
+          direction of travel spoken on the air, <code>westbound</code>, is
+          removed too. <code>North</code> and <code>South</code> are kept,
+          because on these streets they are part of the name.
+        </p>
+      </div>
+      <div class="row">
+        <p class="t-data row__key">Then a check it is a street</p>
+        <p class="t-body">
+          What is left has to end in a word that names a kind of street, from a
+          fixed list: street, avenue, road, drive, boulevard and the rest. If
+          it does not, the row gets a blank. This is what rejects fragments and
+          transcription noise, and it is the reason 1,161 located calls have no
+          street.
+        </p>
+      </div>
+      <div class="row">
+        <p class="t-data row__key">Then a check for numbers</p>
+        <p class="t-body">
+          Any remaining digit disqualifies the row, with one exception: an
+          ordinal such as <code>12th</code> or <code>21st</code> is kept,
+          because it is the street's name and is shared by everyone on it.
+          Nothing in the published column contains a house number.
+        </p>
+      </div>
+    </div>
+
+    <p class="t-body measure">
+      One consequence is worth naming rather than leaving for someone to
+      discover. A street is not anonymous everywhere. Of the 1,590 distinct
+      streets in the file, 1,147 appear exactly once,
+      and on a short street a single call with a medical nature and a
+      timestamp narrows to very few doors. Coarsening the timestamp does not
+      fix that, because what identifies is the street and not the clock. We
+      publish it anyway, because the argument of this page is that a dispatch
+      record paid for publicly should be readable, and a street without a
+      number is what the agency's own released records contain. If you are
+      building on this file, that is the part to handle with care.
     </p>
   </div>
 </section>
