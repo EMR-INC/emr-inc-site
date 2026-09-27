@@ -4,8 +4,7 @@ Surveyed 2026-09-27 against the live repo, the Vercel account, and public DNS.
 This is a description of what exists right now, not a plan. Where the live state
 and the repo disagree, the disagreement is the finding, and it is called out.
 
-Companion documents: `MIGRATION.md` (on the PR #1 branch) is the runbook for the
-Wix move. `DESIGN-BRIEF.md` is the standing brief for visual revisions.
+Companion documents: `MIGRATION.md` is the runbook for the Wix move. `DESIGN-BRIEF.md` is the standing brief for visual revisions.
 
 ---
 
@@ -17,7 +16,8 @@ step. It is served by Vercel. Its DNS is still served by Wix. Its mail is Google
 Workspace. Nothing else in the company runs on this repo.
 
 The thing to know before reading further: **the content that is live is not the
-content on `main`.** The two have never been the same.
+content on `main`.** That was true until 2026-09-27, when PR #1 was merged and
+the two were reconciled. Section 2 records what changed.
 
 ---
 
@@ -25,53 +25,49 @@ content on `main`.** The two have never been the same.
 
 `EMR-INC/emr-inc-site` (public, GitHub, default branch `main`).
 
-Two lines of work diverge from a common ancestor, `2f7b038` (2026-09-13, the
-corkboard landing page):
+Until 2026-09-27 two lines of work diverged from a common ancestor, `2f7b038`
+(2026-09-13, the corkboard landing page), and the live site ran the one that was
+not `main`:
 
-| Line | Head | Adds on top of `2f7b038` | Deployed? |
+| Line | Head | Added on top of `2f7b038` | Was deployed? |
 |---|---|---|---|
 | `main` | `2fe9078` | `call-sign.html`, `member-research.html` | never |
-| PR #1 `claude/wix-to-vercel-cloudflare-wyu0ka` | `a3812a2` (2026-09-26) | Vercel config, contact page, `/internal` auth gate, DNS zone, runbook | **yes, this is live** |
+| PR #1 `claude/wix-to-vercel-cloudflare-wyu0ka` | `a3812a2` (2026-09-26) | Vercel config, contact page, `/internal` auth gate, DNS zone, runbook | yes, this was live |
 
-`main` has never been deployed. Every one of the eight Vercel deployments,
-including both production promotions, came off the PR #1 branch. That branch
-forked before `2fe9078`, so it is also one commit behind `main` today.
+Every one of the eight Vercel deployments, including both production promotions,
+came off the PR #1 branch. `main` had never been deployed at all.
 
-[PR #1](https://github.com/EMR-INC/emr-inc-site/pull/1) is still open and still a
-draft. So the live site is running unmerged draft code, and `main` is not a
-description of production.
+### The reconciliation
 
-(`claude/emr-inc-architecture-tr2aqt`, the branch carrying this document, is
-`main` plus this file and nothing else.)
+[PR #1](https://github.com/EMR-INC/emr-inc-site/pull/1) was merged to `main` as
+`c8cecd8`. `main` now holds both lines: the Vercel configuration and the auth
+gate from PR #1, and the Call/Sign and member-research pages that were only ever
+on `main`.
 
-### What each line holds that the other does not
+The merge was clean, and that was the thing to watch rather than a reassurance.
+PR #1 edited the headline in `index.html` and `main`'s extra commit did not touch
+that file, so Git would have silently adopted PR #1's wording over `main`'s "The
+civil service has a data problem." with nobody asked. The headline was therefore
+decided deliberately rather than by default, and set to:
 
-- `main` only: `call-sign.html`, `member-research.html`. Headline: "The civil
-  service has a data problem."
-- PR #1 only: `vercel.json`, `.vercelignore`, `middleware.js`, `api/auth/*`,
-  `api/_lib/session.mjs`, `contact.html`, `internal/research.html`,
-  `dns/emr-inc.net.cloudflare.zone`, `MIGRATION.md`. Headline: "Emergency
-  services has a data problem."
+> **Emergency Services has a data problem.**
 
-### What merging PR #1 would actually do
+It appears in three places that have to agree: the `<h1>` in `index.html`, that
+page's `<meta name="description">`, and the content guard in
+`build-standalone.py`. The guard is what makes the third one load-bearing: the
+build asserts the string survives the rewrite, so a headline change that misses
+`build-standalone.py` fails the build rather than shipping quietly.
 
-Tested by merging the two heads locally. It merges **cleanly, with no conflict**,
-which is the part worth flagging: PR #1 edits the headline and `main`'s extra
-commit does not touch `index.html`, so Git resolves it silently in PR #1's
-favour. The site would come out reading "Emergency services has a data problem."
-without anyone being asked.
+Note the capitalisation is deliberate and is the one place the site departs from
+sentence case in a headline.
 
-That is not a conflict to resolve, it is a decision that will get made by default
-unless someone makes it deliberately.
+PR #1's "Still open" note was stale where it said `call-sign.html` did not exist
+yet; `main` had carried it since `2fe9078`.
 
-The rest of the merge is good news: the result has `call-sign.html`,
-`member-research.html`, `contact.html` and `internal/research.html` together, and
-the only link left broken anywhere is `open-data.html`.
+### Where that leaves the link graph
 
-PR #1's own "Still open" note is stale on one point: it says `call-sign.html`
-does not exist yet, and `main` has had it since `2fe9078`.
-
----
+`open-data.html` is the only broken link left, on all six pages. Everything else
+resolves. Before the merge each branch was missing what the other had.
 
 ## 3. Hosting
 
@@ -148,7 +144,7 @@ registration itself has to move first. Until it does, Wix is a live dependency
 and cancelling Wix Premium would take the site and the mail down. `MIGRATION.md`
 step 7 has this ordering right; it is worth not skipping.
 
-`dns/emr-inc.net.cloudflare.zone` (PR #1 branch) is an exact 2026-09-25 copy of
+`dns/emr-inc.net.cloudflare.zone` is an exact 2026-09-25 copy of
 the Wix zone, kept as the reference for what has to survive the move. Note it
 records the pre-move apex (`185.230.63.x`, Wix) and `www` (`cdn3.wixdns.net`),
 not the current Vercel values. It is a snapshot of the starting point, not of
@@ -165,28 +161,25 @@ outbound mail asks union officers to trust a link.
 
 ## 5. Pages and content
 
-Files on `main`: `index.html`, `research.html`, `call-sign.html`,
-`member-research.html`, plus `styles.css` (30 KB, the whole design system) and
+Files on `main` after the merge: `index.html`, `research.html`,
+`call-sign.html`, `member-research.html`, `contact.html` and
+`internal/research.html`, plus `styles.css` (30 KB, the whole design system) and
 `reveal.js`.
-
-Files on the deployed PR #1 branch: `index.html`, `research.html`,
-`contact.html`, `internal/research.html`.
 
 ### Broken internal links
 
-`open-data.html` is linked from the nav or footer of every page and **does not
-exist on any branch**. After a PR #1 merge it is still the one broken link, on
-all six pages.
+`open-data.html` is linked from the nav or footer of **all six pages** and does
+not exist. It is the only broken link left; the PR #1 merge resolved the rest.
 
-Beyond that, each branch is missing exactly what the other one has, so whichever
-one you look at today, some of the nav is dead:
+Before the merge each branch was missing exactly what the other had, which is why
+whichever one you looked at had dead nav links:
 
-| Link target | On `main` | On the deployed branch | After merging both |
+| Link target | `main` before | Deployed branch before | `main` now |
 |---|---|---|---|
 | `open-data.html` | missing | missing | **still missing** |
-| `contact.html` | **missing** | present | present |
-| `call-sign.html` | present | **missing** | present |
-| `member-research.html` | present | missing (not linked) | present |
+| `contact.html` | missing | present | present |
+| `call-sign.html` | present | missing | present |
+| `member-research.html` | present | not linked | present |
 
 Every page carries a hand-copied nav and footer. `internal/research.html` says so
 in a comment: there is no template step, so a nav change is a four-to-six file
@@ -195,8 +188,8 @@ differ between branches.
 
 ### The `/internal` gate
 
-On the PR #1 branch, `research.html` is a public summary and the full research
-page moved to `internal/research.html`, gated by `middleware.js`:
+`research.html` is a public summary and the full research page lives at
+`internal/research.html`, gated by `middleware.js`:
 
 - `middleware.js` matches `/internal` and `/internal/:path*`, verifies an
   HMAC-SHA256 signed cookie (`emr_internal`, 8-hour life), and 302s to
@@ -219,9 +212,12 @@ The design is sound. Two things about its current state:
    "Internal sign-in is not configured yet." and the gate refuses everyone.
    Fail-closed is the right default, but right now nobody can reach the internal
    page, including the people it is for.
-2. It does not matter yet, because none of it is in production. The live
-   deployment predates the gate, so `/research` currently still serves the full
-   research page to the public.
+2. **The merge makes this live.** Before it, the deployed build predated the
+   gate and `/research` served the full research page to anyone. Now `/research`
+   is the public summary and the full page sits at `/internal/research` behind a
+   sign-in that no one can complete. Until the three variables are set, the full
+   research page is reachable by nobody, including the staff it was gated for.
+   Setting them in the Vercel project is the whole fix.
 
 ---
 
@@ -353,28 +349,34 @@ repo is downstream of both by hand-copy, with no sync and no check.
 
 ## 10. Risks, in the order I would deal with them
 
-1. **Production runs an unmerged draft branch, and `main` has never shipped.**
-   Merge PR #1 and make `main` the production branch. Decide the headline
-   *before* merging: the merge is clean, so Git will silently adopt "Emergency
-   services has a data problem." over `main`'s "The civil service has a data
-   problem." if nobody chooses.
+1. **The `/internal` gate is unusable, and the merge made it live.**
+   `SESSION_SECRET`, `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are unset in
+   the Vercel project, so sign-in returns "Internal sign-in is not configured
+   yet." and the gate refuses everyone. `/research` is now the public summary, so
+   the full research page is reachable by nobody. Setting the three variables is
+   the whole fix.
 2. **Wix is still a live dependency.** Wix serves the DNS, including the MX
    records. Losing or cancelling it before the registrar transfer completes takes
-   down both the site and company mail. Finish steps 5–7 of `MIGRATION.md`, in
+   down both the site and company mail. Finish steps 5 to 7 of `MIGRATION.md`, in
    that order.
 3. **No DKIM, no DMARC.** SPF alone. Add both in whichever DNS is authoritative
    at the time.
-4. **`open-data.html` is linked everywhere and exists nowhere.** Every page ships
-   a 404 in its nav, and merging PR #1 does not fix this one. Either build it or
-   drop the link.
-5. **Each branch fixes half the link graph.** The deployed branch has
-   `contact.html` but not `call-sign.html`; `main` is the reverse. Until they
-   merge, whichever is live has dead nav links.
-6. **The `/internal` gate is unusable.** Three environment variables are unset in
-   Vercel, so it refuses everyone. It also is not in production yet, which means
-   the full research page is currently public at `/research`.
-7. **A public repo holds the DNS zone, including verification tokens.** `dns/` is
-   `.vercelignore`d but still committed. Low severity, but combined with a
-   possible GitHub Pages setting on the root it is worth a look.
-8. **Nav and footer are copy-pasted across six files.** Already drifted. The next
-   page makes it worse.
+4. **`open-data.html` is linked everywhere and exists nowhere.** All six pages
+   ship a 404 in the nav, and it is the one link the merge did not fix. Either
+   build it or drop the link.
+5. **Confirm Vercel's production branch is `main`.** Every deployment so far came
+   off the old PR #1 branch, so this was never exercised. If it is not `main`, a
+   merge still does not reach the site and the repo goes back to disagreeing with
+   production.
+6. **A public repo holds the DNS zone, including verification tokens.** `dns/` is
+   `.vercelignore`d but still committed. Low severity on its own, but worth a
+   look alongside whether GitHub Pages is still serving the repo root.
+7. **Nav and footer are copy-pasted across six files.** Already drifted once. The
+   next page makes it worse.
+
+### Closed by the 2026-09-27 merge
+
+- Production ran an unmerged draft branch while `main` had never shipped. PR #1
+  merged as `c8cecd8`, with the headline decided deliberately rather than taken
+  by Git's silent default.
+- Each branch fixed half the link graph. `main` now carries all six pages.
