@@ -32,12 +32,24 @@
 </nav>
 
 <!-- PAGE HEAD ---------------------------------------------------------------
-     ⚠️ THE LIVE APP IS https://callsign.ohpah.app AND THAT HOSTNAME IS NOT A
-     TYPO TO BE TIDIED. It is a Cloudflare Worker Custom Domain on the ohpah.app
-     zone. emr-inc.net sits on Wix nameservers, so a callsign.emr-inc.net
-     alias is not available without migrating NS and pre-loading the company's
-     Google MX records first. Repointing the link at an emr-inc.net host that
-     does not exist would take the dashboard offline for every member.
+     The dashboard now lives at https://callsign.emr-inc.net, the company domain.
+     Both entrances work and serve the identical app; this page uses the company
+     one deliberately, so members are not asked to trust a second brand's domain
+     to read their own numbers.
+
+     ⚠️ THE APP ITSELF STILL RUNS ON CLOUDFLARE, NOT VERCEL. callsign.emr-inc.net
+     is a CNAME to Vercel which host-scope rewrites every path to the Cloudflare
+     Worker behind spotlight.ohpah.app. The previous version of this comment said
+     a callsign.emr-inc.net alias was impossible while emr-inc.net sits on Wix
+     nameservers. That was half right and is preserved here because the half that
+     is still true matters: emr-inc.net NS are ns2/ns3.wixdns.net, so the zone is
+     NOT in the Cloudflare account, so a Workers Custom Domain on this hostname
+     remains impossible and the Vercel hop is load-bearing. Do not "simplify" it
+     to a CNAME straight at the Worker — that request reaches Cloudflare matching
+     no zone and fails at TLS, which reads as a certificate problem and is not.
+
+     https://callsign.ohpah.app also still serves, so any link already in a
+     member's hands keeps working. Nothing here needs to be kept in sync with it.
 
      The label says DASHBOARD because the wordmark does. The product is
      "CALL/SIGN:" and the dashboard is the thing this page links to.
@@ -55,7 +67,7 @@
       numbers instead of anecdotes.
     </p>
     <div class="btn-row">
-      <a class="btn btn--line" href="https://callsign.ohpah.app">Open the dashboard</a>
+      <a class="btn btn--line" href="https://callsign.emr-inc.net">Open the dashboard</a>
     </div>
     <p class="t-small" style="color: var(--steel-400);">
       Sign in required. Accounts are issued to the local, not requested here.
@@ -166,7 +178,7 @@
           departments already publish and what could be measured from it.
         </p>
         <div class="btn-row">
-          <a class="btn btn--solid" href="https://callsign.ohpah.app">Open the dashboard</a>
+          <a class="btn btn--solid" href="https://callsign.emr-inc.net">Open the dashboard</a>
           <a class="btn btn--line-dark" href="contact.html">Ask about your local</a>
         </div>
       </div>
