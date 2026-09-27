@@ -1,254 +1,72 @@
 #!/usr/bin/env python3
-"""Build the public EMR research snapshot and data-art page from call traffic.
+"""Build the public EMR research snapshot and data-art page.
 
-The source workbook contains PHI-adjacent raw transcripts. This program keeps
-that material in memory only and writes aggregate counts. It never serializes a
-transcript, address, source row, or person-level record.
+The source is an aggregate-only JSON endpoint. This publisher rejects row-level
+fields and writes the same verified snapshot into JSON and both public pages.
 """
 
 from __future__ import annotations
 
 import argparse
-import datetime as dt
-import hashlib
 import html
 import json
 import os
-import re
 import sys
-import tempfile
-from collections import Counter
+import urllib.request
 from pathlib import Path
-from typing import Iterable
-from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SHEET_ID = "1ZqyTT9tFZqq61FrRbdS8MFXjmmycv3sa9xgvgfgP3GU"
-TIME_ZONE = ZoneInfo("America/New_York")
-WINDOW = dt.timedelta(days=7)
-DEDUP_SECONDS = 180
-
-UNIT_RE = re.compile(
-    r"\b(rescue|engine|truck|ladder|squad|medic|ambulance|battalion|chief|hazmat|tanker|marine|air)\s*[- ]?(\d{1,3}[a-z]?)\b",
-    re.I,
-)
-
-TYPE_RULES: list[tuple[str, re.Pattern[str]]] = [
-    ("FIRE", re.compile(r"\b(structure fire|working fire|fire alarm|smoke|brush fire|vehicle fire|outside fire|commercial fire|residential fire)\b", re.I)),
-    ("MVC", re.compile(r"\b(mvc|mva|motor vehicle|vehicle accident|traffic crash|rollover|extrication|pedestrian struck)\b", re.I)),
-    ("MEDICAL", re.compile(r"\b(medical|ill person|chest pain|difficulty breathing|unconscious|seizure|fall|overdose|cardiac|stroke|hemorrhage|injury|sick person|trauma)\b", re.I)),
-]
+DEFAULT_SOURCE_URL = "https://spotlight.ohpah.app/api/open-data-snapshot"
+FORBIDDEN_KEYS = {"transcript", "address", "audio_url", "id", "source_row", "person"}
 
 
-def clean(value: object) -> str:
-    return "" if value is None else str(value).strip()
+def load_snapshot(path: Path | None) -> dict:
+    if path is not None:
+        return json.loads(path.read_text(encoding="utf-8"))
 
-
-def parse_time(value: object) -> dt.datetime | None:
-    if isinstance(value, dt.datetime):
-        parsed = value
-    else:
-        raw = clean(value)
-        if not raw:
-            return None
-        parsed = None
-        for form in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S"):
-            try:
-                parsed = dt.datetime.strptime(raw, form)
-                break
-            except ValueError:
-                continue
-        if parsed is None:
-            return None
-    if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=TIME_ZONE)
-    return parsed.astimezone(TIME_ZONE)
-
-
-def phi_flagged(value: object) -> bool:
-    raw = clean(value).lower()
-    return raw not in {"", "0", "false", "no", "n", "none"}
-
-
-def classify(call_type: str, transcript: str) -> str:
-    combined = f"{call_type} {transcript}"
-    for label, pattern in TYPE_RULES:
-        if pattern.search(combined):
-            return label
-    return "OTHER"
-
-
-def primary_unit(unit: str, transcript: str) -> str | None:
-    match = UNIT_RE.search(f"{unit} {transcript}")
-    if not match:
-        return None
-    return f"{match.group(1).upper()} {match.group(2).upper()}"
-
-
-def normalized_signature(unit: str, call_type: str, address: str, transcript: str) -> str:
-    # The hash is used only while deduplicating in memory; it is never published.
-    detail = address or re.sub(r"\s+", " ", transcript.lower())[:180]
-    raw = "|".join((unit, call_type, detail)).encode("utf-8", "ignore")
-    return hashlib.sha256(raw).hexdigest()
-
-
-def iter_workbook_rows(path: Path) -> Iterable[dict[str, object]]:
-    from openpyxl import load_workbook
-
-    workbook = load_workbook(path, read_only=True, data_only=True)
-    for sheet in workbook.worksheets:
-        if not re.fullmatch(r"[A-Z][a-z]{2} \d{4}", sheet.title):
-            continue
-        headers = [clean(value) for value in next(sheet.iter_rows(min_row=2, max_row=2, values_only=True))]
-        index = {name: position for position, name in enumerate(headers) if name}
-        required = {"Time (ET)", "Channel", "PHI?", "Call type", "Address", "Unit", "Transcript"}
-        if not required.issubset(index):
-            continue
-        for values in sheet.iter_rows(min_row=3, values_only=True):
-            yield {name: values[position] if position < len(values) else None for name, position in index.items()}
-
-
-def download_workbook() -> Path:
-    secret = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON")
-    if not secret:
-        raise RuntimeError("GOOGLE_SERVICE_ACCOUNT_JSON is required for a live refresh")
-
-    try:
-        info = json.loads(secret)
-    except json.JSONDecodeError as exc:
-        raise RuntimeError("GOOGLE_SERVICE_ACCOUNT_JSON is not valid JSON") from exc
-
-    from google.auth.transport.requests import AuthorizedSession
-    from google.oauth2.service_account import Credentials
-
-    credentials = Credentials.from_service_account_info(
-        info,
-        scopes=["https://www.googleapis.com/auth/drive.readonly"],
+    url = os.environ.get("OHPAH_OPEN_DATA_SOURCE_URL", DEFAULT_SOURCE_URL)
+    request = urllib.request.Request(
+        url,
+        headers={"Accept": "application/json", "User-Agent": "emr-inc-open-data-publisher/1.0"},
     )
-    session = AuthorizedSession(credentials)
-    sheet_id = os.environ.get("OHPAH_CALL_SHEET_ID", DEFAULT_SHEET_ID)
-    response = session.get(
-        f"https://www.googleapis.com/drive/v3/files/{sheet_id}/export",
-        params={"mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
-        timeout=120,
-    )
-    response.raise_for_status()
-    handle = tempfile.NamedTemporaryFile(prefix="ohpah-call-source-", suffix=".xlsx", delete=False)
-    handle.write(response.content)
-    handle.close()
-    return Path(handle.name)
+    with urllib.request.urlopen(request, timeout=60) as response:
+        if response.status != 200:
+            raise RuntimeError(f"aggregate source returned HTTP {response.status}")
+        return json.load(response)
 
 
-def aggregate(rows: Iterable[dict[str, object]]) -> dict:
-    parsed: list[dict[str, object]] = []
-    phi_times: list[dt.datetime] = []
+def validate_source(snapshot: dict) -> None:
+    required = {"schema_version", "edition", "generated_at_utc", "source", "window", "metrics", "daily", "call_types", "quality", "method", "limitations"}
+    missing = required - snapshot.keys()
+    if missing:
+        raise ValueError(f"Snapshot missing required keys: {sorted(missing)}")
+    if snapshot.get("schema_version") != 1:
+        raise ValueError("Unsupported snapshot schema version")
+    if snapshot.get("source", {}).get("published_fields") != "aggregate counts only":
+        raise ValueError("Source did not assert the aggregate-only privacy boundary")
+    if len(snapshot.get("method", [])) != 4:
+        raise ValueError("The approved method object requires exactly four checks")
+    if not snapshot.get("daily"):
+        raise ValueError("Daily series is empty")
 
-    for row in rows:
-        when = parse_time(row.get("Time (ET)"))
-        if when is None:
-            continue
-        if phi_flagged(row.get("PHI?")):
-            phi_times.append(when)
-            continue
+    total = snapshot["metrics"].get("total_alert_candidates")
+    if not isinstance(total, int) or total <= 0:
+        raise ValueError("total_alert_candidates must be a positive integer")
+    if total != sum(day.get("count", 0) for day in snapshot["daily"]):
+        raise ValueError("Daily counts do not reconcile to total_alert_candidates")
+    if total != sum(item.get("count", 0) for item in snapshot["call_types"]):
+        raise ValueError("Call-type counts do not reconcile to total_alert_candidates")
 
-        channel = clean(row.get("Channel"))
-        call_type_raw = clean(row.get("Call type"))
-        transcript = clean(row.get("Transcript"))
-        unit = primary_unit(clean(row.get("Unit")), transcript)
-        broad_type = classify(call_type_raw, transcript)
-
-        channel_lc = channel.lower()
-        source_ok = "station alerting" in channel_lc or "dispatch" in channel_lc
-        if not source_ok or unit is None or broad_type == "OTHER":
-            continue
-
-        parsed.append({
-            "time": when,
-            "type": broad_type,
-            "unit": unit,
-            "signature": normalized_signature(unit, broad_type, clean(row.get("Address")), transcript),
-        })
-
-    if not parsed:
-        raise ValueError("No publishable alert candidates were found; refusing to replace the current snapshot")
-
-    latest = max(item["time"] for item in parsed)
-    start = latest - WINDOW
-    excluded_phi = sum(1 for when in phi_times if start <= when <= latest)
-    in_window = [item for item in parsed if start <= item["time"] <= latest]
-    in_window.sort(key=lambda item: item["time"])
-
-    deduped: list[dict[str, object]] = []
-    recent: dict[str, dt.datetime] = {}
-    for item in in_window:
-        signature = str(item["signature"])
-        previous = recent.get(signature)
-        if previous and (item["time"] - previous).total_seconds() <= DEDUP_SECONDS:
-            continue
-        recent[signature] = item["time"]
-        deduped.append(item)
-
-    if not deduped:
-        raise ValueError("The seven-day window contains no publishable candidates")
-
-    daily_counts = Counter(item["time"].date() for item in deduped)
-    type_counts = Counter(str(item["type"]) for item in deduped)
-    night_count = sum(1 for item in deduped if item["time"].hour >= 22 or item["time"].hour < 6)
-
-    dates: list[dt.date] = []
-    cursor = start.date()
-    while cursor <= latest.date():
-        dates.append(cursor)
-        cursor += dt.timedelta(days=1)
-
-    total = len(deduped)
-    generated = dt.datetime.now(dt.timezone.utc).replace(microsecond=0)
-    snapshot = {
-        "schema_version": 1,
-        "edition": "rolling seven days",
-        "generated_at_utc": generated.isoformat().replace("+00:00", "Z"),
-        "source": {
-            "title": "OHPAH - Raw Radio Traffic",
-            "kind": "read-only Google Sheet",
-            "published_fields": "aggregate counts only",
-        },
-        "window": {
-            "start_et": start.isoformat(timespec="seconds"),
-            "end_et": latest.isoformat(timespec="seconds"),
-            "hours": 168,
-        },
-        "metrics": {
-            "total_alert_candidates": total,
-            "mean_per_24_hours": round(total / 7, 1),
-            "night_share_pct": round(night_count / total * 100, 1),
-        },
-        "daily": [
-            {"date": day.isoformat(), "label": day.strftime("%b %-d"), "count": daily_counts.get(day, 0)}
-            for day in dates
-        ],
-        "call_types": [
-            {"label": label, "count": count}
-            for label, count in sorted(type_counts.items(), key=lambda pair: (-pair[1], pair[0]))
-        ],
-        "quality": {
-            "phi_flagged_rows_excluded": excluded_phi,
-            "dedupe_window_seconds": DEDUP_SECONDS,
-            "candidate_definition": "Dispatch-channel rows with a recognized apparatus identifier and broad emergency type.",
-        },
-        "method": [
-            {"label": "Source workbook", "text": "Read-only rows from the OHPAH Raw Radio Traffic workbook. The public artifact contains aggregates only; transcripts, addresses, and source rows are never written to this repository."},
-            {"label": "Candidate rule", "text": "A row counts only when it comes from a station-alerting or dispatch channel and contains both a recognized apparatus identifier and a broad emergency type."},
-            {"label": "Privacy boundary", "text": "Rows flagged for possible PHI are excluded before analysis. The committed snapshot contains counts and time bins only."},
-            {"label": "Publish check", "text": "The job fails closed when the source schema changes, no candidates are found, required output fields are missing, or generated HTML does not contain the same snapshot."},
-        ],
-        "limitations": [
-            "Florida radio systems represented in the source workbook only.",
-            "Transcript-derived alert candidates are not verified CAD incidents or confirmed unit responses.",
-            "Repeated transmissions are grouped conservatively within a three-minute window.",
-            "No transcript, address, source-row link, or person-level record is published.",
-        ],
-    }
-    return snapshot
+    def walk(value: object) -> None:
+        if isinstance(value, dict):
+            for key, child in value.items():
+                if key.lower() in FORBIDDEN_KEYS:
+                    raise ValueError(f"Forbidden row-level field reached public snapshot: {key}")
+                walk(child)
+        elif isinstance(value, list):
+            for child in value:
+                walk(child)
+    walk(snapshot)
 
 
 def render_research(snapshot: dict) -> str:
@@ -334,18 +152,13 @@ def write_outputs(snapshot: dict, template_path: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input-xlsx", type=Path, help="Use a local workbook export instead of Google Drive")
+    parser.add_argument("--input-json", type=Path, help="Use a local aggregate snapshot instead of the live endpoint")
     parser.add_argument("--template", type=Path, default=ROOT / "templates" / "open-data.html")
     args = parser.parse_args()
 
-    workbook = args.input_xlsx or download_workbook()
-    temporary = args.input_xlsx is None
-    try:
-        snapshot = aggregate(iter_workbook_rows(workbook))
-        write_outputs(snapshot, args.template)
-    finally:
-        if temporary:
-            workbook.unlink(missing_ok=True)
+    snapshot = load_snapshot(args.input_json)
+    validate_source(snapshot)
+    write_outputs(snapshot, args.template)
     print("Built data/research.json, research.html, and open-data.html")
 
 
