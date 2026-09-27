@@ -30,8 +30,10 @@ Everything not named here should stay as it is.
 
 ## 2. Who this is for
 
-EMR Inc. builds software for firefighters and EMS personnel, sold through IAFF
-locals rather than to departments or employers. The audience is a working
+EMR Inc. builds software for firefighters and EMS personnel in partnership with
+IAFF locals and the members they represent. Departments and employers can support
+implementation and use appropriate aggregate reporting, but individual member
+records remain controlled by the member. The primary audience is a working
 firefighter and a union officer, not a healthcare executive. The company's
 argument is that publicly funded emergency dispatch and incident data is being
 closed off, and that this is measurable harm.

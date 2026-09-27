@@ -805,9 +805,10 @@ img, svg { display: block; max-width: 100%; }
   display: block;
   width: min(104px, 28vw);
   margin: var(--s-32) auto 0;
+  background: transparent;
   transition: transform 180ms ease, opacity 180ms ease;
 }
-.footer__mascot img { display: block; width: 100%; height: auto; }
+.footer__mascot img { display: block; width: 100%; height: auto; background: transparent; }
 .footer__mascot:hover { transform: translateY(-4px); opacity: 0.88; }
 .footer__mascot:focus-visible { outline: 3px solid var(--beam-500); outline-offset: 4px; }
 .footer__mascot + .footer__base { margin-top: var(--s-24); }
