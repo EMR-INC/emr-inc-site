@@ -215,6 +215,10 @@ img, svg { display: block; max-width: 100%; }
 .nav__link:hover         { color: var(--white); }
 .nav__link[aria-current] { color: var(--white); }
 
+/* Way back to the landing page from every inner page. The landing page has
+   no nav wordmark, so this is the only route home besides the browser. */
+.nav__link--home { color: var(--white); }
+
 /* --------------------------------------------------------------------------
    5b. THE BOARD  ·  corkboard revision, ported from Claude design 2026-09-13
    Three logged deviations from design_system.md, all deliberate:
