@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>document.documentElement.className += ' js';</script>
+<title>CALL/SIGN: DASHBOARD &middot; EMR Inc.</title>
+<meta name="description" content="CALL/SIGN is the union dashboard from EMR Inc. Built per local, aggregated at department and shift level, from dispatch records the agency already generates.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=DM+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- NAV + FOOTER are duplicated from index.html rather than included, because
+     this is a static site with no template step. research.html said "if a third
+     page arrives, add the include instead of copying this a third time." This
+     is that third page, and the copy is made anyway: an include needs a build
+     step, and build-standalone.py already owns the only build this repo has.
+     If a FOURTH page arrives, stop and add the include. -->
+<nav class="nav">
+  <div class="container nav__inner">
+    <div class="nav__links">
+      <a class="nav__link" href="research.html">Research</a>
+      <a class="nav__link" href="https://expectvictims.com">Expect Victims</a>
+      <a class="nav__link" href="https://expectfire.com">Expect Fire</a>
+      <a class="nav__link" href="call-sign.html">CALL/SIGN: DASHBOARD</a>
+      <a class="nav__link" href="contact.html">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HEAD ---------------------------------------------------------------
+     ⚠️ THE LIVE APP IS https://callsign.ohpah.app AND THAT HOSTNAME IS NOT A
+     TYPO TO BE TIDIED. It is a Cloudflare Worker Custom Domain on the ohpah.app
+     zone. emr-inc.net sits on Wix nameservers, so a callsign.emr-inc.net
+     alias is not available without migrating NS and pre-loading the company's
+     Google MX records first. Repointing the link at an emr-inc.net host that
+     does not exist would take the dashboard offline for every member.
+
+     The label says DASHBOARD because the wordmark does. The product is
+     "CALL/SIGN:" and the dashboard is the thing this page links to.
+     ------------------------------------------------------------------------ -->
+<header class="hero hero--short field-navy">
+  <div class="container stack-24">
+    <p class="t-label" style="color: var(--steel-150);">Inside Expect Victims &nbsp;&middot;&nbsp; The union side</p>
+    <h1 style="margin: 0;">
+      <img src="assets/callsign-dashboard.png" alt="CALL/SIGN: DASHBOARD"
+           style="width: 100%; max-width: 420px; height: auto;">
+    </h1>
+    <p class="t-body measure" style="color: var(--steel-150);">
+      The branch that does face the desk. Built per local, a la carte.
+      Aggregated at department and shift level, so the local can argue with
+      numbers instead of anecdotes.
+    </p>
+    <div class="btn-row">
+      <a class="btn btn--line" href="https://callsign.ohpah.app">Open the dashboard</a>
+    </div>
+    <p class="t-small" style="color: var(--steel-400);">
+      Sign in required. Accounts are issued to the local, not requested here.
+    </p>
+  </div>
+</header>
+
+<!-- WHAT IT IS --------------------------------------------------------------
+     Reuses the standing claims from the landing page card and the OHPAH
+     poster rather than writing new ones. The disclaimer at the bottom of this
+     section is the verbatim notice from index.html: departments see aggregates
+     only, nothing here is clinical. It is a hard constraint, not copy.
+     ------------------------------------------------------------------------ -->
+<section class="section field-white">
+  <div class="container stack-40">
+
+    <div class="stack-16 reveal">
+      <p class="t-label" style="color: var(--steel-400);">What it is</p>
+      <h2 class="t-display measure">A dashboard the local can take into a room.</h2>
+    </div>
+
+    <div class="grid-2">
+      <p class="t-body measure reveal">
+        Every figure is built from dispatch records the agency already
+        generates. Nothing in it is recalled, estimated by the member, or
+        entered after the fact. That is the whole reason it holds up when
+        somebody on the other side of the table disputes it.
+      </p>
+      <p class="t-body measure reveal">
+        It is not a second login and it is not a separate product. CALL/SIGN
+        is the union facing cut of Expect Victims, carrying the same
+        measurements the platform already takes, arranged for the person who
+        has to make the case rather than the person on the truck.
+      </p>
+    </div>
+
+    <div class="rows reveal">
+      <div class="row">
+        <p class="t-data row__key">Who it is sold to</p>
+        <p class="t-body">
+          IAFF locals. Not departments and not employers. The local is the
+          buyer because the local represents the member whose record it is.
+        </p>
+      </div>
+      <div class="row">
+        <p class="t-data row__key">What it measures</p>
+        <p class="t-body">
+          Fire Exposure Score, Sleep Debt Index and Work Intensity Index, the
+          three OHPAH metrics, plus the dispatch activity they are built from.
+          Broken out by department and by shift.
+        </p>
+      </div>
+      <div class="row">
+        <p class="t-data row__key">Where the numbers come from</p>
+        <p class="t-body">
+          Public dispatch and incident records, the county property appraiser
+          for construction era, and the American Community Survey for
+          community context. The dashboard carries a method page naming the
+          source of every figure on it.
+        </p>
+      </div>
+      <div class="row">
+        <p class="t-data row__key">What it cites</p>
+        <p class="t-body">
+          Published findings are shown with the journal and the PubMed ID, so
+          any claim read aloud in a hearing can be checked by the person
+          hearing it. Work EMR is still running is shelved separately and
+          labelled as unreviewed.
+        </p>
+      </div>
+    </div>
+
+    <div class="notice reveal">
+      <p class="t-small">
+        These are counts of observed dispatch activity. They are not a clinical
+        finding, they are not a diagnosis, and they are not a forecast. The
+        member owns the record and can export it. Departments see aggregates
+        only.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- GETTING IN --------------------------------------------------------------
+     Deliberately does NOT offer a signup form. There is no self-serve tier and
+     no account creation endpoint; a form here would collect addresses for a
+     flow that does not exist. Contact is the honest control.
+     ------------------------------------------------------------------------ -->
+<section class="section field-ivory">
+  <div class="container stack-40">
+
+    <div class="stack-16 reveal">
+      <p class="t-label" style="color: var(--steel-400);">Getting in</p>
+      <h2 class="t-h2 measure">Access comes through your local.</h2>
+    </div>
+
+    <div class="grid-2">
+      <p class="t-body measure reveal">
+        There is no public signup. CALL/SIGN is built per local and scoped to
+        that local's own departments, so an account only means anything once
+        there is a local behind it. If your local already has one, sign in at
+        the link above.
+      </p>
+      <div class="stack-24 reveal">
+        <p class="t-body measure">
+          If it does not, say so and we will walk through what your
+          departments already publish and what could be measured from it.
+        </p>
+        <div class="btn-row">
+          <a class="btn btn--solid" href="https://callsign.ohpah.app">Open the dashboard</a>
+          <a class="btn btn--line-dark" href="contact.html">Ask about your local</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Footer duplicated by hand from index.html. See the note above the nav. -->
+<footer class="footer field-navy">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="stack-24">
+        <h2 style="margin: 0;">
+          <img class="footer__logo" src="assets/emr-inc-logo.png" alt="EMR Inc.">
+        </h2>
+        <p class="t-body measure" style="color: var(--steel-150);">
+          Emergency Medical Resolutions Inc. We sell through the workplace organization:
+          IAFF locals, not departments and not employers. The local is the buyer because
+          the local represents the member whose record it is.
+        </p>
+        <p class="t-label" style="color: var(--steel-400); margin-top: var(--s-16);">Contact</p>
+        <div class="footer__contact">
+          <a class="footer__contact-link" href="mailto:michael.harvey@emr-inc.net">michael.harvey@emr-inc.net</a>
+          <!-- Only @ohpah.app is verified ours (checked 2026-09-13). The
+               handoff's @expectvictims does not exist and @expectfire belongs
+               to an unrelated account; both dropped. -->
+          <a class="footer__contact-link" href="https://instagram.com/ohpah.app">OHPAH.app on Instagram</a>
+          <a class="footer__contact-link" href="https://expectvictims.com">expectvictims.com</a>
+          <a class="footer__contact-link" href="https://expectfire.com">expectfire.com</a>
+          <a class="footer__contact-link" href="contact.html">Contact page</a>
+        </div>
+      </div>
+      <div class="rows">
+        <div class="row">
+          <p class="t-data row__key">Incorporated</p>
+          <p class="t-body">Delaware C corp, August 19, 2025</p>
+        </div>
+        <div class="row">
+          <p class="t-data row__key">Registration</p>
+          <p class="t-body">Foreign corporation registration in Florida, complete</p>
+        </div>
+        <div class="row">
+          <p class="t-data row__key">Built by</p>
+          <p class="t-body">Firefighters across multiple career departments</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__base stack-16">
+      <div class="footer__links">
+        <a class="footer__link" href="open-data.html">Open data</a>
+        <a class="footer__link" href="research.html">Research</a>
+        <a class="footer__link" href="member-research.html">Member research</a>
+        <a class="footer__link" href="https://expectvictims.com">Expect Victims</a>
+        <a class="footer__link" href="https://expectfire.com">Expect Fire</a>
+        <a class="footer__link" href="call-sign.html">CALL/SIGN: DASHBOARD</a>
+        <a class="footer__link" href="contact.html">Contact</a>
+      </div>
+      <p class="t-data" style="color: var(--steel-400);">
+        EMR Inc. &nbsp;&middot;&nbsp; emr-inc.net &nbsp;&middot;&nbsp; Delaware C corp &nbsp;&middot;&nbsp; File No. 10300393
+      </p>
+    </div>
+  </div>
+</footer>
+
+<script src="reveal.js"></script>
+</body>
+</html>

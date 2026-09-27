@@ -1,3 +1,11 @@
 .DS_Store
 emr-inc-standalone.html
 emr-inc-research-standalone.html
+
+# ⚠️ THIS REPO IS PUBLIC AND GitHub Pages SERVES ITS ROOT, so anything committed
+# here is world-readable at a guessable URL. `wrangler-account.json` carries the
+# Cloudflare account identity and must never land in it. The Cloudflare Pages
+# deploy uploads a staged copy of 13 named files, so ignoring these costs the
+# site nothing.
+.wrangler/
+.claude/

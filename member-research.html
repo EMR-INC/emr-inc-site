@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>document.documentElement.className += ' js';</script>
+<title>Member research &middot; EMR Inc.</title>
+<meta name="description" content="The studies EMR Inc. is currently running. Unreviewed work in progress, listed so members can see what is being worked on and on what data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=DM+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════════════════
+     MEMBER RESEARCH — THE PUBLIC HALF OF A TWO-HALF ANSWER
+
+     ⚠️ THIS PAGE IS PUBLIC. There is no authentication anywhere on emr-inc.net:
+     it is a static site served by Cloudflare Pages, GitHub Pages and Vercel, and
+     all three serve every file to anybody who asks. The page is NAMED "member
+     research" because that is the shelf it describes, NOT because it is gated,
+     and the hero says so in the first sentence a reader gets. If that sentence
+     is ever deleted, the title starts lying.
+
+     ⚠️ SO THE FILES THEMSELVES ARE NOT HERE, AND THAT IS THE WHOLE DESIGN.
+     The research folder holds credentials, address-bearing dispatch data — which
+     is exactly what the CALL/SIGN password exists to protect — drafts explicitly
+     marked "superseded" and "firefighter review required", and unexecuted
+     paperwork. Publishing an index of that on an open host would leak
+     credentials, leak addresses, and put retracted drafts in front of a reader
+     who cannot tell they were retracted. The file list lives behind the
+     CALL/SIGN login instead.
+
+     ⚠️ AND THIS COMMENT IS PUBLIC TOO. It is deliberately unspecific: no folder
+     name, no filenames, no sizes. A comment arguing that a folder is sensitive
+     must not itself inventory the folder, and "it is only a comment" is not a
+     defence on a static host that serves every byte to anybody who asks.
+
+     ⚠️ AND NOTHING ON THIS PAGE MAY BE STYLED AS A FINDING. These five studies
+     are unreviewed and in progress. `t-data-lg`, `plate__num` and the `viz`
+     treatments are reserved for counts we have actually run and can cite; see
+     research.html. Prose only here, no numerals, no KPI rows.
+
+     SOURCE OF TRUTH: ohpah-spotlight/app/lib/our-studies.ts. Titles, stages and
+     descriptions below are copied from it by hand because this repo has no build
+     step and cannot import it. ⚠️ IF THAT FILE CHANGES, THIS PAGE IS STALE —
+     it is the second hand-kept copy of the same list, so check both.
+     ════════════════════════════════════════════════════════════════════════ -->
+<nav class="nav">
+  <div class="container nav__inner">
+    <div class="nav__links">
+      <a class="nav__link" href="research.html">Research</a>
+      <a class="nav__link" href="https://expectvictims.com">Expect Victims</a>
+      <a class="nav__link" href="https://expectfire.com">Expect Fire</a>
+      <a class="nav__link" href="call-sign.html">CALL/SIGN: DASHBOARD</a>
+      <a class="nav__link" href="contact.html">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero hero--short field-navy">
+  <div class="container stack-24">
+    <p class="t-label" style="color: var(--steel-150);">Member research</p>
+    <h1 class="t-display" style="max-width: 22ch;">What EMR is studying right now.</h1>
+    <p class="t-body measure" style="color: var(--steel-150);">
+      This page is public and it holds no files. It is a list of the work in
+      progress, so a member can see what is being looked at and on what data.
+      The documents themselves sit behind the CALL/SIGN login, because some of
+      them contain dispatch addresses.
+    </p>
+    <div class="btn-row">
+      <a class="btn btn--line" href="https://callsign.ohpah.app">Open CALL/SIGN to read the files</a>
+    </div>
+  </div>
+</header>
+
+<!-- THE BANNER, BEFORE ANY STUDY IS NAMED -----------------------------------
+     Same order of operations as our-studies-list.tsx inside the dashboard: the
+     reader is told this is ours and unfinished BEFORE the first title, not in a
+     badge afterwards. research.html is the shelf of counts we can stand behind;
+     this is the shelf of work that is not there yet, and the two must not be
+     mistaken for each other at a glance.
+     ------------------------------------------------------------------------ -->
+<section class="section field-white">
+  <div class="container stack-40">
+
+    <div class="stack-16 reveal">
+      <p class="t-label" style="color: var(--steel-400);">Our own work &nbsp;&middot;&nbsp; Not peer reviewed</p>
+      <h2 class="t-h2 measure">These are studies we are running, not published papers.</h2>
+      <p class="t-body measure">
+        None of them have been through peer review. None of them carry a journal
+        or a PubMed ID, so none of them should be quoted the way the published
+        work on the research page can be. They are listed here so the work is
+        visible while it is still happening, and for no other reason.
+      </p>
+    </div>
+
+    <!-- Five studies, prose rows. `rows`/`row` and NOT `card`, because a card
+         grid reads as a product menu and these are not things a member can get.
+         The stage sits in the row key, which is where research.html puts a
+         source label, and deliberately not where it puts a number. -->
+    <div class="rows reveal">
+      <div class="row">
+        <p class="t-data row__key">Being analysed</p>
+        <div class="stack-8">
+          <p class="t-body"><strong>SDI Sleep Analysis</strong></p>
+          <p class="t-body">
+            How night call volume distributes across shifts and stations, using
+            the dispatch record the dashboard already shows. Looks at the 2200
+            to 0600 window against the published sleep literature rather than
+            restating it.
+          </p>
+        </div>
+      </div>
+      <div class="row">
+        <p class="t-data row__key">Being analysed</p>
+        <div class="stack-8">
+          <p class="t-body"><strong>The Invisible Load</strong></p>
+          <p class="t-body">
+            The share of the work that does not appear as a fire: EMS runs,
+            repeat addresses and calls that close without a transport.
+          </p>
+        </div>
+      </div>
+      <div class="row">
+        <p class="t-data row__key">Collecting data</p>
+        <div class="stack-8">
+          <p class="t-body"><strong>NERIS Transcription Study</strong></p>
+          <p class="t-body">
+            How reliably a radio transcript can be classified into NERIS call
+            types, and how often the recording is too unclear to classify at
+            all.
+          </p>
+        </div>
+      </div>
+      <div class="row">
+        <p class="t-data row__key">Collecting data</p>
+        <div class="stack-8">
+          <p class="t-body"><strong>Construction Carcinogen Catalog</strong></p>
+          <p class="t-body">
+            Which materials a building of a given era was built from, and which
+            of those are on a published carcinogen registry.
+          </p>
+        </div>
+      </div>
+      <div class="row">
+        <p class="t-data row__key">Being written up</p>
+        <div class="stack-8">
+          <p class="t-body"><strong>CAD Dataset Documentation</strong></p>
+          <p class="t-body">
+            A written record of what the dispatch dataset contains, how it was
+            captured and where it is known to be incomplete. Supporting
+            documentation for the studies above rather than a study in its own
+            right.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="notice reveal">
+      <p class="t-small">
+        Work in progress. No result from any of these studies is stated on this
+        page, and none should be read into the descriptions. A stage says how
+        far along the work is. It does not say what the work found.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- WHERE THE FILES ARE -----------------------------------------------------
+     Says out loud what is NOT published and why. A member who can see that
+     raw dispatch data and draft consent language exist, and is told plainly
+     that they are held back on purpose, is better served than one who finds an
+     index of links that all return a permission error.
+     ------------------------------------------------------------------------ -->
+<section class="section field-ivory">
+  <div class="container stack-40">
+
+    <div class="stack-16 reveal">
+      <p class="t-label" style="color: var(--steel-400);">Where the files are</p>
+      <h2 class="t-h2 measure">Behind the login, and some of it not at all.</h2>
+    </div>
+
+    <div class="grid-2">
+      <p class="t-body measure reveal">
+        The full document list is inside CALL/SIGN, where a member is already
+        signed in. It is not mirrored onto this site, because this site has no
+        login and some of those documents carry the addresses calls were
+        dispatched to.
+      </p>
+      <p class="t-body measure reveal">
+        Parts of the data room are not published to either place. That is a
+        decision, not a backlog.
+      </p>
+    </div>
+
+    <div class="rows reveal">
+      <div class="row">
+        <p class="t-data row__key">Held back</p>
+        <p class="t-body">
+          Raw dispatch extracts and geocoding caches. These contain the street
+          address of individual calls. Aggregated versions of the same data are
+          what the dashboard shows.
+        </p>
+      </div>
+      <div class="row">
+        <p class="t-data row__key">Held back</p>
+        <p class="t-body">
+          Superseded drafts and anything awaiting firefighter review. An older
+          version of a scoring document is indistinguishable from the current
+          one once it is out of the folder it was superseded in.
+        </p>
+      </div>
+      <div class="row">
+        <p class="t-data row__key">Held back</p>
+        <p class="t-body">
+          Grant applications, IRB submissions, draft consent language and
+          partnership paperwork. Business and regulatory records, not studies.
+        </p>
+      </div>
+      <div class="row">
+        <p class="t-data row__key">Published instead</p>
+        <p class="t-body">
+          Counts we have run and can stand behind go on the research page, with
+          the source and the denominator stated. Published findings we cite go
+          in the dashboard with the journal and the PubMed ID attached.
+        </p>
+      </div>
+    </div>
+
+    <div class="btn-row reveal">
+      <a class="btn btn--solid" href="https://callsign.ohpah.app">Open CALL/SIGN</a>
+      <a class="btn btn--line-dark" href="research.html">See the research we have published</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- Footer duplicated by hand from index.html. Fourth copy. See the note in
+     call-sign.html: if a fifth page arrives, add the include step. -->
+<footer class="footer field-navy">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="stack-24">
+        <h2 style="margin: 0;">
+          <img class="footer__logo" src="assets/emr-inc-logo.png" alt="EMR Inc.">
+        </h2>
+        <p class="t-body measure" style="color: var(--steel-150);">
+          Emergency Medical Resolutions Inc. We sell through the workplace organization:
+          IAFF locals, not departments and not employers. The local is the buyer because
+          the local represents the member whose record it is.
+        </p>
+        <p class="t-label" style="color: var(--steel-400); margin-top: var(--s-16);">Contact</p>
+        <div class="footer__contact">
+          <a class="footer__contact-link" href="mailto:michael.harvey@emr-inc.net">michael.harvey@emr-inc.net</a>
+          <a class="footer__contact-link" href="https://instagram.com/ohpah.app">OHPAH.app on Instagram</a>
+          <a class="footer__contact-link" href="https://expectvictims.com">expectvictims.com</a>
+          <a class="footer__contact-link" href="https://expectfire.com">expectfire.com</a>
+          <a class="footer__contact-link" href="contact.html">Contact page</a>
+        </div>
+      </div>
+      <div class="rows">
+        <div class="row">
+          <p class="t-data row__key">Incorporated</p>
+          <p class="t-body">Delaware C corp, August 19, 2025</p>
+        </div>
+        <div class="row">
+          <p class="t-data row__key">Registration</p>
+          <p class="t-body">Foreign corporation registration in Florida, complete</p>
+        </div>
+        <div class="row">
+          <p class="t-data row__key">Built by</p>
+          <p class="t-body">Firefighters across multiple career departments</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__base stack-16">
+      <div class="footer__links">
+        <a class="footer__link" href="open-data.html">Open data</a>
+        <a class="footer__link" href="research.html">Research</a>
+        <a class="footer__link" href="member-research.html">Member research</a>
+        <a class="footer__link" href="https://expectvictims.com">Expect Victims</a>
+        <a class="footer__link" href="https://expectfire.com">Expect Fire</a>
+        <a class="footer__link" href="call-sign.html">CALL/SIGN: DASHBOARD</a>
+        <a class="footer__link" href="contact.html">Contact</a>
+      </div>
+      <p class="t-data" style="color: var(--steel-400);">
+        EMR Inc. &nbsp;&middot;&nbsp; emr-inc.net &nbsp;&middot;&nbsp; Delaware C corp &nbsp;&middot;&nbsp; File No. 10300393
+      </p>
+    </div>
+  </div>
+</footer>
+
+<script src="reveal.js"></script>
+</body>
+</html>
