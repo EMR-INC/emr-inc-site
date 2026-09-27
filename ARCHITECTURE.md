@@ -297,6 +297,7 @@ Both files carry a scope note worth preserving: the data is **Florida only**
 | `emr-inc.net` | Wix NS | Vercel (this repo) | the site |
 | `www.emr-inc.net` | Wix NS | Vercel, 308 → apex | — |
 | `en.emr-inc.net` | Wix NS | Wix CDN | orphan from the Wix site |
+| `callsign.emr-inc.net` | Wix NS | Vercel (this project), host-scoped rewrite → the Cloudflare Worker | the live CALL/SIGN app on the company domain |
 | `command-center.emr-inc.net` | Wix NS | Lovable (`185.158.133.1`) | internal tool, outside this repo |
 | `ohpah.app`, `callsign.ohpah.app` | **Cloudflare** | Cloudflare proxy | OHPAH product + the live CALL/SIGN app |
 | `expectvictims.com` | **GoDaddy** | `216.150.1.1` | product site, linked from every page |
@@ -305,10 +306,31 @@ Both files carry a scope note worth preserving: the data is **Florida only**
 Three separate DNS providers and at least two registrars across seven hosts. Only
 `emr-inc.net` is in the migration.
 
-`call-sign.html` already documents the awkward part in a source comment: the live
-CALL/SIGN app is at `callsign.ohpah.app`, on Cloudflare, and cannot become
-`callsign.emr-inc.net` while `emr-inc.net` is on Wix nameservers. The union-facing
-product therefore sits on the OHPAH domain, not the company domain.
+The union-facing product now answers on the company domain as well as the OHPAH
+one. `callsign.emr-inc.net` is a CNAME to `cname.vercel-dns.com`, attached to this
+Vercel project, with a host-scoped rewrite forwarding every path to the Cloudflare
+Worker behind `spotlight.ohpah.app`. `callsign.ohpah.app` still serves, so links
+already in circulation keep working.
+
+The earlier claim here — that `callsign.emr-inc.net` "cannot" exist while
+`emr-inc.net` is on Wix nameservers — was too strong, but the constraint behind it
+is real and worth stating precisely, because the obvious simplification is broken:
+
+- A Workers **Custom Domain** requires the zone to be active in the Cloudflare
+  account. `emr-inc.net` NS are `ns2`/`ns3.wixdns.net`, so it is not, so this
+  hostname cannot be attached to the Worker directly.
+- A bare CNAME from Wix straight to `spotlight.ohpah.app` does **not** work either.
+  The request arrives at Cloudflare with `Host: callsign.emr-inc.net`, matches no
+  zone and no route, and fails at TLS — which presents as a certificate error and
+  is not one.
+- So the Vercel hop is load-bearing, not incidental. It can be dropped for a
+  Workers Custom Domain only after the zone moves to Cloudflare.
+
+Host-scoping the rewrite is also not a style choice. `/assets/` is occupied on both
+sides: this site serves `/assets/emr-inc-logo.png`, and the Worker's Vite build is
+`base: "/"` so it emits `/assets/*` and `/fonts/*` at the root. A path-scoped
+rewrite under `emr-inc.net/call-sign` would return a 200 HTML document whose JS
+404s — unstyled and inert, and green on every status check.
 
 ### Third-party runtime dependencies
 
@@ -335,7 +357,7 @@ Nine repos in `EMR-INC`; this is the only public one.
 | `emr-inc-site` | public | this repo |
 | `OHPAH-DESIGN` | private | **source of the design system this repo implements** |
 | `ohpah-research` | private | **source of `data/*.json`** (Supabase `casmwfxrxlysqizxahcw`) |
-| `call-sign` | private | the app behind `callsign.ohpah.app` |
+| `call-sign` | private | the app, reached at `callsign.emr-inc.net` (also `callsign.ohpah.app`) |
 | `OHPAH-app` | private | React Native / Expo + Supabase + Cloudflare dispatch worker |
 | `ohpah-ops` | private | algorithm + LLM interpretation layers |
 | `ohpah-spotlight` | private | — |
