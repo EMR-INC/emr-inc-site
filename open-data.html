@@ -259,6 +259,96 @@ a {
   color: var(--stock);
 }
 
+.study-section {
+  padding: clamp(56px, 8vw, 120px) clamp(24px, 5vw, 72px);
+  background: var(--ink);
+  color: var(--stock);
+  border-bottom: 2px solid var(--ink);
+}
+
+.study-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, .55fr);
+  gap: clamp(24px, 5vw, 72px);
+  align-items: end;
+  margin-bottom: clamp(32px, 5vw, 64px);
+}
+
+.study-head h2 {
+  margin: 0;
+  font: 900 clamp(48px, 9vw, 132px)/.84 'Archivo Black', 'Arial Black', Arial, sans-serif;
+  letter-spacing: -.06em;
+  text-transform: uppercase;
+}
+
+.study-intro {
+  margin: 0;
+  max-width: 48ch;
+  font: 700 14px/1.65 'Courier New', monospace;
+}
+
+.study-frame {
+  display: block;
+  width: min(100%, 1080px);
+  margin: 0 auto;
+  background: var(--stock);
+  border: 3px solid var(--stock);
+  box-shadow: 18px 18px 0 var(--blue), -10px -10px 0 var(--red);
+  overflow: hidden;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.study-frame:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: 26px 26px 0 var(--blue), -14px -14px 0 var(--red);
+}
+
+.study-frame:focus-visible {
+  outline: 5px solid var(--yellow);
+  outline-offset: 8px;
+}
+
+.study-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.study-meta {
+  width: min(100%, 1080px);
+  margin: 36px auto 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: start;
+}
+
+.study-meta details {
+  border-top: 2px solid rgba(241, 235, 221, .55);
+}
+
+.study-meta p {
+  max-width: 68ch;
+  margin: 8px 0 0;
+  font: 400 14px/1.65 'Courier New', monospace;
+}
+
+.study-open {
+  display: inline-block;
+  border: 2px solid var(--stock);
+  padding: 14px 18px;
+  font: 700 12px/1 'Courier New', monospace;
+  letter-spacing: .08em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.study-open:hover,
+.study-open:focus-visible {
+  background: var(--stock);
+  color: var(--ink);
+}
+
 .controls-section {
   padding: clamp(48px, 6vw, 96px) clamp(24px, 5vw, 72px);
   background: var(--stock);
@@ -392,6 +482,10 @@ details li {
   .daily-head { grid-template-columns: 1fr; }
   .daily-field { min-height: 240px; gap: 7px; }
   .day-label { font-size: 9px; }
+  .study-head,
+  .study-meta { grid-template-columns: 1fr; }
+  .study-frame { box-shadow: 10px 10px 0 var(--blue), -6px -6px 0 var(--red); }
+  .study-open { justify-self: start; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -453,6 +547,28 @@ details li {
       <p class="daily-copy" id="window_copy">Each column is one calendar date touched by the rolling seven-day window. Height is the count of transcript-derived alert candidates.</p>
     </div>
     <div class="daily-field" id="daily_field" role="img" aria-label="Sep 20: 323; Sep 21: 367; Sep 22: 435; Sep 23: 412; Sep 24: 444; Sep 25: 372; Sep 26: 364; Sep 27: 23"><div class='day-column'><div class='day-bar' style='height:72.75%'></div><strong class='day-count'>323</strong><span class='day-label'>Sep 20</span></div><div class='day-column'><div class='day-bar' style='height:82.66%'></div><strong class='day-count'>367</strong><span class='day-label'>Sep 21</span></div><div class='day-column'><div class='day-bar' style='height:97.97%'></div><strong class='day-count'>435</strong><span class='day-label'>Sep 22</span></div><div class='day-column'><div class='day-bar' style='height:92.79%'></div><strong class='day-count'>412</strong><span class='day-label'>Sep 23</span></div><div class='day-column'><div class='day-bar' style='height:100.00%'></div><strong class='day-count'>444</strong><span class='day-label'>Sep 24</span></div><div class='day-column'><div class='day-bar' style='height:83.78%'></div><strong class='day-count'>372</strong><span class='day-label'>Sep 25</span></div><div class='day-column'><div class='day-bar' style='height:81.98%'></div><strong class='day-count'>364</strong><span class='day-label'>Sep 26</span></div><div class='day-column'><div class='day-bar' style='height:5.18%'></div><strong class='day-count'>23</strong><span class='day-label'>Sep 27</span></div></div>
+  </section>
+
+  <section class="study-section" aria-labelledby="pulse_title">
+    <div class="study-head">
+      <div>
+        <p class="eyebrow">Featured incident study · Sep 20–26, 2026</p>
+        <h2 id="pulse_title">The pulse<br>between.</h2>
+      </div>
+      <p class="study-intro">Sixty-one deduplicated cardiac-arrest incidents sit beside two explicit ROSC declarations captured in radio traffic. The gap describes documentation in the available record, not clinical survival.</p>
+    </div>
+
+    <a class="study-frame" href="assets/cardiac-arrest-rosc-diagrammatic-modernism.svg" target="_blank" rel="noopener" aria-label="Open The Pulse Between study at full resolution">
+      <img src="assets/cardiac-arrest-rosc-diagrammatic-modernism.svg" alt="The Pulse Between diagram showing 61 deduplicated cardiac-arrest incidents across seven days, two with explicit radio-documented ROSC declarations.">
+    </a>
+
+    <div class="study-meta">
+      <details>
+        <summary>Read the study boundary</summary>
+        <p>Source: OHPAH raw emergency-dispatch transcripts. Incidents are grouped by time, channel, and incident context. The 3.3% figure is a radio-documentation ratio, not a clinical survival rate. Tactical traffic may be incomplete, and missing traffic is not zero.</p>
+      </details>
+      <a class="study-open" href="assets/cardiac-arrest-rosc-diagrammatic-modernism.svg" target="_blank" rel="noopener">Open full study</a>
+    </div>
   </section>
 
   <section class="controls-section" id="finding" data-sd-id="29">
@@ -548,4 +664,3 @@ details li {
 </script>
 
 </body></html>
-
