@@ -53,6 +53,28 @@
             loading="lazy">Loading&hellip;</iframe>
     <div class="btn-row">
       <a class="btn btn--line-dark" href="https://docs.google.com/forms/d/1FXXOZsZu6endmH4xCkZWJ3StrX3s7w-r0k2CAmFuuow/viewform" target="_blank" rel="noopener">Open the form in a new tab</a>
+      <a class="btn btn--line-dark" href="mailto:michael.harvey@emr-inc.net">Email us instead</a>
+    </div>
+
+    <!-- Plain text as well as the mailto: a fair number of department networks
+         block embedded Google content outright, and on those the iframe above
+         is a blank box. Anyone who lands here with nothing rendering still
+         needs to leave with an address they can type.
+         Not .footer__contact-link, which is ivory-50: correct on the navy
+         footer, invisible on this white field. -->
+    <p class="t-data" style="color: var(--steel-400);">michael.harvey@emr-inc.net</p>
+
+    <!-- Responses feed the contact CRM in the Data Room, where consent is a
+         tracked field. Saying so here is what makes the form's consent box
+         mean something. -->
+    <div class="notice">
+      <p class="t-small measure">
+        What happens to what you send: it becomes a contact record we use to
+        answer you and to keep track of the conversation. The consent box at the
+        end of the form is the only thing that lets us contact you about
+        anything beyond your own inquiry. Leave it unchecked and we will still
+        reply.
+      </p>
     </div>
   </div>
 </section>
