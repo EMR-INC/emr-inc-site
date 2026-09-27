@@ -803,10 +803,8 @@ img, svg { display: block; max-width: 100%; }
 
 .footer__mascot {
   display: block;
-  width: min(220px, 52vw);
-  margin-top: var(--s-40);
-  border-radius: var(--r-container);
-  overflow: hidden;
+  width: min(104px, 28vw);
+  margin: var(--s-32) auto 0;
   transition: transform 180ms ease, opacity 180ms ease;
 }
 .footer__mascot img { display: block; width: 100%; height: auto; }
