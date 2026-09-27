@@ -1,0 +1,7 @@
+# Working files that should not be served from emr-inc.net.
+DESIGN-BRIEF.md
+MIGRATION.md
+build-standalone.py
+*-standalone.html
+experiments/
+dns/
