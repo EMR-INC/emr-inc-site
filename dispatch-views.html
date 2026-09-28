@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>document.documentElement.className += ' js';</script>
+<title>Dispatch views &middot; EMR Inc.</title>
+<meta name="description" content="What the published dispatch CSV looks like when you draw it. Demand by day and hour in three dimensions, the overnight gap night by night, and the shape of the file against the Florida NFIRS record. Rebuilt Monday, Wednesday and Friday.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=DM+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- DISPATCH VIEWS ---------------------------------------------------------
+     NAV + FOOTER are duplicated from index.html rather than included, because
+     this is a static site with no template step.
+
+     NOTHING ON THIS PAGE IS A HAND WRITTEN NUMBER. Every figure, label, axis
+     tick, sample count and caption number is read at runtime from
+     data/dispatch-views.json, which data/build-dispatch-views.py computes from
+     data/dispatch-events.csv, which is the file the open data page publishes.
+     That chain is the whole claim of the page: a reader can download the CSV,
+     run the script and get the same JSON, so no figure here rests on a private
+     step. If you find yourself typing a statistic into this file, the chain is
+     broken and the page has started lying.
+
+     The markup below is therefore hosts and prose only. The prose states what
+     a figure means and what it cannot mean; the figure states the numbers.
+
+     GRAIN IS DEPARTMENT AND UNIT. Station grain is deferred, and nothing
+     person grain is reachable from a radio transmission. The three named
+     measures, Work Intensity, Sleep Debt and Fire Exposure, are NOT computed
+     here. What is drawn is the dispatch activity they are built from. Do not
+     add a score to this page without the review that gates it.
+
+     EVERY EDITION IS DRAWN DIFFERENTLY. Cadence is Monday, Wednesday and
+     Friday, and each build picks a different camera angle, lighting, mark
+     shape, sort order and section order. Those choices are DERIVED FROM THE
+     BUILD DATE in build-dispatch-views.py, never randomised, so the drawing
+     stays reproducible: same date in, same picture out. Consecutive editions
+     are guaranteed to differ on all six axes.
+
+     THE SECTIONS BELOW ARE REORDERED AT RUNTIME, so do not hard code their
+     numbers or their light and dark banding. Both are assigned by the script.
+     Write each section so it stands on its own and does not refer to "the
+     figure above" or to a neighbour it may not have next time.
+
+     The variation is composition only. It never changes what a mark means:
+     height is the rate and length is the count in every edition, and colour
+     carries no magnitude in any of them.
+     ---------------------------------------------------------------------- -->
+<nav class="nav">
+  <div class="container nav__inner">
+    <div class="nav__links">
+      <a class="nav__link" href="research.html">Research</a>
+      <a class="nav__link" href="https://expectvictims.com">Expect Victims</a>
+      <a class="nav__link" href="https://expectfire.com">Expect Fire</a>
+      <a class="nav__link" href="call-sign.html">CALL/SIGN: DASHBOARD</a>
+      <a class="nav__link" href="contact.html">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<header class="section field-ink">
+  <div class="container stack-40">
+    <p class="t-label" style="color: var(--beam-500);">Dispatch views</p>
+    <h1 class="t-display" style="max-width: 24ch;">Same file. Drawn.</h1>
+    <p class="t-body measure" style="color: var(--steel-150);">
+      These are the figures we read the open data with. They are built from the
+      CSV on that page and nothing else, so every number below can be
+      reproduced by downloading the file and running one script. Rebuilt every
+      Monday, Wednesday and Friday.
+    </p>
+    <div class="rows" data-fig="stamp"></div>
+    <p class="t-small measure" style="color: var(--steel-400);" data-fig="edition-note"></p>
+    <div class="btn-row">
+      <a class="btn btn--solid" href="data/dispatch-events.csv" download>Download the CSV</a>
+      <a class="btn btn--line" href="open-data.html">What is in it, and what is not</a>
+    </div>
+  </div>
+</header>
+
+<!-- 1 · THE SURFACE -------------------------------------------------------
+     Day of week by hour of day. Height is the magnitude and nothing else
+     carries it: the blocks are one colour, because hue encoding a quantity is
+     forbidden by the design system and is unnecessary when the geometry
+     already says it.
+
+     The cell value is a RATE, not a count. A sixty four day window does not
+     contain equal numbers of each weekday, so a raw surface has ridges that
+     are partly an artifact of where the window started and stopped. Each row
+     is divided by its own count of days observed.
+     ---------------------------------------------------------------------- -->
+<section class="section" data-section="surface">
+  <div class="container stack-40">
+    <div class="stack-24">
+      <p class="t-label" data-fig="num-surface"></p>
+      <h2 class="t-h2 measure">When the calls come.</h2>
+      <p class="t-body measure">
+        Seven days across, twenty four hours deep, and the height of each block
+        is how many transmissions that hour of that weekday carried on an
+        average day it was observed. Drag the slider to turn it. Hover or tap a
+        block to read it exactly.
+      </p>
+      <p class="t-body measure">
+        The height is the only thing encoding the quantity. The blocks are one
+        colour on purpose: a second channel saying the same thing would make
+        the figure look more precise than the counting behind it.
+      </p>
+    </div>
+
+    <figure class="viz stack-16" data-fig="surface">
+      <div class="viz__controls">
+        <label class="t-data viz__control-label" for="surface-rotate">Rotate</label>
+        <input class="viz__range" id="surface-rotate" type="range" min="6" max="84" step="1" value="34">
+      </div>
+      <div class="viz__scroll">
+        <svg class="viz__svg" data-draw="surface" viewBox="0 0 960 640" role="img"></svg>
+      </div>
+      <p class="t-data viz__readout" data-fig="surface-readout"></p>
+      <figcaption class="t-small viz__caption" data-fig="surface-caption"></figcaption>
+    </figure>
+
+    <div class="stack-24">
+      <h3 class="t-h3">The tallest blocks, in words.</h3>
+      <p class="t-small" style="color: var(--steel-400);">
+        The same peaks the figure shows, as text, because a three dimensional
+        figure is not readable by everyone and the numbers should not depend on
+        seeing it.
+      </p>
+      <div class="rows" data-fig="surface-peaks"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · THE BASELINE ------------------------------------------------------
+     The obvious objection to the file is that it captures a fraction of true
+     call volume, so any shape in it might be a shape in the capture. The test
+     is external: compare the hour of day profile against a census sized
+     record of the same state, which is already in this repo as
+     data/nfirs-hour-of-day.json.
+
+     Shares, never counts. The two denominators differ by four orders of
+     magnitude and both are printed in the caption so the shares can be turned
+     back into counts.
+     ---------------------------------------------------------------------- -->
+<section class="section" data-section="baseline">
+  <div class="container stack-40">
+    <div class="stack-24">
+      <p class="t-label" data-fig="num-baseline"></p>
+      <h2 class="t-h2 measure">Is the slice representative.</h2>
+      <p class="t-body measure">
+        Our capture is a fraction of what actually gets dispatched, which is
+        the first thing anyone should ask about it. So here is the hour of day
+        profile of our file laid over the same profile from the Florida NFIRS
+        record, which is a different and much larger record of the same state.
+        If the two curves have the same shape, the slice is at least not
+        arriving at odd hours.
+      </p>
+      <p class="t-body measure">
+        Both are drawn as shares, because the sample sizes are four orders of
+        magnitude apart and plotting counts would put one of them flat on the
+        axis. Both denominators are in the caption.
+      </p>
+    </div>
+
+    <figure class="viz stack-16">
+      <div class="viz__scroll">
+        <svg class="viz__svg" data-draw="hours" viewBox="0 0 960 420" role="img"></svg>
+      </div>
+      <div class="viz__legend" data-fig="hours-legend"></div>
+      <figcaption class="t-small viz__caption" data-fig="hours-caption"></figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 3 · THE NIGHTS --------------------------------------------------------
+     One mark per night, every night in the window, never averaged. The
+     governing doc is explicit that the longest unbroken gap is a distribution
+     and that reducing it to a mean is a fabrication.
+
+     THE PROSE MUST NOT NAME THE MARK. The edition decides whether these are
+     bars, stems or steps, so copy that says "one bar per night" is wrong two
+     editions out of three. Say "mark".
+
+     A night the receiver heard nothing all day is NOT drawn as a long gap. It
+     is drawn as absent, because a quiet night and a deaf receiver are
+     indistinguishable from inside the file and the restful reading is the
+     flattering one.
+     ---------------------------------------------------------------------- -->
+<section class="section" data-section="nights">
+  <div class="container stack-40">
+    <div class="stack-24">
+      <p class="t-label" data-fig="num-nights"></p>
+      <h2 class="t-h2 measure">The longest unbroken stretch, night by night.</h2>
+      <p class="t-body measure">
+        Between ten at night and six in the morning, the single longest run
+        with no dispatch on it. One mark per night, in order, for every night
+        in the window. It is not averaged, and it is not going to be: the
+        average of a night with one long run and a night cut into six pieces
+        describes neither of them.
+      </p>
+      <p class="t-body measure">
+        Nights where the receiver heard nothing at all that day are drawn as
+        absent rather than as restful, since from inside the file those two
+        look the same.
+      </p>
+    </div>
+
+    <figure class="viz stack-16">
+      <div class="viz__scroll">
+        <svg class="viz__svg" data-draw="nights" viewBox="0 0 960 340" role="img"></svg>
+      </div>
+      <div class="viz__legend" data-fig="nights-legend"></div>
+      <figcaption class="t-small viz__caption" data-fig="nights-caption"></figcaption>
+    </figure>
+
+    <p class="t-small notice measure">
+      This is a count of dispatches in a window of the clock. It is not a sleep
+      measurement, it says nothing about any individual, and no health claim is
+      made or implied by it.
+    </p>
+  </div>
+</section>
+
+<!-- 4 · WHAT THE CALLS WERE -----------------------------------------------
+     call_type is free text off the air. The count of distinct spellings behind
+     each group is printed next to the group, because that number is the honest
+     measure of how soft the grouping is, and Unclassified is drawn at full
+     height rather than hidden.
+     ---------------------------------------------------------------------- -->
+<section class="section" data-section="composition">
+  <div class="container stack-64">
+    <div class="stack-40">
+      <div class="stack-24">
+        <p class="t-label" data-fig="num-composition"></p>
+        <h2 class="t-h2 measure">What the calls were, roughly.</h2>
+        <p class="t-body measure">
+          The nature of a call arrives as whatever the dispatcher said, so it
+          is uneven text and not a code. Grouping it takes a judgement, and the
+          number of distinct spellings feeding each group is printed beside the
+          group so you can see how much judgement. The unclassified pile is
+          drawn at its real size rather than dropped, because it is the largest
+          single statement the field makes about itself.
+        </p>
+      </div>
+
+      <figure class="viz stack-16">
+        <div class="viz__scroll">
+          <svg class="viz__svg" data-draw="nature" viewBox="0 0 960 460" role="img"></svg>
+        </div>
+        <figcaption class="t-small viz__caption" data-fig="nature-caption"></figcaption>
+      </figure>
+    </div>
+
+    <div class="stack-40">
+      <div class="stack-24">
+        <h3 class="t-h3">Busiest units heard.</h3>
+        <p class="t-body measure">
+          Unit is the finest grain on this page. There is no station figure and
+          no per person figure anywhere on it: pushing a department rate down
+          to a station misstates the busy ones badly, and nothing about an
+          individual is reachable from a radio transmission or belongs on a
+          public page.
+        </p>
+      </div>
+
+      <figure class="viz stack-16">
+        <div class="viz__scroll">
+          <svg class="viz__svg" data-draw="units" viewBox="0 0 960 800" role="img"></svg>
+        </div>
+        <figcaption class="t-small viz__caption" data-fig="units-caption"></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · THE DENOMINATORS --------------------------------------------------
+     Instrument the premise. These are the counts every figure above divides
+     by, including the fields that are blank on most rows. A page that draws
+     six charts and never says how much of the file was empty is not being
+     open about the file.
+     ---------------------------------------------------------------------- -->
+<section class="section" data-section="denominators">
+  <div class="container stack-40">
+    <div class="stack-24">
+      <p class="t-label" data-fig="num-denominators"></p>
+      <h2 class="t-h2 measure">What this file is not.</h2>
+      <p class="t-body measure">
+        Every figure above has a denominator, and some of those denominators
+        are much smaller than the row count, because several fields are blank
+        on most rows. Here they are, rather than left for someone to find.
+      </p>
+    </div>
+
+    <div class="rows" data-fig="capture-rows"></div>
+
+    <p class="t-body measure" data-fig="capture-note"></p>
+
+    <p class="t-body measure">
+      Two things are absent by decision rather than by accident. There is no
+      station level figure on this page, because a department rate pushed down
+      to a station is a well documented error and on this data it misstates the
+      busiest station several times over. And there is no score: the measures
+      built on top of this activity are held until the review that gates them
+      is done. What is drawn here is counting.
+    </p>
+  </div>
+</section>
+
+<footer class="footer field-navy">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="stack-24">
+        <h2 style="margin: 0;">
+          <img class="footer__logo" src="assets/emr-inc-logo.png" alt="EMR Inc.">
+        </h2>
+        <p class="t-body measure" style="color: var(--steel-150);">
+          Emergency Medical Resolutions Inc. We sell through the workplace organization:
+          IAFF locals, not departments and not employers. The local is the buyer because
+          the local represents the member whose record it is.
+        </p>
+        <p class="t-label" style="color: var(--steel-400); margin-top: var(--s-16);">Contact</p>
+        <div class="footer__contact">
+          <a class="footer__contact-link" href="mailto:michael.harvey@emr-inc.net">michael.harvey@emr-inc.net</a>
+          <a class="footer__contact-link" href="https://instagram.com/ohpah.app">OHPAH.app on Instagram</a>
+          <a class="footer__contact-link" href="https://expectvictims.com">expectvictims.com</a>
+          <a class="footer__contact-link" href="https://expectfire.com">expectfire.com</a>
+          <a class="footer__contact-link" href="contact.html">Contact page</a>
+        </div>
+      </div>
+      <div class="rows">
+        <div class="row">
+          <p class="t-data row__key">Incorporated</p>
+          <p class="t-body">Delaware C corp, August 19, 2025</p>
+        </div>
+        <div class="row">
+          <p class="t-data row__key">Registration</p>
+          <p class="t-body">Foreign corporation registration in Florida, complete</p>
+        </div>
+        <div class="row">
+          <p class="t-data row__key">Built by</p>
+          <p class="t-body">Firefighters across multiple career departments</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__base stack-16">
+      <div class="footer__links">
+        <a class="footer__link" href="open-data.html">Open data</a>
+        <a class="footer__link" href="dispatch-views.html">Dispatch views</a>
+        <a class="footer__link" href="research.html">Research</a>
+        <a class="footer__link" href="member-research.html">Member research</a>
+        <a class="footer__link" href="https://expectvictims.com">Expect Victims</a>
+        <a class="footer__link" href="https://expectfire.com">Expect Fire</a>
+        <a class="footer__link" href="call-sign.html">CALL/SIGN: DASHBOARD</a>
+        <a class="footer__link" href="contact.html">Contact</a>
+      </div>
+      <p class="t-data" style="color: var(--steel-400);">
+        EMR Inc. &nbsp;&middot;&nbsp; emr-inc.net &nbsp;&middot;&nbsp; Delaware C corp &nbsp;&middot;&nbsp; File No. 10300393
+      </p>
+    </div>
+  </div>
+</footer>
+
+<script src="reveal.js"></script>
+<script src="dispatch-views.js"></script>
+</body>
+</html>
