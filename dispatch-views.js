@@ -20,6 +20,20 @@
 
    Geometry is in the viewBox and is fixed there. Ink is in styles.css section
    10c. Nothing in this file sets a colour.
+
+   EVERY EDITION LOOKS DIFFERENT, AND NONE OF IT IS RANDOM. doc.composition
+   carries a camera angle, an elevation, a lighting direction, a mark shape for
+   the nights figure, a sort order for the ranked bars and a section order, all
+   derived from the build date by build-dispatch-views.py. A Math.random() here
+   would be one line shorter and would quietly end the page's reproducibility,
+   because two readers would get two drawings of one file while the page went on
+   claiming they could reproduce it. Seeded from the date, anyone can.
+
+   The line between the two kinds of choice is the thing to hold: COMPOSITION
+   VARIES, ENCODING NEVER DOES. The seed may move the camera and reorder the
+   page. It may not decide that height means something else this week. If a new
+   axis of variation would change what a reader concludes from a figure, it is
+   not composition and does not belong in the table.
    ========================================================================== */
 (function () {
   'use strict';
@@ -126,22 +140,63 @@
      ================================================================== */
   var surfaceState = null;
 
+  /* Lighting directions, one per edition. These are vectors on the ground
+     plane, and a side face reads as lit when its outward normal points with
+     the light rather than against it.
+
+     They are deliberately off axis. A light of exactly (-1, 0) puts a dot
+     product of zero on the two faces at right angles to it, which would leave
+     those faces neither lit nor shaded and would flatten the figure at some
+     camera angles. Tilting each vector a little guarantees every visible face
+     lands on one side or the other.
+
+     This is lighting and only lighting. The value a face gets depends on which
+     way the face points, never on how tall the block is, so the shading cannot
+     be read as a second encoding of the data on top of the height. */
+  var LIGHTS = {
+    left:  [-0.92,  0.38],
+    right: [ 0.92,  0.38],
+    front: [ 0.38,  0.92],
+    back:  [ 0.38, -0.92]
+  };
+
   function drawSurface(deg) {
     var st8 = surfaceState;
     if (!st8) return;
     var s = st8.s, rate = st8.rate, scale = st8.scale, dows = s.days_of_week;
+    var comp = st8.comp;
     var svg = svgFor('surface');
 
     var TH = deg * Math.PI / 180;
     var ct = Math.cos(TH), stn = Math.sin(TH);
+    var light = LIGHTS[comp.lighting] || LIGHTS.left;
 
     /* Centre, half widths and the height of a full scale block. SY is already
        the foreshortened depth: the ground plane is squashed rather than
        genuinely perspective projected, which keeps every block the same size
        and so keeps height comparable across the whole figure. A real
        perspective would make the near Sunday blocks taller than identical
-       Monday ones, which would be a lie told by the projection. */
-    var CX = 428, CY = 432, SX = 276, SY = 124, ZH = 234;
+       Monday ones, which would be a lie told by the projection.
+
+       Elevation is the edition's, so the plane is flatter or steeper from one
+       build to the next, and the frame has to follow it.
+
+       THE PLANE IS DEEPER THAN IT LOOKS. A corner at (1, 1) projects to
+       (sin + cos) * SY, and sin + cos peaks at root two, not at one, when the
+       camera is near forty five degrees. Sizing the frame to 2 * SY is the
+       obvious arithmetic and it is wrong by forty per cent at the worst angle:
+       it clipped the near row clean off the bottom at the steeper elevations.
+       The extent is 2 * root two * SY, so that is what the viewBox gets, plus
+       the block height above the far corner and the hour labels below the near
+       one. Height is recomputed per edition rather than fixed in the markup,
+       which also means a flat edition does not carry a band of dead space. */
+    var CX = 434, SX = 276, ZH = 234;
+    var SY = SX * comp.elevation;
+    var DEEP = Math.SQRT2 * SY;        /* half depth of the plane, worst case */
+    var PAD = 20, LABEL = 19;
+    var VH = Math.ceil(2 * DEEP + ZH + LABEL + 2 * PAD);
+    var CY = DEEP + ZH + PAD;
+    svg.setAttribute('viewBox', '0 0 960 ' + VH);
     function P(x, y, z) {
       return [CX + (x * ct - y * stn) * SX,
               CY + (x * stn + y * ct) * SY - z * ZH];
@@ -221,8 +276,11 @@
        [0, -1, [c.x0, c.y0], [c.x1, c.y0]]].forEach(function (f) {
         if (f[0] * stn + f[1] * ct <= 0) return;   /* faces away, never seen */
         var a = f[2], b = f[3];
-        g.push(poly('sur-side', [P(a[0], a[1], c.z), P(b[0], b[1], c.z),
-                                 P(b[0], b[1], 0), P(a[0], a[1], 0)]));
+        /* Lit or shaded by which way the face points, not by how tall it is. */
+        var cls = (f[0] * light[0] + f[1] * light[1]) > 0
+          ? 'sur-side' : 'sur-side--dim';
+        g.push(poly(cls, [P(a[0], a[1], c.z), P(b[0], b[1], c.z),
+                          P(b[0], b[1], 0), P(a[0], a[1], 0)]));
       });
       g.push(poly('sur-top', topFace));
       g.push('</g>');
@@ -249,9 +307,13 @@
     });
     var max = 0;
     rate.forEach(function (r) { r.forEach(function (v) { if (v > max) max = v; }); });
-    surfaceState = { s: s, rate: rate, scale: niceScale(max) };
+    surfaceState = { s: s, rate: rate, scale: niceScale(max), comp: doc.composition };
 
+    /* The edition sets where the camera starts. The slider still spans its
+       whole range from there, so nothing an edition chooses takes a view away
+       from the reader; it only decides which one they are handed first. */
     var slider = document.getElementById('surface-rotate');
+    slider.value = doc.composition.azimuth;
     drawSurface(+slider.value);
     /* Direct manipulation, redrawn synchronously. No transition, so this is
        not one of the page's four motions and it respects reduced motion by
@@ -390,14 +452,38 @@
     }
     out.push(txt('sur-eyebrow', 16, 24, 'MINUTES, LONGEST UNBROKEN GAP'));
 
+    /* Three mark shapes, one per edition. All three draw the same sixty four
+       numbers and none of them aggregates: the figure is a distribution and
+       stays one whatever it is drawn with.
+
+       The absence stub is identical in all three. A night the receiver heard
+       nothing is never drawn as a tall bar, a tall stem or a high step,
+       because that would read as a long restful gap, and a quiet night and a
+       deaf receiver are indistinguishable from inside the file. The steps
+       variant additionally BREAKS its line at those nights rather than running
+       through them, since a continuous line across a hole asserts a value
+       that was never measured. */
+    var mark = (doc.composition || {}).night_mark || 'bars';
+    var prevY = null;
     nights.forEach(function (n, i) {
       var x = L + i * W;
       if (n.capture_gap) {
         out.push(rect('bar-gap', x + 1, B - 7, W - 2, 7));
+        prevY = null;                 /* break the line, never bridge the hole */
         return;
       }
-      out.push(rect('bar-night', x + 1, Y(n.longest_gap_min),
-                    W - 2, B - Y(n.longest_gap_min)));
+      var y = Y(n.longest_gap_min);
+      if (mark === 'stems') {
+        out.push(seg('stem-night', [x + W / 2, B], [x + W / 2, y]));
+        out.push('<circle class="stem-head" cx="' + (x + W / 2).toFixed(1) +
+                 '" cy="' + y.toFixed(1) + '" r="2.8"/>');
+      } else if (mark === 'steps') {
+        if (prevY !== null) out.push(seg('step-night', [x, prevY], [x, y]));
+        out.push(seg('step-night', [x, y], [x + W, y]));
+        prevY = y;
+      } else {
+        out.push(rect('bar-night', x + 1, y, W - 2, B - y));
+      }
     });
 
     nights.forEach(function (n, i) {
@@ -427,9 +513,23 @@
      length and marked as not a category, because it is the largest single
      statement this field makes about itself.
      ================================================================== */
+  /* Ranked bars are shown either biggest first or alphabetically, by edition.
+     Both are honest orderings of the same set and each answers a different
+     question: by value tells you what dominates, alphabetically lets you find
+     the one you came for. The set itself never changes, so an alphabetical
+     edition is still exactly the top twenty and the caption still says so.
+     Sorting a copy, because the JSON is shared with the captions. */
+  function ranked(rows, key, order) {
+    var copy = rows.slice();
+    if (order === 'alpha') {
+      copy.sort(function (a, b) { return String(a[key]).localeCompare(String(b[key])); });
+    }
+    return copy;
+  }
+
   function drawNature(doc) {
     var n = doc.nature;
-    var groups = n.groups;
+    var groups = ranked(n.groups, 'group', (doc.composition || {}).rank_order);
     var LBL = 200, L = 216, R = 812, T = 54, RH = 42;
     var max = 0;
     groups.forEach(function (g) { max = Math.max(max, g.count); });
@@ -474,7 +574,7 @@
      ================================================================== */
   function drawUnits(doc) {
     var u = doc.units;
-    var top20 = u.top;
+    var top20 = ranked(u.top, 'unit', (doc.composition || {}).rank_order);
     var LBL = 150, L = 166, R = 812, T = 54, RH = 34;
     var max = 0;
     top20.forEach(function (r) { max = Math.max(max, r.count); });
@@ -512,15 +612,67 @@
      6 · THE STAMP AND THE DENOMINATORS
      ================================================================== */
   function drawStamp(doc) {
-    var w = doc.window;
+    var w = doc.window, c = doc.composition;
     rowsInto(fig('stamp'), [
       ['Window', longDate(w.first_local) + ' to ' + longDate(w.last_local) +
                  '. ' + fmt(w.days) + ' days, ' + w.timezone + '.'],
       ['Read', fmt(w.transmissions) + ' transmissions'],
       ['Built', longDate(doc.built) + '. Rebuilt ' + esc(doc.cadence) + '.'],
+      ['Edition', fmt(c.edition) + ', drawn from ' + esc(c.seed) +
+                  '. Camera ' + fmt(c.azimuth) + '\u00b0, lit from the ' +
+                  esc(c.lighting) + '.'],
       ['From', '<code>' + esc(doc.source) + '</code>'],
       ['Grain', esc(doc.grain)]
     ]);
+    var note = fig('edition-note');
+    if (note) note.textContent = c.note;
+  }
+
+  /* ======================================================================
+     7 · THE EDITION
+     The page is rebuilt three times a week and is drawn differently every
+     time. This moves the sections, renumbers them and reassigns the light and
+     dark banding, so nothing about the order is written into the markup.
+
+     Say so on the page. A layout that changes on its own, silently, invites a
+     returning reader to think the data moved when only the camera did, and a
+     figure that misleads by its framing is no better than one that misleads by
+     its numbers. The stamp prints the edition and the date it came from, so
+     the change is declared and checkable rather than merely noticed.
+
+     The closing section stays last in every edition. It is the one that says
+     what the file is not, and that argument only lands after the figures it
+     qualifies; rotating it into the lead would turn the page's own caveat into
+     its opening claim.
+     ================================================================== */
+  function arrange(doc) {
+    var order = { surface:  ['surface', 'baseline', 'nights'],
+                  baseline: ['baseline', 'surface', 'nights'],
+                  nights:   ['nights', 'surface', 'baseline'] };
+    var lead = order[(doc.composition || {}).flow] || order.surface;
+    var names = lead.concat(['composition', 'denominators']);
+
+    var nodes = {}, anchor = null;
+    names.forEach(function (name) {
+      nodes[name] = document.querySelector('[data-section="' + name + '"]');
+      if (nodes[name] && !anchor) anchor = nodes[name].parentNode;
+    });
+    if (!anchor) return;
+
+    names.forEach(function (name, i) {
+      var el = nodes[name];
+      if (!el) return;
+      anchor.insertBefore(el, document.querySelector('.footer'));
+      /* Banding alternates down the page as ordered, not as authored, so the
+         sections never end up two whites deep after a swap. */
+      el.classList.remove('field-white', 'field-ivory');
+      el.classList.add(i % 2 ? 'field-ivory' : 'field-white');
+      var num = fig('num-' + name);
+      if (num) {
+        num.textContent = (i + 1 < 10 ? '0' : '') + (i + 1);
+        num.style.color = 'var(--steel-400)';
+      }
+    });
   }
 
   function drawCapture(doc) {
@@ -569,6 +721,7 @@
       return r.json();
     })
     .then(function (doc) {
+      arrange(doc);
       drawStamp(doc);
       initSurface(doc);
       drawHours(doc);

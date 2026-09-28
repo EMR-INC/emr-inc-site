@@ -54,6 +54,92 @@ LOCAL = ZoneInfo("America/New_York")
 
 DOW = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
+# ---------------------------------------------------------------------------
+# THE EDITION, AND WHY THE VARIATION IS COMPUTED RATHER THAN RANDOM
+# ---------------------------------------------------------------------------
+# The page is redrawn Monday, Wednesday and Friday and is meant to look
+# different every time. That variation is DERIVED FROM THE BUILD DATE, not
+# drawn from a random number generator, and the reason matters more than the
+# effect.
+#
+# The page's entire claim is that a reader can download the published CSV, run
+# this script and reproduce the picture. A Math.random() in the browser would
+# give two readers two different drawings of the same file, and the page would
+# quietly stop being reproducible while still saying that it was. That is a far
+# worse trade than a livelier page is a gain. Seeded from the date, the edition
+# is recomputable by anyone: the stamp prints the build date, the date gives
+# the edition number, and the edition number gives every choice below.
+#
+# WHAT VARIES IS COMPOSITION. WHAT NEVER VARIES IS ENCODING.
+#
+#   May vary   camera azimuth and elevation, lighting direction, the mark used
+#              for the nights figure, the sort order of ranked bars, and the
+#              order the sections appear in.
+#   Never      what a mark MEANS. Height is always the rate. Length is always
+#              the count. Hue never carries magnitude in any edition. The
+#              denominators, the rounding, the grain and the privacy floor are
+#              untouched by the seed. Someone who learns to read one edition
+#              can read the next one without relearning it.
+#
+# Nothing here is allowed to change a number. If a future axis of variation
+# would change what a reader concludes, it is not composition and does not
+# belong in this table.
+#
+# The strides are chosen so that CONSECUTIVE EDITIONS DIFFER ON EVERY AXIS.
+# Sampling each axis independently would let a Wednesday land on Monday's
+# camera angle by chance, and "different every time" would be true only on
+# average. Each stride below is coprime with the length of its own list, so
+# every axis advances through all of its values and never repeats back to back.
+# The full combination repeats on a cycle of lcm(8,5,4,3,2,3) = 120 editions,
+# which at three builds a week is about forty weeks.
+EPOCH = dt.date(2026, 9, 25)          # edition 0. Arbitrary, but fixed forever.
+BUILD_DAYS = {0, 2, 4}                # Monday, Wednesday, Friday
+
+AZIMUTHS = [14, 24, 32, 40, 48, 58, 68, 78]   # degrees, inside the slider range
+ELEVATIONS = [0.34, 0.42, 0.50, 0.58, 0.66]   # ground plane squash
+LIGHTING = ["left", "right", "front", "back"]  # which side face reads as lit
+NIGHT_MARKS = ["bars", "stems", "steps"]
+RANK_ORDERS = ["value", "alpha"]
+FLOWS = ["surface", "baseline", "nights"]      # which section leads the page
+
+
+def edition_number(built: dt.date) -> int:
+    """Count the scheduled builds from EPOCH to `built`.
+
+    Counted in BUILDS, not in days, because Monday to Wednesday is two days
+    and Friday to Monday is three. Indexing on the raw day number would make
+    the strides jump unevenly and the guarantee that consecutive editions
+    differ would not hold across a weekend.
+    """
+    step = 1 if built >= EPOCH else -1
+    n, day = 0, EPOCH
+    while day != built:
+        day += dt.timedelta(days=step)
+        if day.weekday() in BUILD_DAYS:
+            n += step
+    return n
+
+
+def composition(built: dt.date) -> dict:
+    e = edition_number(built)
+    return {
+        "edition": e,
+        "seed": built.isoformat(),
+        "azimuth": AZIMUTHS[(e * 3) % len(AZIMUTHS)],
+        "elevation": ELEVATIONS[e % len(ELEVATIONS)],
+        "lighting": LIGHTING[(e * 3) % len(LIGHTING)],
+        "night_mark": NIGHT_MARKS[e % len(NIGHT_MARKS)],
+        "rank_order": RANK_ORDERS[e % len(RANK_ORDERS)],
+        "flow": FLOWS[(e * 2) % len(FLOWS)],
+        "note": "The layout, camera and mark shapes on this page are derived "
+                "from the build date, so every edition is drawn differently "
+                "and any reader can recompute which drawing a given date "
+                "produces. Only the composition varies. Height is the rate "
+                "and length is the count in every edition, colour never "
+                "carries magnitude in any of them, and no number on the page "
+                "is affected by it.",
+    }
+
 # The overnight window is 22:00 to 06:00 local, taken from migration
 # 00071_metrics_one_definition.sql so that the public counting uses the same
 # window as the internal measure. No new constant is invented here.
@@ -275,6 +361,7 @@ def main():
         # parsing an ISO date as UTC and printing it local.
         "built": dt.datetime.now(LOCAL).strftime("%Y-%m-%d"),
         "cadence": "Monday, Wednesday, Friday",
+        "composition": composition(dt.datetime.now(LOCAL).date()),
         "note": "Every figure here is recomputable from the published CSV alone. "
                 "The CSV is a static capture, so these views move only when the "
                 "capture is refreshed, not on every build.",

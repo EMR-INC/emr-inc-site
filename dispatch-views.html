@@ -35,7 +35,21 @@
      here. What is drawn is the dispatch activity they are built from. Do not
      add a score to this page without the review that gates it.
 
-     Cadence is Monday, Wednesday and Friday.
+     EVERY EDITION IS DRAWN DIFFERENTLY. Cadence is Monday, Wednesday and
+     Friday, and each build picks a different camera angle, lighting, mark
+     shape, sort order and section order. Those choices are DERIVED FROM THE
+     BUILD DATE in build-dispatch-views.py, never randomised, so the drawing
+     stays reproducible: same date in, same picture out. Consecutive editions
+     are guaranteed to differ on all six axes.
+
+     THE SECTIONS BELOW ARE REORDERED AT RUNTIME, so do not hard code their
+     numbers or their light and dark banding. Both are assigned by the script.
+     Write each section so it stands on its own and does not refer to "the
+     figure above" or to a neighbour it may not have next time.
+
+     The variation is composition only. It never changes what a mark means:
+     height is the rate and length is the count in every edition, and colour
+     carries no magnitude in any of them.
      ---------------------------------------------------------------------- -->
 <nav class="nav">
   <div class="container nav__inner">
@@ -60,6 +74,7 @@
       Monday, Wednesday and Friday.
     </p>
     <div class="rows" data-fig="stamp"></div>
+    <p class="t-small measure" style="color: var(--steel-400);" data-fig="edition-note"></p>
     <div class="btn-row">
       <a class="btn btn--solid" href="data/dispatch-events.csv" download>Download the CSV</a>
       <a class="btn btn--line" href="open-data.html">What is in it, and what is not</a>
@@ -78,10 +93,10 @@
      are partly an artifact of where the window started and stopped. Each row
      is divided by its own count of days observed.
      ---------------------------------------------------------------------- -->
-<section class="section field-white">
+<section class="section" data-section="surface">
   <div class="container stack-40">
     <div class="stack-24">
-      <p class="t-label" style="color: var(--steel-400);">01</p>
+      <p class="t-label" data-fig="num-surface"></p>
       <h2 class="t-h2 measure">When the calls come.</h2>
       <p class="t-body measure">
         Seven days across, twenty four hours deep, and the height of each block
@@ -131,10 +146,10 @@
      magnitude and both are printed in the caption so the shares can be turned
      back into counts.
      ---------------------------------------------------------------------- -->
-<section class="section field-ivory">
+<section class="section" data-section="baseline">
   <div class="container stack-40">
     <div class="stack-24">
-      <p class="t-label" style="color: var(--steel-400);">02</p>
+      <p class="t-label" data-fig="num-baseline"></p>
       <h2 class="t-h2 measure">Is the slice representative.</h2>
       <p class="t-body measure">
         Our capture is a fraction of what actually gets dispatched, which is
@@ -162,26 +177,30 @@
 </section>
 
 <!-- 3 · THE NIGHTS --------------------------------------------------------
-     One bar per night, every night in the window, never averaged. The
+     One mark per night, every night in the window, never averaged. The
      governing doc is explicit that the longest unbroken gap is a distribution
      and that reducing it to a mean is a fabrication.
+
+     THE PROSE MUST NOT NAME THE MARK. The edition decides whether these are
+     bars, stems or steps, so copy that says "one bar per night" is wrong two
+     editions out of three. Say "mark".
 
      A night the receiver heard nothing all day is NOT drawn as a long gap. It
      is drawn as absent, because a quiet night and a deaf receiver are
      indistinguishable from inside the file and the restful reading is the
      flattering one.
      ---------------------------------------------------------------------- -->
-<section class="section field-white">
+<section class="section" data-section="nights">
   <div class="container stack-40">
     <div class="stack-24">
-      <p class="t-label" style="color: var(--steel-400);">03</p>
+      <p class="t-label" data-fig="num-nights"></p>
       <h2 class="t-h2 measure">The longest unbroken stretch, night by night.</h2>
       <p class="t-body measure">
         Between ten at night and six in the morning, the single longest run
-        with no dispatch on it. One bar per night, in order, for every night in
-        the window. It is not averaged, and it is not going to be: the average
-        of a night with one long run and a night cut into six pieces describes
-        neither of them.
+        with no dispatch on it. One mark per night, in order, for every night
+        in the window. It is not averaged, and it is not going to be: the
+        average of a night with one long run and a night cut into six pieces
+        describes neither of them.
       </p>
       <p class="t-body measure">
         Nights where the receiver heard nothing at all that day are drawn as
@@ -212,11 +231,11 @@
      measure of how soft the grouping is, and Unclassified is drawn at full
      height rather than hidden.
      ---------------------------------------------------------------------- -->
-<section class="section field-ivory">
+<section class="section" data-section="composition">
   <div class="container stack-64">
     <div class="stack-40">
       <div class="stack-24">
-        <p class="t-label" style="color: var(--steel-400);">04</p>
+        <p class="t-label" data-fig="num-composition"></p>
         <h2 class="t-h2 measure">What the calls were, roughly.</h2>
         <p class="t-body measure">
           The nature of a call arrives as whatever the dispatcher said, so it
@@ -264,10 +283,10 @@
      six charts and never says how much of the file was empty is not being
      open about the file.
      ---------------------------------------------------------------------- -->
-<section class="section field-white">
+<section class="section" data-section="denominators">
   <div class="container stack-40">
     <div class="stack-24">
-      <p class="t-label" style="color: var(--steel-400);">05</p>
+      <p class="t-label" data-fig="num-denominators"></p>
       <h2 class="t-h2 measure">What this file is not.</h2>
       <p class="t-body measure">
         Every figure above has a denominator, and some of those denominators

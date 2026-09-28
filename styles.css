@@ -972,6 +972,25 @@ img, svg { display: block; max-width: 100%; }
 .sur-top  { fill: var(--navy-700); stroke: var(--white); stroke-width: 0.5; }
 .sur-side { fill: var(--navy-500); stroke: var(--white); stroke-width: 0.5; }
 
+/* The shaded side. Which faces get this and which get .sur-side depends on the
+   edition's lighting direction, so the figure is lit from a different quarter
+   each build.
+
+   THIS IS LIGHTING, NOT A SECOND ENCODING. A face is lit or shaded by which
+   way it points and by nothing else, so a one transmission block and a twenty
+   transmission block wear exactly the same two values. Reading the darker face
+   as "more" is therefore impossible, which is the property that lets the
+   surface have shading at all without breaking the rule that hue and value
+   carry no magnitude.
+
+   It takes navy-700, the same value as the top face, rather than a third step.
+   The ramp has only two navies and the one darker value, ink-900, is already
+   spoken for by hover; a third shade would either have to be invented outside
+   the tokens or would collide with the interface state and make hovering a dim
+   face invisible. Two plies is also the house limit. The hairline in the field
+   colour keeps the top edge legible where the two meet. */
+.sur-side--dim { fill: var(--navy-700); stroke: var(--white); stroke-width: 0.5; }
+
 /* A measured zero. Drawn flat on the plane rather than omitted, because every
    hour of every weekday was observed, so a zero is a finding and not a hole. */
 .sur-zero { fill: var(--steel-150); stroke: var(--white); stroke-width: 0.5; }
@@ -981,7 +1000,8 @@ img, svg { display: block; max-width: 100%; }
    design_system.md MOTION forbids both. */
 .sur-cell { cursor: crosshair; }
 .sur-cell.is-hot .sur-top,
-.sur-cell.is-hot .sur-side { fill: var(--ink-900); }
+.sur-cell.is-hot .sur-side,
+.sur-cell.is-hot .sur-side--dim { fill: var(--ink-900); }
 .sur-zero.is-hot { fill: var(--steel-400); }
 
 .viz__controls {
@@ -1024,6 +1044,20 @@ img, svg { display: block; max-width: 100%; }
 
 /* ---- 3 · the nights ---- */
 .bar-night { fill: var(--navy-700); }
+
+/* The same sixty four values drawn as stems or as a step profile instead of as
+   bars, chosen by the edition. One value for all three, because the choice of
+   mark is composition and carries no reading: a stem edition is not reporting
+   anything a bar edition was not. Every one of them stays at one mark per
+   night, since the governing doc forbids averaging this into a single number
+   and a smoothed curve would be that average wearing a different shape. */
+.stem-night { stroke: var(--navy-700); stroke-width: 1.5; }
+.stem-head  { fill: var(--navy-700); }
+.step-night {
+  stroke: var(--navy-700);
+  stroke-width: 2;
+  stroke-linecap: square;
+}
 /* A night the receiver heard nothing. Deliberately a stub at the baseline
    rather than a full height bar: a quiet night and a deaf receiver look
    identical from inside the file, and the restful reading is the flattering
