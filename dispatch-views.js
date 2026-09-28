@@ -6,10 +6,11 @@
    THE ONE RULE: not a single number is written in this file or in the HTML.
    Every value, axis tick, sample count and caption figure is read from the
    JSON at runtime. The JSON is built by data/build-dispatch-views.py from
-   data/dispatch-events.csv, which is the file the open data page publishes, so
-   a reader can reproduce every mark on the page from a public download. Typing
-   a statistic into this file breaks that chain silently, which is the worst way
-   for it to break.
+   data/dispatch-events.csv. The CSV is NOT published (2026-09-28) and the page
+   no longer claims a reader can recompute these marks; what it claims is that
+   the build script is readable, so how a number is derived can be audited.
+   Typing a statistic into this file breaks even that chain silently, which is
+   the worst way for it to break.
 
    COLOUR CARRIES NOTHING QUANTITATIVE. design_system.md is explicit that value
    carries magnitude and hue never does, so magnitude is length in the flat
@@ -736,7 +737,6 @@
          Say so, rather than showing empty frames that look like no data. */
       fail('The figures could not be loaded: ' + err.message +
            '. This page reads data/dispatch-views.json over HTTP, so it has ' +
-           'to be served rather than opened as a local file. The numbers ' +
-           'themselves are in data/dispatch-events.csv either way.');
+           'to be served rather than opened as a local file.');
     });
 })();

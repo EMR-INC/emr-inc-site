@@ -632,25 +632,29 @@ details li {
     </div>
   </section>
 
-  <!-- THE CSV IS A WIDER DISCLOSURE THAN THE REST OF THIS PAGE, and the copy
-       below says so on purpose. Everything above is aggregate counts. This is
-       one row per radio transmission, located to the street. Do not soften
-       that sentence to make the section sit more comfortably under the
-       aggregate-only language: the two are different promises and a reader
-       who conflates them has been misled by us, not by themselves.
+  <!-- THIS SECTION USED TO PUBLISH THE ROW LEVEL CSV. It no longer does
+       (2026-09-28). The file is one row per radio transmission located to the
+       street, and we decided not to hand that out.
 
-       The file itself is static and committed. The daily job that regenerates
-       this page does not touch it, so this section is plain markup with no
-       markers in it and passes through scripts/update_research.py untouched. -->
+       What is left is a statement of what exists and what is withheld, which is
+       worth keeping: a reader should be able to tell exactly how far this page
+       goes and where it stops. Everything published here is aggregate counts.
+
+       Do not reinstate a download link here without reinstating the file, and
+       do not describe the record as published while it is not. The page's only
+       real asset is that its promises match what it actually does.
+
+       This section is plain markup with no markers in it and passes through
+       scripts/update_research.py untouched, so the same block lives in both
+       templates/open-data.html and the generated open-data.html. Edit both. -->
   <section class="files-section" id="files" aria-labelledby="files_title">
     <div class="files-grid">
       <p class="eyebrow">The file</p>
-      <h2 id="files_title">Take the<br>records.</h2>
-      <p>Every dispatch transmission captured on the monitored talkgroups over the published window, as a plain CSV. One row per transmission, with the call type, the severity, the responding unit and the time it went out.</p>
-      <p>This is a wider disclosure than the rest of this page, and it is worth being exact about how. The figures above are aggregate counts. This file is row level, and it is located to the street: the house number is dropped and the street name is kept. The radio transcripts, the full addresses, the coordinates and anything that identifies a member are not in it, and the script that builds it lists every withheld column with the reason it is withheld.</p>
-      <p>It is the same file the figures on the dispatch views page are drawn from. Nothing on that page comes from a source a reader cannot reach.</p>
+      <h2 id="files_title">What is<br>withheld.</h2>
+      <p>Behind these figures is one row per dispatch transmission captured on the monitored talkgroups, with the call type, the severity, the responding unit and the time it went out. That record is not published.</p>
+      <p>It is worth being exact about why. Everything on this page is an aggregate count. The underlying record is row level and located to the street, and row level street located dispatch data is a different kind of disclosure from a count, no matter how careful the counts are. Radio transcripts, full addresses, coordinates and anything that identifies a member are not in it either, and have never been published anywhere on this site.</p>
+      <p>What we do publish is the method. The scripts that build these figures are readable, so how a number is computed can be checked even though the rows behind it cannot be refetched.</p>
       <div class="files-actions">
-        <a class="study-open" href="data/dispatch-events.csv" download>Download the CSV</a>
         <a class="study-open" href="dispatch-views.html">See the figures drawn from it</a>
         <a class="study-open" href="data/build-open-data.py">Read the build script</a>
       </div>
@@ -664,7 +668,7 @@ details li {
         <li data-sd-id="48">Florida radio systems represented in the source workbook only.</li>
         <li data-sd-id="49">Marks are transcript-derived alert candidates, not verified CAD incidents or confirmed unit responses.</li>
         <li data-sd-id="50">Rows flagged for possible PHI are excluded before aggregation.</li>
-        <li data-sd-id="51">No transcript, full address, or person-level record is published anywhere on this site. The counts on this page are aggregates; the CSV linked above is row level and carries a street name with the house number removed. Those are two different promises and neither one covers the other.</li>
+        <li data-sd-id="51">No transcript, full address, or person-level record is published anywhere on this site. Everything on this page is an aggregate count. The row level dispatch record the counts are derived from is not published either.</li>
       </ul>
       <p class="source" data-sd-id="52">Source and full method: <a href="research.html" data-sd-id="53">EMR Inc. research</a>. <span id="refresh_note">Window 2026-09-20T02:19:13-04:00 through 2026-09-27T02:19:13-04:00. Refreshed 2026-09-27T06:55:10Z.</span></p>
     </details>

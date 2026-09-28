@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 """Build data/dispatch-views.json, which is what dispatch-views.html draws.
 
-THE INPUT IS THE PUBLISHED FILE, data/dispatch-events.csv, and that is the
-point. Every figure on the views page can be reproduced by a reader who
-downloads the CSV from the open-data page and runs this script. There is no
-private intermediate step and no number on the page that came from somewhere
-the reader cannot reach. If this ever starts reading a private source, the
-claim the page makes about itself stops being true.
+THE INPUT IS data/dispatch-events.csv, WHICH IS NOT PUBLISHED. It was, until
+2026-09-28, and the point of that was that a reader could download the CSV from
+the open-data page, run this script, and get byte for byte the figures on the
+views page. That is gone: the record is one row per radio transmission located
+to the street, and we decided not to hand it out.
+
+What is left is the weaker claim, and it is the one the pages now make. THIS
+SCRIPT is published, so a reader can audit how any figure is computed, line by
+line, without being able to recompute it from the rows. Do not restore the
+stronger wording anywhere on the site unless the file goes back up with it.
+Half of that pair is a lie in one direction or the other.
 
 Cadence is Monday, Wednesday and Friday, driven by
 .github/workflows/dispatch-views.yml.
@@ -62,13 +67,14 @@ DOW = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sund
 # drawn from a random number generator, and the reason matters more than the
 # effect.
 #
-# The page's entire claim is that a reader can download the published CSV, run
-# this script and reproduce the picture. A Math.random() in the browser would
-# give two readers two different drawings of the same file, and the page would
-# quietly stop being reproducible while still saying that it was. That is a far
-# worse trade than a livelier page is a gain. Seeded from the date, the edition
-# is recomputable by anyone: the stamp prints the build date, the date gives
-# the edition number, and the edition number gives every choice below.
+# The page tells the reader which drawing a given date produces, and a
+# Math.random() in the browser would make that false: two readers would get two
+# different drawings of one file while the page went on saying the composition
+# is derived from the date. Seeded from the date, the claim holds and anyone can
+# check it without any access to the underlying rows: the stamp prints the build
+# date, the date gives the edition number, and the edition number gives every
+# choice below. This is now the ONLY reproducibility claim the page makes, the
+# CSV having stopped being published on 2026-09-28, so do not weaken it.
 #
 # WHAT VARIES IS COMPOSITION. WHAT NEVER VARIES IS ENCODING.
 #
@@ -352,7 +358,11 @@ def main():
 
     doc = {
         "title": "OHPAH dispatch views",
-        "source": "data/dispatch-events.csv, the file published on the open data page",
+        # Named, not linked, and explicitly not offered. This string is printed
+        # on the page in the stamp's "From" row, so it is the one place a reader
+        # is told where the numbers came from. It must not read as an invitation
+        # to fetch it, because the file is excluded from the deployment.
+        "source": "data/dispatch-events.csv, held privately, not published",
         "built_by": "data/build-dispatch-views.py",
         # Stamped in LOCAL, not UTC. The stamp is printed next to a window that
         # the page declares as America/New_York, so a UTC stamp reads a day
@@ -362,9 +372,10 @@ def main():
         "built": dt.datetime.now(LOCAL).strftime("%Y-%m-%d"),
         "cadence": "Monday, Wednesday, Friday",
         "composition": composition(dt.datetime.now(LOCAL).date()),
-        "note": "Every figure here is recomputable from the published CSV alone. "
-                "The CSV is a static capture, so these views move only when the "
-                "capture is refreshed, not on every build.",
+        "note": "Every figure here is a count computed by a published script "
+                "from a dispatch record that is not published. The record is a "
+                "static capture, so these views move only when the capture is "
+                "refreshed, not on every build.",
         "grain": "Department and unit. Station grain is deferred by "
                  "OHPAH_Department_Unit_Timeframe_Views_2026-09-04, build rule 2.",
         "window": {

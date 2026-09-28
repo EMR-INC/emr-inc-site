@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script>document.documentElement.className += ' js';</script>
 <title>Dispatch views &middot; EMR Inc.</title>
-<meta name="description" content="What the published dispatch CSV looks like when you draw it. Demand by day and hour in three dimensions, the overnight gap night by night, and the shape of the file against the Florida NFIRS record. Rebuilt Monday, Wednesday and Friday.">
+<meta name="description" content="What the dispatch record looks like when you draw it. Demand by day and hour in three dimensions, the overnight gap night by night, and the shape of the file against the Florida NFIRS record. Rebuilt Monday, Wednesday and Friday.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=DM+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -20,11 +20,18 @@
      NOTHING ON THIS PAGE IS A HAND WRITTEN NUMBER. Every figure, label, axis
      tick, sample count and caption number is read at runtime from
      data/dispatch-views.json, which data/build-dispatch-views.py computes from
-     data/dispatch-events.csv, which is the file the open data page publishes.
-     That chain is the whole claim of the page: a reader can download the CSV,
-     run the script and get the same JSON, so no figure here rests on a private
-     step. If you find yourself typing a statistic into this file, the chain is
-     broken and the page has started lying.
+     data/dispatch-events.csv. If you find yourself typing a statistic into this
+     file, the chain is broken and the page has started lying.
+
+     THE CSV IS NO LONGER PUBLISHED (2026-09-28). It was, and the page used to
+     claim that a reader could download it, run the script and get the same
+     JSON. That claim is now gone from the prose and the download button is gone
+     with it, because the file is row level and located to the street and we are
+     not handing that out. What survives is weaker and true: the script is
+     published, so a reader can audit HOW a figure is computed, but cannot
+     recompute it themselves. Do not restore the old wording without restoring
+     the file, and do not restore the file without deciding to publish it again.
+     Half of that pair is a lie in one direction or the other.
 
      The markup below is therefore hosts and prose only. The prose states what
      a figure means and what it cannot mean; the figure states the numbers.
@@ -68,16 +75,16 @@
     <p class="t-label" style="color: var(--beam-500);">Dispatch views</p>
     <h1 class="t-display" style="max-width: 24ch;">Same file. Drawn.</h1>
     <p class="t-body measure" style="color: var(--steel-150);">
-      These are the figures we read the open data with. They are built from the
-      CSV on that page and nothing else, so every number below can be
-      reproduced by downloading the file and running one script. Rebuilt every
-      Monday, Wednesday and Friday.
+      These are the figures we read the open data with. They are built from one
+      dispatch record and nothing else, drawn by a script we publish. The record
+      itself is row level and is not published. Rebuilt every Monday, Wednesday
+      and Friday.
     </p>
     <div class="rows" data-fig="stamp"></div>
     <p class="t-small measure" style="color: var(--steel-400);" data-fig="edition-note"></p>
     <div class="btn-row">
-      <a class="btn btn--solid" href="data/dispatch-events.csv" download>Download the CSV</a>
-      <a class="btn btn--line" href="open-data.html">What is in it, and what is not</a>
+      <a class="btn btn--solid" href="open-data.html">What is in it, and what is not</a>
+      <a class="btn btn--line" href="data/build-dispatch-views.py">Read the build script</a>
     </div>
   </div>
 </header>
