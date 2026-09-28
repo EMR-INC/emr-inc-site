@@ -82,8 +82,14 @@ jobs:
       # the EMR-INC org that owns this repo. The CLI needs neither, so it avoids
       # granting a second identity standing access to the org for a build.
       #
-      # See dispatch-views.yml for the long version of the reasoning; the two
-      # steps are deliberately identical so they cannot drift apart.
+      # See dispatch-views.yml for the long version of the reasoning. The two
+      # steps are otherwise identical, and deliberately so, but their `if:`
+      # conditions differ on purpose: dispatch-views.yml deploys on a manual run
+      # even with nothing to commit, because it is the hand lever for shipping
+      # the site. This one does not, because a manual run here bypasses the 08:00
+      # Eastern gate and republishes the research figures, so firing it to push
+      # out an unrelated change would move numbers as a side effect. Use the
+      # other workflow to deploy by hand.
       #
       # If Git integration is ever connected, DELETE this step, or every refresh
       # will build to production twice.

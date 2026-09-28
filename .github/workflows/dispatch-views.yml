@@ -116,8 +116,17 @@ jobs:
       # The redraw itself succeeded and is committed; a red run here would say
       # "the build broke" when what actually happened is "nobody has wired the
       # deploy yet", and the annotation says exactly that instead.
+      #
+      # A MANUAL RUN ALWAYS DEPLOYS, even when the redraw changed nothing. This
+      # is the repository's only hand lever for deploying emr-inc.net: the token
+      # lives in a repository secret and nowhere else, so nobody's laptop can run
+      # `vercel deploy` against this project. Gating a manual run on the redraw
+      # having produced a change would mean that any commit which is not itself a
+      # redraw -- a copy fix, a removed file, a header change -- could reach main
+      # with no way to get it onto the live site. That is the exact failure this
+      # step was added to close, so it must not be reintroduced one level up.
       - name: Deploy the new edition to emr-inc.net
-        if: steps.commit.outputs.pushed == 'true'
+        if: steps.commit.outputs.pushed == 'true' || github.event_name == 'workflow_dispatch'
         shell: bash
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
