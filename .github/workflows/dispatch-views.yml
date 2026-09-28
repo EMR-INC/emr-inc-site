@@ -84,9 +84,33 @@ jobs:
       # drawing forever while git looked healthy, which is the worst kind of
       # failure because every status check stays green.
       #
-      # A deploy hook is a URL that, when POSTed to, builds a named branch. It
-      # carries its own authorisation in the path, so it IS a credential: keep it
-      # in the secret, never echo it, and do not add curl -v to debug this step.
+      # If Git integration is ever connected, DELETE this step. With it connected
+      # the push above deploys on its own, and leaving this here would build the
+      # same commit to production twice on every run.
+      #
+      # WHY THE CLI AND NOT A DEPLOY HOOK. A deploy hook would be one line of
+      # curl, but Vercel refuses to create one until the project is connected to
+      # a Git repository, and connecting it is blocked on an identity problem:
+      # the Vercel account signs into GitHub as `mikeharvey941-wq`, which is not
+      # a member of the EMR-INC org that owns this repo. The CLI needs neither, so
+      # it is the route that does not require handing a second GitHub identity
+      # standing access to the org just to trigger a build.
+      #
+      # This uploads the working tree as it stands AFTER the push above, so what
+      # is deployed is exactly what was committed. `vercel.json` and
+      # `.vercelignore` are committed too, which is what makes this reproduce a
+      # deploy run by hand rather than approximating one.
+      #
+      # The token is read from the environment, never passed as `--token`, so it
+      # never appears in argv or in a process listing. It IS a credential: do not
+      # echo it and do not add `set -x` to debug this step.
+      #
+      # The org and project IDs are identifiers, not secrets, and are inlined on
+      # purpose: pinning them here is what makes the deploy land on THIS project
+      # instead of silently creating a new one named after the directory.
+      #
+      # The CLI major is pinned. `vercel@latest` would let a breaking release
+      # land straight in a cron that nobody watches.
       #
       # If the secret is absent the step warns and passes rather than failing.
       # The redraw itself succeeded and is committed; a red run here would say
@@ -96,20 +120,13 @@ jobs:
         if: steps.commit.outputs.pushed == 'true'
         shell: bash
         env:
-          DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: team_rwxqo0kDlEjDlDdXAJv9y7e6
+          VERCEL_PROJECT_ID: prj_kiJjgBMbwd070fbCefZ3zz1Uv9E4
         run: |
           set -euo pipefail
-          if [[ -z "$DEPLOY_HOOK_URL" ]]; then
-            echo "::warning title=Committed but not deployed::The new edition is on main, but the secret VERCEL_DEPLOY_HOOK_URL is not set, so emr-inc.net still shows the previous edition. Set the secret, or run a deployment by hand."
+          if [[ -z "${VERCEL_TOKEN:-}" ]]; then
+            echo "::warning title=Committed but not deployed::The new edition is on main, but the secret VERCEL_TOKEN is not set, so emr-inc.net still shows the previous edition. Set the secret, or run a deployment by hand."
             exit 0
           fi
-          # curl's own exit code is folded into the status check so that a network
-          # failure and an HTTP error take the same path. Without the `|| code=000`
-          # the `set -e` above would kill the step first and the message below,
-          # which is the only line that says what went wrong, would never print.
-          code=$(curl -sS -X POST -o /dev/null -w '%{http_code}' "$DEPLOY_HOOK_URL") || code="000"
-          if [[ "$code" != "200" && "$code" != "201" ]]; then
-            echo "Deploy hook returned HTTP $code." >&2
-            exit 1
-          fi
-          echo "Deploy hook accepted (HTTP $code). The build runs on Vercel; this job does not wait for it."
+          npx --yes vercel@60 deploy --prod --yes
