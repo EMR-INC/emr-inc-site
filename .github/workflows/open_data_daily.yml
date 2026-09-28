@@ -53,16 +53,53 @@ jobs:
         run: node scripts/validate_generated.mjs
 
       - name: Commit refreshed public artifacts
+        id: commit
         if: steps.window.outputs.run == 'true'
         shell: bash
         run: |
           git add data/research.json research.html open-data.html
           if git diff --cached --quiet; then
             echo "No public research change"
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "data: refresh daily open-data report"
           git push
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      # The Vercel project has no Git integration, so a commit on main updates
+      # the repository and nothing else. Without this step research.html would go
+      # on claiming it is refreshed daily while the live page froze on whichever
+      # tree was last deployed by hand -- a claim that becomes false on the site
+      # before it becomes false in git, which is precisely the failure this page
+      # exists to not commit.
+      #
+      # The hook URL carries its own authorisation in the path, so it is a
+      # credential. Never echo it and do not add curl -v here.
+      #
+      # An absent secret warns instead of failing: the refresh itself worked and
+      # is committed, and a red run would misreport an unwired deploy as a broken
+      # build.
+      - name: Deploy the refreshed report to emr-inc.net
+        if: steps.commit.outputs.pushed == 'true'
+        shell: bash
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$DEPLOY_HOOK_URL" ]]; then
+            echo "::warning title=Committed but not deployed::The refreshed report is on main, but the secret VERCEL_DEPLOY_HOOK_URL is not set, so emr-inc.net still shows the previous figures. Set the secret, or run a deployment by hand."
+            exit 0
+          fi
+          # curl's own exit code is folded into the status check so a network
+          # failure and an HTTP error take the same path; without `|| code=000`
+          # the `set -e` would kill the step before the message below prints.
+          code=$(curl -sS -X POST -o /dev/null -w '%{http_code}' "$DEPLOY_HOOK_URL") || code="000"
+          if [[ "$code" != "200" && "$code" != "201" ]]; then
+            echo "Deploy hook returned HTTP $code." >&2
+            exit 1
+          fi
+          echo "Deploy hook accepted (HTTP $code). The build runs on Vercel; this job does not wait for it."
 

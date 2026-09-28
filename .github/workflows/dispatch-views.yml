@@ -58,6 +58,7 @@ jobs:
         run: python3 data/build-dispatch-views.py
 
       - name: Commit the new edition
+        id: commit
         run: |
           set -euo pipefail
           git config user.name  "github-actions[bot]"
@@ -67,9 +68,48 @@ jobs:
           # has already been published, where committing nothing is correct.
           if git diff --quiet -- data/dispatch-views.json; then
             echo "Already built for $(date -u +%F). Nothing to commit."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           edition=$(python3 -c "import json;print(json.load(open('data/dispatch-views.json'))['composition']['edition'])")
           git add data/dispatch-views.json
           git commit -m "Redraw the dispatch views page, edition ${edition}"
           git push
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      # PUSHING TO main DOES NOT DEPLOY THIS SITE. The Vercel project has no Git
+      # integration connected, so a commit reaching main updates the repository
+      # and nothing else: emr-inc.net goes on serving whatever tree was last
+      # deployed by hand. Without this step the page would keep last edition's
+      # drawing forever while git looked healthy, which is the worst kind of
+      # failure because every status check stays green.
+      #
+      # A deploy hook is a URL that, when POSTed to, builds a named branch. It
+      # carries its own authorisation in the path, so it IS a credential: keep it
+      # in the secret, never echo it, and do not add curl -v to debug this step.
+      #
+      # If the secret is absent the step warns and passes rather than failing.
+      # The redraw itself succeeded and is committed; a red run here would say
+      # "the build broke" when what actually happened is "nobody has wired the
+      # deploy yet", and the annotation says exactly that instead.
+      - name: Deploy the new edition to emr-inc.net
+        if: steps.commit.outputs.pushed == 'true'
+        shell: bash
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$DEPLOY_HOOK_URL" ]]; then
+            echo "::warning title=Committed but not deployed::The new edition is on main, but the secret VERCEL_DEPLOY_HOOK_URL is not set, so emr-inc.net still shows the previous edition. Set the secret, or run a deployment by hand."
+            exit 0
+          fi
+          # curl's own exit code is folded into the status check so that a network
+          # failure and an HTTP error take the same path. Without the `|| code=000`
+          # the `set -e` above would kill the step first and the message below,
+          # which is the only line that says what went wrong, would never print.
+          code=$(curl -sS -X POST -o /dev/null -w '%{http_code}' "$DEPLOY_HOOK_URL") || code="000"
+          if [[ "$code" != "200" && "$code" != "201" ]]; then
+            echo "Deploy hook returned HTTP $code." >&2
+            exit 1
+          fi
+          echo "Deploy hook accepted (HTTP $code). The build runs on Vercel; this job does not wait for it."
