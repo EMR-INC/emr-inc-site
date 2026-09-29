@@ -1,16 +1,11 @@
 # Working files that should not be served from emr-inc.net.
 
-# The row level dispatch record (2026-09-28). It used to be linked for download
-# from the open data page; it is not published any more. One row per radio
-# transmission, located to the street, is a different kind of disclosure from the
-# aggregate counts this site publishes, and not one we want to make. Excluding it
-# here is what actually stops it being served: taking the link out of the HTML
-# only hides it, the URL stays fetchable.
-#
-# This does NOT break the rebuild. data/build-dispatch-views.py reads the CSV from
-# the repository checkout inside GitHub Actions, never over HTTP from the site, so
-# the Monday/Wednesday/Friday redraw is unaffected by its absence here.
-data/dispatch-events.csv
+# NOTE, 2026-09-29: this file governs the VERCEL deployment, which serves the
+# subdomains only. The emr-inc.net apex is GitHub Pages, publishing the whole
+# `main` root straight from the branch, so nothing can be withheld from the apex
+# by listing it here. Withholding a file from emr-inc.net means keeping it out of
+# the branch. This was learned the hard way while unpublishing the dispatch
+# capture: an entry here looked like it had worked and had not.
 
 DESIGN-BRIEF.md
 MIGRATION.md

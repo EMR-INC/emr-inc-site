@@ -1,13 +1,21 @@
 # Redraw the dispatch views page, Monday, Wednesday and Friday.
 #
-# WHAT THIS ACTUALLY CHANGES. The input, data/dispatch-events.csv, is a
-# committed file and this job does not touch it, so the numbers on the page are
-# the same on Wednesday as they were on Monday. What changes is the build stamp
-# and, derived from it, the edition: the camera angle, the ground plane
-# elevation, the lighting direction, the mark used for the nights figure, the
-# sort order of the ranked bars, and the order the sections appear in. The page
-# is meant to be drawn differently every time it is published, and this is the
-# job that publishes it.
+# WHAT THIS ACTUALLY CHANGES. Nothing numeric. The dispatch capture the figures
+# are counted from is NOT in this repository (removed 2026-09-29, and purged from
+# the history, because it is row level and located to the street). The counts are
+# carried in the committed data/dispatch-views.json, and the capture is static
+# anyway, so the numbers were always the same on Wednesday as they were on Monday.
+#
+# What changes is the build stamp and, derived from it, the edition: the camera
+# angle, the ground plane elevation, the lighting direction, the mark used for the
+# nights figure, the sort order of the ranked bars, and the order the sections
+# appear in. The page is meant to be drawn differently every time it is published,
+# and this is the job that publishes it.
+#
+# build-dispatch-views.py takes its restamp path when the CSV is absent, which is
+# every run here, and that path is byte for byte identical to a full rebuild on
+# the same date. If the capture is ever refreshed, put the new CSV in data/ and
+# run the script locally ONCE to recompute the counts, then commit the JSON only.
 #
 # It follows that a failed run is not a data outage. Nothing goes stale and no
 # figure is wrong; the page simply keeps last edition's drawing until the next

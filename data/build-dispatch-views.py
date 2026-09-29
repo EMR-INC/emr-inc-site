@@ -475,5 +475,46 @@ def main():
     print(f"  with unit {with_unit:,}  severity {with_sev:,}  nature {with_nature:,}  street {with_street:,}")
 
 
+def restamp():
+    """Redraw without the source rows, which is the normal case from 2026-09-28.
+
+    The dispatch record is no longer carried in this repository, so most runs
+    cannot recompute the counts. They do not need to. The capture is STATIC:
+    `main()` reading it on Monday and again on Wednesday produces identical
+    figures, and the workflow comment has said so since the job was written.
+    The only things a redraw is meant to change are the build stamp and the
+    edition derived from it, and both come from the date alone.
+
+    So this recomputes exactly those two fields on the committed JSON and
+    rewrites it. Every count, denominator, note and window is carried through
+    untouched, because inventing or re-deriving them without the rows in hand
+    is the one thing that would make this page start lying.
+
+    THIS IS NOT A FALLBACK FOR A BROKEN BUILD. If the counts themselves need to
+    move, the capture has been refreshed, and the refreshed CSV has to be put
+    back in data/ for one run so `main()` can do the real arithmetic. Do not
+    reach for this path to paper over a missing file you were expecting.
+    """
+    if not OUT.exists():
+        sys.stderr.write(
+            f"{OUT.name} is missing and {CSV_IN.name} is not here either, so "
+            "there is nothing to redraw and nothing to compute it from. Restore "
+            "the capture to data/ and run again.\n")
+        return 1
+
+    doc = json.loads(OUT.read_text())
+    today = dt.datetime.now(LOCAL).date()
+    doc["built"] = today.strftime("%Y-%m-%d")
+    doc["composition"] = composition(today)
+    OUT.write_text(json.dumps(doc, indent=2) + "\n")
+
+    c = doc["composition"]
+    print(f"{OUT.name}: restamped {doc['built']}, edition {c['edition']} "
+          f"(counts carried through; {CSV_IN.name} is not published)")
+    return 0
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    # The rows are present only when someone has deliberately put the capture
+    # back to recompute. The published, everyday path is the restamp.
+    sys.exit(main() if CSV_IN.exists() else restamp())

@@ -9,3 +9,7 @@ emr-inc-research-standalone.html
 # site nothing.
 .wrangler/
 .claude/
+
+# The dispatch capture. Never commit it again: it left the repository and the
+# history on 2026-09-29 on purpose. Working copy lives outside the repo.
+data/dispatch-events.csv

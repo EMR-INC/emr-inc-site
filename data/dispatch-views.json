@@ -2,11 +2,11 @@
   "title": "OHPAH dispatch views",
   "source": "data/dispatch-events.csv, held privately, not published",
   "built_by": "data/build-dispatch-views.py",
-  "built": "2026-09-28",
+  "built": "2026-09-29",
   "cadence": "Monday, Wednesday, Friday",
   "composition": {
     "edition": 1,
-    "seed": "2026-09-28",
+    "seed": "2026-09-29",
     "azimuth": 40,
     "elevation": 0.42,
     "lighting": "back",
