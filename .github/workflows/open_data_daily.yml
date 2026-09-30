@@ -2,8 +2,14 @@ name: Daily open-data publication
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/open_data_daily.yml
+      - scripts/update_research.py
+      - templates/open-data.html
   schedule:
-    # GitHub cron is UTC. Paired triggers plus the New York gate keep publication at 08:00 ET.
+    # Paired UTC triggers target the morning in Eastern time. Delayed runs still refresh from the intended trigger.
     - cron: "0 12 * * *"
     - cron: "0 13 * * *"
 
@@ -18,23 +24,32 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Check Eastern publication window
+      - uses: actions/checkout@v4
+
+      - name: Select the Eastern morning trigger
         id: window
         shell: bash
+        env:
+          REFRESH_EVENT: ${{ github.event_name }}
+          REFRESH_SCHEDULE: ${{ github.event.schedule }}
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          if [[ "$REFRESH_EVENT" != "schedule" ]]; then
             echo "run=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          eastern_hour="$(TZ=America/New_York date +%H)"
-          if [[ "$eastern_hour" == "08" ]]; then
+          # Select the intended trigger, not the delayed job's execution hour.
+          expected_schedule=$(python3 - <<'PYTHON'
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          offset_hours = datetime.now(ZoneInfo("America/New_York")).utcoffset().total_seconds() / 3600
+          print("0 12 * * *" if offset_hours == -4 else "0 13 * * *")
+          PYTHON
+          )
+          if [[ "$REFRESH_SCHEDULE" == "$expected_schedule" ]]; then
             echo "run=true" >> "$GITHUB_OUTPUT"
           else
             echo "run=false" >> "$GITHUB_OUTPUT"
           fi
-
-      - uses: actions/checkout@v4
-        if: steps.window.outputs.run == 'true'
 
       - uses: actions/setup-python@v5
         if: steps.window.outputs.run == 'true'
@@ -83,13 +98,8 @@ jobs:
       # granting a second identity standing access to the org for a build.
       #
       # See dispatch-views.yml for the long version of the reasoning. The two
-      # steps are otherwise identical, and deliberately so, but their `if:`
-      # conditions differ on purpose: dispatch-views.yml deploys on a manual run
-      # even with nothing to commit, because it is the hand lever for shipping
-      # the site. This one does not, because a manual run here bypasses the 08:00
-      # Eastern gate and republishes the research figures, so firing it to push
-      # out an unrelated change would move numbers as a side effect. Use the
-      # other workflow to deploy by hand.
+      # deployment mechanisms are identical. This workflow also deploys a manual or pipeline-change run even when the
+      # endpoint returns the same snapshot, so a source repair reaches the site.
       #
       # If Git integration is ever connected, DELETE this step, or every refresh
       # will build to production twice.
@@ -97,11 +107,10 @@ jobs:
       # The token is read from the environment rather than passed as `--token`,
       # so it never reaches argv. Do not echo it and do not add `set -x`.
       #
-      # An absent secret warns instead of failing: the refresh itself worked and
-      # is committed, and a red run would misreport an unwired deploy as a broken
-      # build.
+      # An absent deployment credential fails explicitly: a committed snapshot is
+      # not a successful update of the public website.
       - name: Deploy the refreshed report to emr-inc.net
-        if: steps.commit.outputs.pushed == 'true'
+        if: steps.window.outputs.run == 'true' && (steps.commit.outputs.pushed == 'true' || github.event_name != 'schedule')
         shell: bash
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -110,8 +119,8 @@ jobs:
         run: |
           set -euo pipefail
           if [[ -z "${VERCEL_TOKEN:-}" ]]; then
-            echo "::warning title=Committed but not deployed::The refreshed report is on main, but the secret VERCEL_TOKEN is not set, so emr-inc.net still shows the previous figures. Set the secret, or run a deployment by hand."
-            exit 0
+            echo "::error title=Committed but not deployed::VERCEL_TOKEN is missing; emr-inc.net still shows the previous figures."
+            exit 1
           fi
           npx --yes vercel@60 deploy --prod --yes
 

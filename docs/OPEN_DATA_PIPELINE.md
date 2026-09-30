@@ -4,12 +4,12 @@ The public source and the artwork are one build:
 
 1. The Spotlight worker exposes `/api/open-data-snapshot`, a cached, aggregate-only rolling seven-day JSON response from the live OHPAH Research dispatch corpus.
 2. Its database query selects only `dispatch_ts`, `call_type`, `unit_normalized`, `neris_type`, and `talkgroup`. Transcript, address, row ID, audio, and person-level fields are never selected or returned.
-3. `.github/workflows/open_data_daily.yml` runs at 08:00 America/New_York every day and can also run manually.
+3. `.github/workflows/open_data_daily.yml` targets the Eastern morning every day and can also run manually. GitHub may start cron jobs late; the job selects the intended 08:00 ET cron trigger using the Eastern UTC offset, instead of requiring the actual execution hour to equal 08. A delayed trigger still fetches the current snapshot. Pipeline source changes on main also trigger a refresh.
 4. `scripts/update_research.py` fetches and validates the endpoint, including the aggregate-only assertion and count reconciliation.
 5. `data/research.json` is the machine-readable source snapshot.
 6. `research.html` is the human-readable source and method record.
 7. `open-data.html` is generated from the same snapshot using the approved OHPAH data-art template.
-8. The workflow validates reconciliation and browser scripts, commits only the three public artifacts, and the existing Vercel Git integration deploys the commit.
+8. The workflow validates reconciliation and browser scripts, commits only the three public artifacts, then deploys the exact updated checkout to the existing Vercel project using its repository credential. Missing deployment credentials fail the workflow visibly.
 
 ## GitHub configuration
 
