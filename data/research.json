@@ -1,27 +1,27 @@
 {
   "schema_version": 1,
   "edition": "rolling seven days",
-  "generated_at_utc": "2026-09-30T00:28:44Z",
+  "generated_at_utc": "2026-09-30T00:42:30Z",
   "source": {
     "title": "OHPAH Research dispatch corpus",
     "kind": "aggregate-only public endpoint",
     "published_fields": "aggregate counts only"
   },
   "window": {
-    "start_et": "2026-09-22T20:01:38-04:00",
-    "end_et": "2026-09-29T20:01:38-04:00",
+    "start_et": "2026-09-22T20:19:26-04:00",
+    "end_et": "2026-09-29T20:19:26-04:00",
     "hours": 168
   },
   "metrics": {
-    "total_alert_candidates": 2739,
-    "mean_per_24_hours": 391.3,
+    "total_alert_candidates": 2740,
+    "mean_per_24_hours": 391.4,
     "night_share_pct": 17.7
   },
   "daily": [
     {
       "date": "2026-09-22",
       "label": "Sep 22",
-      "count": 57
+      "count": 50
     },
     {
       "date": "2026-09-23",
@@ -56,17 +56,17 @@
     {
       "date": "2026-09-29",
       "label": "Sep 29",
-      "count": 305
+      "count": 313
     }
   ],
   "call_types": [
     {
       "label": "MEDICAL",
-      "count": 2311
+      "count": 2313
     },
     {
       "label": "FIRE",
-      "count": 238
+      "count": 237
     },
     {
       "label": "MVC",
