@@ -19,6 +19,40 @@ for (const match of page.matchAll(/<script(?![^>]*type="application\/json")[^>]*
   new vm.Script(match[1], { filename: "open-data.html" });
 }
 
+for (const match of page.matchAll(/<script[^>]*src="([^"\s]+)"[^>]*>/g)) {
+  if (/^https?:\/\//.test(match[1])) continue;
+  const file = match[1].replace(/^\//, "");
+  new vm.Script(fs.readFileSync(file, "utf8"), { filename: file });
+}
+
+if (page.includes('id="rescue-one"')) {
+  const rescue = JSON.parse(fs.readFileSync("assets/rescue-one/counts.json", "utf8"));
+  function onlyKeys(value, keys) {
+    if (!value || typeof value !== "object" || Object.keys(value).some(key => !keys.includes(key))) {
+      throw new Error("Unexpected field in public Rescue 1 aggregate");
+    }
+  }
+  onlyKeys(rescue, ["window", "streams"]);
+  onlyKeys(rescue.window, ["start", "end"]);
+  onlyKeys(rescue.streams, ["sarasota", "charlotte"]);
+  for (const name of ["sarasota", "charlotte"]) {
+    const stream = rescue.streams[name];
+    onlyKeys(stream, ["total", "daily"]);
+    if (!Number.isInteger(stream.total) || stream.total < 0 || stream.daily?.length !== 8) {
+      throw new Error("Invalid public Rescue 1 daily series");
+    }
+    stream.daily.forEach(day => {
+      onlyKeys(day, ["date", "count", "partial"]);
+      if (!Number.isInteger(day.count) || day.count < 0 || typeof day.partial !== "boolean") {
+        throw new Error("Invalid public Rescue 1 daily count");
+      }
+    });
+    if (stream.daily.reduce((sum, day) => sum + day.count, 0) !== stream.total) {
+      throw new Error("Public Rescue 1 counts do not reconcile");
+    }
+  }
+}
+
 const embedded = page.match(/<script id="report_data" type="application\/json">([\s\S]*?)<\/script>/);
 if (!embedded) throw new Error("Embedded report snapshot is missing");
 const embeddedData = JSON.parse(embedded[1]);
