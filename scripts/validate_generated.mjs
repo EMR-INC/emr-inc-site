@@ -22,6 +22,8 @@ for (const match of page.matchAll(/<script(?![^>]*type="application\/json")[^>]*
 for (const match of page.matchAll(/<script[^>]*src="([^"\s]+)"[^>]*>/g)) {
   if (/^https?:\/\//.test(match[1])) continue;
   const file = match[1].replace(/^\//, "");
+  // Vercel serves this Analytics asset dynamically from the deployed project.
+  if (file === "_vercel/insights/script.js") continue;
   new vm.Script(fs.readFileSync(file, "utf8"), { filename: file });
 }
 
