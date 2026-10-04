@@ -542,6 +542,29 @@ details li {
 .radio-feature-film video {display:block;width:100%;aspect-ratio:1;object-fit:contain;background:#F1EBDD}
 .radio-feature-film figcaption {font-size:14px;line-height:1.6;margin-top:12px}
 @media(max-width:760px) {.radio-feature {grid-template-columns:1fr}.radio-feature h2 {font-size:clamp(42px,12vw,72px)}}
+
+.radio-context {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(32px,5vw,72px);padding:clamp(24px,5vw,72px);border-bottom:2px solid var(--ink)}
+.radio-context h3 {font:900 clamp(32px,4vw,54px)/1.05 'Arial Black',Arial,sans-serif;letter-spacing:-.04em;margin:20px 0}
+.radio-context p {font-size:17px;line-height:1.65;margin:16px 0;max-width:55ch}
+.radio-mark-field {display:grid;grid-template-columns:repeat(10,1fr);gap:12px;margin:32px 0;max-width:420px}
+.radio-dot {display:inline-block;width:22px;height:22px;border-radius:50%;flex:none;background:#10213B}
+.radio-dot.partial {background:linear-gradient(90deg,#D5222A 50%,transparent 50%);border:2px solid #D5222A}
+.radio-dot.absent {background:transparent;border:2px solid #10213B}
+.radio-key {list-style:none;margin:0;padding:0;display:grid;gap:20px}
+.radio-key li {display:grid;grid-template-columns:22px 1fr;gap:4px 14px;font-size:17px;line-height:1.5}
+.radio-key li>span:last-child {grid-column:2}
+.radio-score strong {font:900 clamp(28px,4vw,46px)/1.2 'Arial Black',Arial,sans-serif}
+.radio-context details {border-top:1px solid var(--ink);padding:20px 0;margin-top:24px}
+.radio-context summary {font-weight:bold;font-size:17px;line-height:1.5;cursor:pointer}
+.radio-timeline {list-style:none;margin:28px 0;padding:0;border-left:2px solid var(--ink)}
+.radio-timeline li {position:relative;padding:0 0 28px 24px}
+.radio-timeline li::before {content:'';position:absolute;left:-7px;top:5px;width:12px;height:12px;border-radius:50%;background:#D5222A}
+.radio-timeline time {display:inline-block;font-weight:bold;font-size:18px;margin-right:16px;font-variant-numeric:tabular-nums}
+.radio-elapsed {font-size:15px;font-variant-numeric:tabular-nums}
+.radio-timeline strong {display:block;font-family:Arial,sans-serif;font-size:21px;line-height:1.4;margin-top:8px}
+.radio-timeline p {margin:8px 0 0;font-size:16px}
+.radio-duration {border-top:2px solid var(--ink);padding-top:20px}
+@media(max-width:760px) {.radio-context {grid-template-columns:1fr}.radio-mark-field {gap:8px}}
 </style>
 <link rel="stylesheet" href="assets/rescue-one/study.css">
 <script src="assets/rescue-one/study.js" defer></script>
@@ -560,10 +583,10 @@ details li {
 
   <section class="radio-feature" id="radio-holds" aria-labelledby="radio-feature-title">
     <div class="radio-feature-copy">
-      <p class="eyebrow">EMR Inc. · Motion study · Bee Ridge</p>
+      <p class="eyebrow">Bee Ridge Road · Commercial structure fire · October 3, 2026</p>
       <h2 id="radio-feature-title">What the<br>radio holds.</h2>
-      <p>A signal becomes a record. Arcs gather, bands cross, and the printed field settles into place.</p>
-      <p class="radio-feature-note">A six second diagrammatic modernism study. The motion is expressive artwork, not a timeline or a measurement of incident activity.</p>
+      <p>A commercial fire seen through its radio record. Follow the dispatch, arrival, water on fire, searches, and fire out reports below.</p>
+      <p class="radio-feature-note">The artwork introduces the story. The evidence below shows what was reported, when it was reported, and how completely the record meets 47 applicable reporting benchmarks.</p>
       <a href="/assets/what-the-radio-holds.mp4">Open the film →</a>
     </div>
     <figure class="radio-feature-film">
@@ -572,8 +595,28 @@ details li {
         <source src="/assets/what-the-radio-holds.mp4" type="video/mp4">
         <a href="/assets/what-the-radio-holds.mp4">Watch the film</a>
       </video>
-      <figcaption>Black, vermilion, paper. Artwork created with Higgsfield.</figcaption>
+      <figcaption>Signals drawn as arcs and bands. Read the measured evidence and timeline below.</figcaption>
     </figure>
+  </section>
+
+
+  <section class="radio-context" aria-labelledby="radio-data-title">
+    <div class="radio-reading">
+      <p class="eyebrow">Reading the data · one mark per applicable benchmark</p>
+      <h3 id="radio-data-title">What was heard?</h3>
+      <p>The working transcript was checked against 47 applicable EOP reporting benchmarks. EOP means emergency operating procedure. An incomplete attempt earns credit in the current scoring model.</p>
+      <div class="radio-mark-field" role="img" aria-label="47 reporting benchmarks: 9 heard in full, 20 partly heard, 18 not heard"><span class="radio-dot full" aria-hidden="true"></span><span class="radio-dot full" aria-hidden="true"></span><span class="radio-dot full" aria-hidden="true"></span><span class="radio-dot full" aria-hidden="true"></span><span class="radio-dot full" aria-hidden="true"></span><span class="radio-dot full" aria-hidden="true"></span><span class="radio-dot full" aria-hidden="true"></span><span class="radio-dot full" aria-hidden="true"></span><span class="radio-dot full" aria-hidden="true"></span><span class="radio-dot partial" aria-hidden="true"></span><span class="radio-dot partial" aria-hidden="true"></span><span class="radio-dot partial" aria-hidden="true"></span><span class="radio-dot partial" aria-hidden="true"></span><span class="radio-dot partial" aria-hidden="true"></span><span class="radio-dot partial" aria-hidden="true"></span><span class="radio-dot partial" aria-hidden="true"></span><span class="radio-dot partial" aria-hidden="true"></span><span class="radio-dot partial" aria-hidden="true"></span><span class="radio-dot partial" aria-hidden="true"></span><span class="radio-dot partial" aria-hidden="true"></span><span class="radio-dot partial" aria-hidden="true"></span><span class="radio-dot partial" aria-hidden="true"></span><span class="radio-dot partial" aria-hidden="true"></span><span class="radio-dot partial" aria-hidden="true"></span><span class="radio-dot partial" aria-hidden="true"></span><span class="radio-dot partial" aria-hidden="true"></span><span class="radio-dot partial" aria-hidden="true"></span><span class="radio-dot partial" aria-hidden="true"></span><span class="radio-dot partial" aria-hidden="true"></span><span class="radio-dot absent" aria-hidden="true"></span><span class="radio-dot absent" aria-hidden="true"></span><span class="radio-dot absent" aria-hidden="true"></span><span class="radio-dot absent" aria-hidden="true"></span><span class="radio-dot absent" aria-hidden="true"></span><span class="radio-dot absent" aria-hidden="true"></span><span class="radio-dot absent" aria-hidden="true"></span><span class="radio-dot absent" aria-hidden="true"></span><span class="radio-dot absent" aria-hidden="true"></span><span class="radio-dot absent" aria-hidden="true"></span><span class="radio-dot absent" aria-hidden="true"></span><span class="radio-dot absent" aria-hidden="true"></span><span class="radio-dot absent" aria-hidden="true"></span><span class="radio-dot absent" aria-hidden="true"></span><span class="radio-dot absent" aria-hidden="true"></span><span class="radio-dot absent" aria-hidden="true"></span><span class="radio-dot absent" aria-hidden="true"></span><span class="radio-dot absent" aria-hidden="true"></span></div>
+      <ul class="radio-key"><li><span class="radio-dot full" aria-hidden="true"></span><strong>9 heard in full</strong><span>The benchmark was evidenced in the working text.</span></li><li><span class="radio-dot partial" aria-hidden="true"></span><strong>20 partly heard</strong><span>An attempt was heard, with required elements missing.</span></li><li><span class="radio-dot absent" aria-hidden="true"></span><strong>18 not heard</strong><span>No qualifying report appears in the captured record.</span></li></ul>
+      <p class="radio-score"><strong>29 / 47 · 61.7%</strong><br>Benchmarks heard at least in part.</p>
+      <details><summary>How the artwork relates to the evidence</summary><p>The arcs and crossing bands express radio signals assembling into a record. Their positions and motion are artistic choices. The 47 marks here carry the counts; the timeline carries the reported sequence.</p><p>Source: Bee Ridge working transcript and EOP rescore, Revision 5, October 3, 2026. Tac 1 dispatch and Fire Tac 6 tactical traffic. The text was edited from automatic transcription; audio has not been verified. This is a provisional reporting assessment, not an official EOP determination. “Not heard” does not mean an action was not performed.</p></details>
+    </div>
+    <div class="radio-sequence">
+      <p class="eyebrow">October 3, 2026 · Eastern time</p>
+      <h3>The incident, in radio time.</h3>
+      <p>Selected milestones in order. Elapsed time starts with dispatch. These are transmission times, not measured action start times.</p>
+      <ol class="radio-timeline"><li><time datetime="2026-10-03T10:25:03-04:00">10:25:03</time><span class="radio-elapsed">+00:00</span><strong>Structure fire dispatched</strong><p>Tac 1 dispatch sends the initial response to Bee Ridge Road and directs responding units to Tac 6.</p></li><li><time datetime="2026-10-03T10:27:16-04:00">10:27:16</time><span class="radio-elapsed">+02:13</span><strong>Engine 12 arrives</strong><p>Engine 12 reports a working fire at a two story commercial complex and announces an offensive attack.</p></li><li><time datetime="2026-10-03T10:32:57-04:00">10:32:57</time><span class="radio-elapsed">+07:54</span><strong>Water on fire reported</strong><p>The attack crew reports that water has been on the fire for about one or two minutes. This is the report time, not the exact start of water application.</p></li><li><time datetime="2026-10-03T10:41:43-04:00">10:41:43</time><span class="radio-elapsed">+16:40</span><strong>Fire under control reported</strong><p>The radio report describes the fire as under control and says overhaul is underway. Under control is a different milestone from fire out.</p></li><li><time datetime="2026-10-03T10:42:54-04:00">10:42:54</time><span class="radio-elapsed">+17:51</span><strong>Secondary search all clear</strong><p>The second floor secondary search is reported all clear, with power secured to that division.</p></li><li><time datetime="2026-10-03T11:01:37-04:00">11:01:37</time><span class="radio-elapsed">+36:34</span><strong>Decon and rehab announced</strong><p>Decontamination at Engine 12 and rehabilitation with Rescue 9 are announced on the Alpha side.</p></li><li><time datetime="2026-10-03T11:14:29-04:00">11:14:29</time><span class="radio-elapsed">+49:26</span><strong>Fire out reported</strong><p>Division Charlie reports fire out. Command repeats it four seconds later and dispatch acknowledges it nine seconds later.</p></li></ol>
+      <p class="radio-duration"><strong>49 minutes, 26 seconds</strong> from initial dispatch to the first fire out report. This is not total time on scene.</p>
+    </div>
   </section>
 
   <section class="hero-section" data-sd-id="6">
@@ -696,7 +739,7 @@ details li {
       <p class="eyebrow">The file</p>
       <h2 id="files_title">What is<br>withheld.</h2>
       <p>Behind these figures is one row per dispatch transmission captured on the monitored talkgroups, with the call type, the severity, the responding unit and the time it went out. That record is not published.</p>
-      <p>It is worth being exact about why. Everything on this page is an aggregate count. The underlying record is row level and located to the street, and row level street located dispatch data is a different kind of disclosure from a count, no matter how careful the counts are. Radio transcripts, full addresses, coordinates and anything that identifies a member are not in it either, and have never been published anywhere on this site.</p>
+      <p>It is worth being exact about why. This page publishes aggregate counts and selected incident milestones. The underlying record is row level and located to the street, and row level street located dispatch data is a different kind of disclosure from a count, no matter how careful the counts are. Radio transcripts, full addresses, coordinates and anything that identifies a member are not in it either, and have never been published anywhere on this site.</p>
       <p>What we do publish is the method. The scripts that build these figures are readable, so how a number is computed can be checked even though the rows behind it cannot be refetched.</p>
       <div class="files-actions">
         <a class="study-open" href="dispatch-views.html">See the figures drawn from it</a>
@@ -712,7 +755,7 @@ details li {
         <li data-sd-id="48">Florida radio systems represented in the source workbook only.</li>
         <li data-sd-id="49">Marks are transcript-derived alert candidates, not verified CAD incidents or confirmed unit responses.</li>
         <li data-sd-id="50">Rows flagged for possible PHI are excluded before aggregation.</li>
-        <li data-sd-id="51">No transcript, full address, or person-level record is published anywhere on this site. Everything on this page is an aggregate count. The row level dispatch record the counts are derived from is not published either.</li>
+        <li data-sd-id="51">No transcript, full address, or person-level record is published anywhere on this site. Public content consists of aggregate counts and selected incident milestones. The row level dispatch record the counts are derived from is not published either.</li>
       </ul>
       <p class="source" data-sd-id="52">Source and full method: <a href="research.html" data-sd-id="53">EMR Inc. research</a>. <span id="refresh_note">__REFRESH_NOTE__</span></p>
     </details>
