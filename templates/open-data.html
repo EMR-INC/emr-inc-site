@@ -531,6 +531,17 @@ details li {
     scroll-behavior: auto !important;
   }
 }
+
+/* Motion artwork stays in the daily publication template. */
+.radio-feature {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,64px);align-items:center;padding:clamp(24px,5vw,72px);border-bottom:2px solid var(--ink);scroll-margin-top:24px}
+.radio-feature h2 {font:900 clamp(42px,6vw,90px)/.95 'Arial Black',Arial,sans-serif;letter-spacing:-.055em;margin:24px 0;text-transform:uppercase}
+.radio-feature p {font-size:18px;line-height:1.6;max-width:44ch}
+.radio-feature .radio-feature-note {font-size:15px}
+.radio-feature-copy a {display:inline-block;padding:12px 0;text-underline-offset:5px}
+.radio-feature-film {margin:0;min-width:0}
+.radio-feature-film video {display:block;width:100%;aspect-ratio:1;object-fit:contain;background:#F1EBDD}
+.radio-feature-film figcaption {font-size:14px;line-height:1.6;margin-top:12px}
+@media(max-width:760px) {.radio-feature {grid-template-columns:1fr}.radio-feature h2 {font-size:clamp(42px,12vw,72px)}}
 </style>
 <link rel="stylesheet" href="assets/rescue-one/study.css">
 <script src="assets/rescue-one/study.js" defer></script>
@@ -545,6 +556,25 @@ details li {
     <span id="edition_label" data-sd-id="4">OHPAH open data · __EDITION_LABEL__</span>
     <span><a href="/" data-sd-id="54">Home</a> · <a href="research.html" data-sd-id="5">Public source</a></span>
   </header>
+
+
+  <section class="radio-feature" id="radio-holds" aria-labelledby="radio-feature-title">
+    <div class="radio-feature-copy">
+      <p class="eyebrow">EMR Inc. · Motion study · Bee Ridge</p>
+      <h2 id="radio-feature-title">What the<br>radio holds.</h2>
+      <p>A signal becomes a record. Arcs gather, bands cross, and the printed field settles into place.</p>
+      <p class="radio-feature-note">A six second diagrammatic modernism study. The motion is expressive artwork, not a timeline or a measurement of incident activity.</p>
+      <a href="https://d8j0ntlcm91z4.cloudfront.net/user_3Dv7r6xyTMBl3KgLxmXdS1X2BFz/hf_20261004_021541_c5fa074e-16e0-4837-8789-b5f1d469911e.mp4">Open the film →</a>
+    </div>
+    <figure class="radio-feature-film">
+      <video controls playsinline preload="none" aria-label="What the Radio Holds, six second animated graphic poster"
+        poster="https://d8j0ntlcm91z4.cloudfront.net/user_3Dv7r6xyTMBl3KgLxmXdS1X2BFz/hf_20261004_020308_f3af870f-b989-4df8-81d6-cfb3a5f0fd9c.png">
+        <source src="https://d8j0ntlcm91z4.cloudfront.net/user_3Dv7r6xyTMBl3KgLxmXdS1X2BFz/hf_20261004_021541_c5fa074e-16e0-4837-8789-b5f1d469911e.mp4" type="video/mp4">
+        <a href="https://d8j0ntlcm91z4.cloudfront.net/user_3Dv7r6xyTMBl3KgLxmXdS1X2BFz/hf_20261004_021541_c5fa074e-16e0-4837-8789-b5f1d469911e.mp4">Watch the film</a>
+      </video>
+      <figcaption>Black, vermilion, paper. Artwork created with Higgsfield.</figcaption>
+    </figure>
+  </section>
 
   <section class="hero-section" data-sd-id="6">
     <div class="split-text-container split-top" data-sd-id="7">
