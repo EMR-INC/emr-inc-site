@@ -50,8 +50,10 @@ email to the whole list.
    generates the HMAC secret used to sign unsubscribe links.
 3. Deploy, New deployment, Web app. Execute as **me**, access **anyone**. Copy
    the url into `CONFIG.WEBAPP_URL`. This is what the unsubscribe link hits.
-4. Fill `POSTAL_ADDRESS`. `REPLY_TO`, `SITE_URL` and `ISSUES_FOLDER_ID` are
-   already set.
+4. Nothing left to fill. `POSTAL_ADDRESS` is the registered agent address on the
+   Delaware filing, and `REPLY_TO`, `SITE_URL` and `ISSUES_FOLDER_ID` are set.
+   `WEBAPP_URL` from step 3 is the only value that cannot be committed ahead of
+   time, because it does not exist until the deployment does.
 5. Run `listIssues()`. It prints the schedule and, for each row, whether both
    parts are actually in the folder yet. Run it before a send date, not after.
 6. Run `sendTestToSelf('issue-01')`. Confirm the figure renders and the
