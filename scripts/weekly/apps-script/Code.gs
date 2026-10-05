@@ -353,6 +353,27 @@ function readOne_(folder, name) {
   return file.getBlob().getDataAsString('UTF-8');
 }
 
+/**
+ * How many more recipients this account can take today.
+ *
+ * Standalone on purpose. The same number appears in a dry run, but a dry run
+ * needs a due issue, so reading the quota that way means setting a send date
+ * first, which is the wrong order when the quota is what decides MAX_PER_RUN.
+ *
+ * 100 is a consumer account, 1500 is Workspace. The number is recipients, not
+ * messages, and it is a rolling 24 hours rather than a calendar day.
+ */
+function quota() {
+  var left = MailApp.getRemainingDailyQuota();
+  Logger.log('Recipients left today: %s', left);
+  Logger.log(left >= 130
+    ? 'Workspace sized. MAX_PER_RUN can go to 130 and the whole list sends in '
+      + 'one pass.'
+    : 'Consumer sized. Leave MAX_PER_RUN at ' + CONFIG.MAX_PER_RUN + '; the catch '
+      + 'up trigger sends the rest about 25 hours later.');
+  Logger.log('MAX_PER_RUN is currently %s.', CONFIG.MAX_PER_RUN);
+}
+
 /** What is scheduled, and whether its files are actually there yet. */
 function listIssues() {
   var ss = SpreadsheetApp.getActive();
