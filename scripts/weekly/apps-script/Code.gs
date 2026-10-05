@@ -81,7 +81,11 @@ var CONFIG = {
   // (script.google.com/macros/s/.../exec), not emr-inc.net: the apex is static
   // GitHub Pages and cannot record an unsubscribe. Deploy, New deployment, Web
   // app, execute as me, access anyone, then paste the url it gives you.
-  WEBAPP_URL:     '',
+  // Deployed 2026-10-05. If you ever create a NEW deployment rather than a new
+  // version of this one, Google mints a different url and every unsubscribe link
+  // in already sent issues points at the old one. Update in place instead:
+  // Deploy, Manage deployments, pencil, Version: New version.
+  WEBAPP_URL:     'https://script.google.com/macros/s/AKfycbzwr0NTMUCgIjtwnQbsDWSWF6u10illXvlsnd0dRk0jIwHMWQ50zoB9MX4JjnPSawx9Ow/exec',
 
   DRY_RUN:        true,       // writes the log, sends nothing
   MAX_PER_RUN:    90,         // Workspace allows 1500 a day, consumer 100

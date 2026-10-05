@@ -48,12 +48,17 @@ email to the whole list.
 1. Open the CRM sheet, Extensions, Apps Script. Paste `Code.gs`.
 2. Run `setup()` once. It creates the log, unsubscribe and issues sheets and
    generates the HMAC secret used to sign unsubscribe links.
-3. Deploy, New deployment, Web app. Execute as **me**, access **anyone**. Copy
-   the url into `CONFIG.WEBAPP_URL`. This is what the unsubscribe link hits.
+3. Already done, deployed 2026-10-05. `WEBAPP_URL` holds the live endpoint.
+   Access must be **anyone**, not "anyone with a Google account": recipients
+   clicking unsubscribe from a work address are not signed in to Google.
+
+   To change the code behind that url later, update the deployment **in place**:
+   Deploy, Manage deployments, pencil, Version: **New version**. A second *New
+   deployment* mints a different url, and every unsubscribe link in an already
+   sent issue would point at the old one.
 4. Nothing left to fill. `POSTAL_ADDRESS` is the registered agent address on the
-   Delaware filing, and `REPLY_TO`, `SITE_URL` and `ISSUES_FOLDER_ID` are set.
-   `WEBAPP_URL` from step 3 is the only value that cannot be committed ahead of
-   time, because it does not exist until the deployment does.
+   Delaware filing, and `REPLY_TO`, `SITE_URL`, `ISSUES_FOLDER_ID` and
+   `WEBAPP_URL` are all set.
 5. Run `listIssues()`. It prints the schedule and, for each row, whether both
    parts are actually in the folder yet. Run it before a send date, not after.
 6. Run `sendTestToSelf('issue-01')`. Confirm the figure renders and the
@@ -87,7 +92,9 @@ passed while the trigger was off goes out on the next firing.
 - `POSTAL_ADDRESS`. CAN-SPAM, 15 USC 7704(a)(5), requires a valid physical
   postal address in every commercial message.
 - `WEBAPP_URL`, or the `{{UNSUBSCRIBE_URL}}` placeholder in either part. Without
-  both, recipients have no way out.
+  both, recipients have no way out. The token on the link is an HMAC of the
+  address, so it is per recipient, not guessable, and stays valid across issues:
+  an unsubscribe link in a year old email still works.
 - `REPLY_TO`. A bulk send needs a monitored reply address.
 - The scope guard. If "Florida only" and "not a national record" are not both in
   the HTML, the email states a Florida finding with nothing marking it as one.
@@ -100,6 +107,9 @@ passed while the trigger was off goes out on the next firing.
 - A complete header row on the issues sheet. Headers are read by name and checked
   before the empty check, so a renamed column fails loudly instead of reading as
   "nothing due" and quietly skipping a Tuesday.
+
+Each of those was checked by removing it and confirming the send is refused,
+rather than by reading the code: eight refusals plus the positive case.
 
 It also dedupes on lowercased email, skips malformed addresses, skips anyone on
 the unsubscribe sheet, and skips anyone already logged `sent` **for this issue**,
