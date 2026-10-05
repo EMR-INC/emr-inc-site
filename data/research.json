@@ -1,32 +1,27 @@
 {
   "schema_version": 1,
   "edition": "rolling seven days",
-  "generated_at_utc": "2026-10-04T16:39:50Z",
+  "generated_at_utc": "2026-10-05T13:40:09Z",
   "source": {
     "title": "OHPAH Research dispatch corpus",
     "kind": "aggregate-only public endpoint",
     "published_fields": "aggregate counts only"
   },
   "window": {
-    "start_et": "2026-09-27T12:07:25-04:00",
-    "end_et": "2026-10-04T12:07:25-04:00",
+    "start_et": "2026-09-28T09:15:37-04:00",
+    "end_et": "2026-10-05T09:15:37-04:00",
     "hours": 168
   },
   "metrics": {
-    "total_alert_candidates": 2856,
-    "mean_per_24_hours": 408,
-    "night_share_pct": 18.6
+    "total_alert_candidates": 2810,
+    "mean_per_24_hours": 401.4,
+    "night_share_pct": 18.7
   },
   "daily": [
     {
-      "date": "2026-09-27",
-      "label": "Sep 27",
-      "count": 211
-    },
-    {
       "date": "2026-09-28",
       "label": "Sep 28",
-      "count": 430
+      "count": 299
     },
     {
       "date": "2026-09-29",
@@ -56,25 +51,30 @@
     {
       "date": "2026-10-04",
       "label": "Oct 4",
-      "count": 158
+      "count": 357
+    },
+    {
+      "date": "2026-10-05",
+      "label": "Oct 5",
+      "count": 97
     }
   ],
   "call_types": [
     {
       "label": "MEDICAL",
-      "count": 2405
+      "count": 2396
     },
     {
       "label": "FIRE",
-      "count": 261
+      "count": 235
     },
     {
       "label": "MVC",
-      "count": 190
+      "count": 179
     }
   ],
   "quality": {
-    "structured_rows_read": 3560,
+    "structured_rows_read": 3498,
     "dedupe_window_seconds": 600,
     "candidate_definition": "Structured dispatch rows with a recognized apparatus identifier and broad emergency type."
   },
