@@ -26,6 +26,24 @@ var CONFIG = {
 
   CONTACTS_SHEET: 'Contacts',
   EMAIL_HEADER:   'Email',
+  SOURCE_HEADER:  'Source',
+
+  // Why each recipient is getting this, keyed by the CRM Source column. The list
+  // is not one cohort: rows 102 to 128 are EMS World attendees and the rest came
+  // from the off road stretcher survey, so a single hardcoded sentence would be
+  // a false statement to one group or the other.
+  //
+  // Keys are matched case insensitively as substrings of the Source cell. The
+  // first dry run logs every distinct Source it saw with a count, so fill this in
+  // from that rather than from a guess.
+  PROVENANCE: {
+    'off-road transport survey':
+      'You are receiving this because you took part in the EMR Inc. off road transport survey.',
+    'ems world':
+      'You are receiving this because we met at EMS World Expo.'
+  },
+  PROVENANCE_DEFAULT:
+    'You are receiving this because you are on the EMR Inc. contact list.',
 
   SENDER_NAME:    'EMR Inc. Field Notes',
   REPLY_TO:       '',         // a mailbox a person actually reads
@@ -50,7 +68,7 @@ var UNSUB_SHEET = 'Field Notes Unsubscribed';
 
 function setup() {
   var ss = SpreadsheetApp.getActive();
-  ensureSheet_(ss, LOG_SHEET, ['Timestamp', 'Issue', 'Email', 'Status', 'Detail']);
+  ensureSheet_(ss, LOG_SHEET, ['Timestamp', 'Issue', 'Email', 'Status', 'Source']);
   ensureSheet_(ss, UNSUB_SHEET, ['Email', 'Timestamp', 'Source']);
 
   var props = PropertiesService.getScriptProperties();
@@ -101,6 +119,11 @@ function assertSendable_(html, text) {
   if (html.indexOf('{{POSTAL_ADDRESS}}') === -1) {
     problems.push('The HTML has no {{POSTAL_ADDRESS}} placeholder.');
   }
+  if (html.indexOf('{{WHY_YOU_GET_THIS}}') === -1
+      || text.indexOf('{{WHY_YOU_GET_THIS}}') === -1) {
+    problems.push('Both parts need a {{WHY_YOU_GET_THIS}} placeholder. The list is '
+                + 'more than one cohort, so the provenance line is per recipient.');
+  }
   if (text.indexOf('{{UNSUBSCRIBE_URL}}') === -1) {
     problems.push('The plain text part has no {{UNSUBSCRIBE_URL}} placeholder.');
   }
@@ -129,11 +152,12 @@ function getRecipients_() {
   var headers = values[0].map(function (h) { return String(h).trim(); });
   var emailCol = headers.indexOf(CONFIG.EMAIL_HEADER);
   if (emailCol === -1) throw new Error('No "' + CONFIG.EMAIL_HEADER + '" column');
+  var sourceCol = headers.indexOf(CONFIG.SOURCE_HEADER);
 
   var unsub = readColumnSet_(ss, UNSUB_SHEET, 0);
   var already = readSentSet_(ss);
 
-  var seen = {}, out = [], skipped = {blank: 0, invalid: 0, dupe: 0,
+  var seen = {}, out = [], sources = {}, skipped = {blank: 0, invalid: 0, dupe: 0,
                                       unsubscribed: 0, alreadySent: 0};
   for (var i = 1; i < values.length; i++) {
     var raw = String(values[i][emailCol] || '').trim().toLowerCase();
@@ -143,9 +167,20 @@ function getRecipients_() {
     seen[raw] = true;
     if (unsub[raw]) { skipped.unsubscribed++; continue; }
     if (already[raw]) { skipped.alreadySent++; continue; }
-    out.push(raw);
+    var src = sourceCol === -1 ? '' : String(values[i][sourceCol] || '').trim();
+    sources[src || '(blank)'] = (sources[src || '(blank)'] || 0) + 1;
+    out.push({email: raw, source: src});
   }
-  return {emails: out, skipped: skipped};
+  return {recipients: out, skipped: skipped, sources: sources};
+}
+
+/** Match the Source cell against the provenance map, case insensitively. */
+function provenanceFor_(source) {
+  var s = String(source || '').toLowerCase();
+  for (var key in CONFIG.PROVENANCE) {
+    if (s.indexOf(key.toLowerCase()) !== -1) return CONFIG.PROVENANCE[key];
+  }
+  return CONFIG.PROVENANCE_DEFAULT;
 }
 
 function readColumnSet_(ss, sheetName, col) {
@@ -226,21 +261,33 @@ function sendIssue() {
 
   var r = getRecipients_();
   var ss = SpreadsheetApp.getActive();
-  var log = ensureSheet_(ss, LOG_SHEET, ['Timestamp', 'Issue', 'Email', 'Status', 'Detail']);
+  var log = ensureSheet_(ss, LOG_SHEET, ['Timestamp', 'Issue', 'Email', 'Status', 'Source']);
 
   var quota = MailApp.getRemainingDailyQuota();
-  var limit = Math.min(CONFIG.MAX_PER_RUN, r.emails.length, quota);
+  var limit = Math.min(CONFIG.MAX_PER_RUN, r.recipients.length, quota);
 
   Logger.log('%s candidates, sending %s. Skipped: %s. Quota left today: %s. DRY_RUN=%s',
-             r.emails.length, limit, JSON.stringify(r.skipped), quota, CONFIG.DRY_RUN);
+             r.recipients.length, limit, JSON.stringify(r.skipped), quota, CONFIG.DRY_RUN);
+  // Shows exactly which Source strings exist, so PROVENANCE can be filled from
+  // the data instead of guessed at.
+  Logger.log('Sources seen: %s', JSON.stringify(r.sources));
+  for (var k in r.sources) {
+    if (provenanceFor_(k) === CONFIG.PROVENANCE_DEFAULT && k !== '(blank)') {
+      Logger.log('NOTE: Source "%s" has no PROVENANCE entry, so %s recipients would '
+               + 'get the generic line.', k, r.sources[k]);
+    }
+  }
 
   var rows = [];
   for (var i = 0; i < limit; i++) {
-    var to = r.emails[i];
+    var to = r.recipients[i].email;
+    var why = provenanceFor_(r.recipients[i].source);
     var body = html.replace(/\{\{UNSUBSCRIBE_URL\}\}/g, unsubUrl_(to))
-                   .replace(/\{\{POSTAL_ADDRESS\}\}/g, escapeHtml_(CONFIG.POSTAL_ADDRESS));
+                   .replace(/\{\{POSTAL_ADDRESS\}\}/g, escapeHtml_(CONFIG.POSTAL_ADDRESS))
+                   .replace(/\{\{WHY_YOU_GET_THIS\}\}/g, escapeHtml_(why));
     var plain = text.replace(/\{\{UNSUBSCRIBE_URL\}\}/g, unsubUrl_(to))
-                    .replace(/\{\{POSTAL_ADDRESS\}\}/g, CONFIG.POSTAL_ADDRESS);
+                    .replace(/\{\{POSTAL_ADDRESS\}\}/g, CONFIG.POSTAL_ADDRESS)
+                    .replace(/\{\{WHY_YOU_GET_THIS\}\}/g, why);
     try {
       if (!CONFIG.DRY_RUN) {
         MailApp.sendEmail({
@@ -254,7 +301,7 @@ function sendIssue() {
         Utilities.sleep(CONFIG.THROTTLE_MS);
       }
       rows.push([new Date(), CONFIG.ISSUE_ID, to,
-                 CONFIG.DRY_RUN ? 'dry-run' : 'sent', '']);
+                 CONFIG.DRY_RUN ? 'dry-run' : 'sent', r.recipients[i].source]);
     } catch (err) {
       rows.push([new Date(), CONFIG.ISSUE_ID, to, 'failed', String(err)]);
     }
@@ -275,9 +322,12 @@ function sendTestToSelf() {
     to: me,
     subject: '[TEST] ' + CONFIG.SUBJECT,
     body: text.replace(/\{\{UNSUBSCRIBE_URL\}\}/g, unsubUrl_(me))
-              .replace(/\{\{POSTAL_ADDRESS\}\}/g, CONFIG.POSTAL_ADDRESS),
+              .replace(/\{\{POSTAL_ADDRESS\}\}/g, CONFIG.POSTAL_ADDRESS)
+              .replace(/\{\{WHY_YOU_GET_THIS\}\}/g, CONFIG.PROVENANCE_DEFAULT),
     htmlBody: html.replace(/\{\{UNSUBSCRIBE_URL\}\}/g, unsubUrl_(me))
-                  .replace(/\{\{POSTAL_ADDRESS\}\}/g, escapeHtml_(CONFIG.POSTAL_ADDRESS)),
+                  .replace(/\{\{POSTAL_ADDRESS\}\}/g, escapeHtml_(CONFIG.POSTAL_ADDRESS))
+                  .replace(/\{\{WHY_YOU_GET_THIS\}\}/g,
+                           escapeHtml_(CONFIG.PROVENANCE_DEFAULT)),
     name: CONFIG.SENDER_NAME,
     replyTo: CONFIG.REPLY_TO
   });

@@ -45,13 +45,30 @@ It also dedupes on lowercased email, skips malformed addresses, skips anyone on
 the unsubscribe sheet, and skips anyone already logged `sent` **for this issue**,
 so a re-run after a failure resumes rather than double sending.
 
+## The list is two cohorts, not one
+
+Rows 102 to 128 of `Contacts` are EMS World attendees. Everything above them came
+from the off road stretcher survey. A single hardcoded "why you are getting this"
+sentence would therefore be a false statement to one group or the other, so the
+line is per recipient: `{{WHY_YOU_GET_THIS}}` is filled from the CRM `Source`
+column through the `PROVENANCE` map in `CONFIG`.
+
+Matching is a case insensitive substring test, so `EMS World`, `EMS World Expo
+2026` and `ems world expo booth scan` all resolve to the same line. Anything
+unmatched falls back to `PROVENANCE_DEFAULT` rather than failing the send.
+
+The first dry run logs every distinct `Source` value it saw with a count, and
+names any that fell through to the default. Fill `PROVENANCE` from that output
+rather than from a guess about what the cells contain.
+
 ## The consent problem, which is not a code problem
 
 Column Q of every row in `Contacts` reads **"Not recorded (survey did not ask)"**.
 
-All 105 contacts came from the Off-Road Transport Survey in September 2025. They
-gave an address to answer questions about stretchers. None of them asked for a
-newsletter.
+The survey cohort gave an address to answer questions about stretchers in
+September 2025. None of them asked for a newsletter. The EMS World rows are a
+different and generally stronger basis, since handing over a badge at a booth is
+a deliberate act, but check how that consent was captured before leaning on it.
 
 US CAN-SPAM does not require prior consent, so a send with a working unsubscribe
 and a postal address is lawful. That is a floor, not a judgment. The footer says

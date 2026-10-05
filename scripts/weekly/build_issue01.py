@@ -233,8 +233,7 @@ def email_html(d, alt):
         f'non numeric incident type.<br>EMR Inc. &#183; Emergency Medical Resolutions. '
         f'Individual records belong to the member.<br>'
         f'{{{{POSTAL_ADDRESS}}}}<br>'
-        f'You are receiving this because you took part in the EMR Inc. off road '
-        f'transport survey. '
+        f'{{{{WHY_YOU_GET_THIS}}}} '
         f'<a href="{{{{UNSUBSCRIBE_URL}}}}" style="color:{INK};text-decoration:underline;">'
         f'Unsubscribe</a></td></tr></table>')
 
@@ -312,8 +311,8 @@ Figure source: NFIRS basic incident module, pulled {PULLED}. {GUARD}
 EMR Inc. Individual records belong to the member.
 {{{{POSTAL_ADDRESS}}}}
 
-You are receiving this because you took part in the EMR Inc. off road transport
-survey. To stop receiving Field Notes: {{{{UNSUBSCRIBE_URL}}}}
+{{{{WHY_YOU_GET_THIS}}}}
+To stop receiving Field Notes: {{{{UNSUBSCRIBE_URL}}}}
 """
 
 
@@ -352,7 +351,8 @@ def assert_sendable(h, t):
     """The Apps Script sender refuses to run without these, so the build must
     never hand it an artifact that cannot lawfully go to a list."""
     for name, doc in (("email.html", h), ("email.txt", t)):
-        for token in ("{{UNSUBSCRIBE_URL}}", "{{POSTAL_ADDRESS}}"):
+        for token in ("{{UNSUBSCRIBE_URL}}", "{{POSTAL_ADDRESS}}",
+                          "{{WHY_YOU_GET_THIS}}"):
             if token not in doc:
                 sys.exit(f"{name} is missing {token}; it could not be sent to a list")
     if 'href="#"' in h:
