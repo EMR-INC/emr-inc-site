@@ -37,12 +37,13 @@ DISPLAY = "Archivo Black, Archivo, Arial, sans-serif"
 MONO = "Courier Prime, Courier New, monospace"
 
 DENOM, FIRE_PCT, EMS_PCT = 18_251_127, 1.58, 72.42
+FIRE_N, EMS_N, FDIDS = 289_121, 13_217_940, 396
 GUARD = "Florida only, 2020 through 2025. Not a national record."
 
-W, H = 1200, 1000
-M, S = 70, 620                      # margin, square side
-X0, Y0 = M, 190                     # square top left
-TYPE_X = 760
+W, H = 1200, 910
+M, S = 70, 560                      # margin, square side
+X0, Y0 = M, 180                     # square top left
+TYPE_X = 700
 
 def rgb(h): return tuple(int(h[i:i+2], 16) for i in (1, 3, 5))
 def hx(t): return "#%02X%02X%02X" % tuple(round(c) for c in t)
@@ -60,6 +61,8 @@ def build():
     fire_s = (FIRE_PCT / 100) ** 0.5 * S       # AREA proportional, not height
     fx = X0 + S * 0.56
     fy = hz - fire_s / 2                       # straddles the horizon
+    rest_pct = 100 - EMS_PCT
+    rest_n = DENOM - EMS_N
     p = []
 
     def t(x, y, s, size, fam=MONO, fill=INK, w="bold", a="start", ls="1.4"):
@@ -68,13 +71,24 @@ def build():
                  f'letter-spacing="{ls}">{s}</text>')
 
     p.append(f'<rect x="0" y="0" width="{W}" height="6" fill="{INK}"/>')
-    t(M, 44, "BOUNDED COMPARISON / AREA IS THE ENCODING", 20, MONO, INK, "bold", ls="2")
-    t(W - M, 44, f"{DENOM:,} INCIDENTS", 20, MONO, INK, "normal", "end", ls="1.6")
 
-    # the whole record
+    # The figure has to say what it is on its own, because it travels: forwarded,
+    # screenshotted, pasted into a budget deck with none of the email around it.
+    # Mono at a given size has a fixed advance, so a line that outruns the margin
+    # is silently clipped by the viewBox rather than wrapped. Three lines shipped
+    # clipped once already; now an overrun fails the build.
+    def mono(x, y, txt, size=19, fill=INK, w="normal", ls=0.4):
+        if x + len(txt) * (size * 0.6 + ls) > W - M:
+            sys.exit(f"figure text overruns the right margin: {txt!r}")
+        t(x, y, txt, size, MONO, fill, w, ls=str(ls))
+
+    t(M, 54, "WHAT A FIRE DEPARTMENT ACTUALLY RUNS", 34, DISPLAY, INK, "bold", ls="-0.6")
+    mono(M, 88,  "Every incident Florida filed, 2020 to 2025, by NFIRS incident type.")
+    mono(M, 112, f"{DENOM:,} incidents across {FDIDS} departments. One square is the whole record.")
+    mono(M, 136, "Area is the encoding: a share of the area is a share of the incidents.")
+
     p.append(f'<rect x="{X0}" y="{Y0}" width="{S}" height="{S}" fill="{STOCK}" '
              f'stroke="{INK}" stroke-width="3"/>')
-    # rescue and EMS floods from the bottom
     p.append(f'<rect x="{X0}" y="{hz:.1f}" width="{S}" height="{blue_h:.1f}" fill="{BLUE}"/>')
     # fire, in two halves so the overprint is explicit geometry and not a filter
     p.append(f'<rect x="{fx:.1f}" y="{fy:.1f}" width="{fire_s:.2f}" '
@@ -83,36 +97,41 @@ def build():
              f'height="{fire_s/2:.2f}" fill="{OVER}"/>')
     p.append(f'<rect x="{X0}" y="{Y0}" width="{S}" height="{S}" fill="none" '
              f'stroke="{INK}" stroke-width="3"/>')
-    # the horizon reads across the whole square, so the flood has a declared edge
     p.append(f'<line x1="{X0}" y1="{hz:.1f}" x2="{X0+S}" y2="{hz:.1f}" '
              f'stroke="{INK}" stroke-width="2"/>')
 
-    # leader from the fire square to its label. Terminates on the square, never
-    # in empty space: design_system.md fails a diagram whose line ends nowhere.
+    # Leader from the fire square to its key entry. It terminates on the square at
+    # one end and on the legend at the other: design_system.md fails a diagram
+    # whose line ends in empty space.
     ly = fy + fire_s / 2
-    p.append(f'<line x1="{fx+fire_s:.1f}" y1="{ly:.1f}" x2="{TYPE_X-18}" y2="{ly:.1f}" '
+    p.append(f'<line x1="{fx+fire_s:.1f}" y1="{ly:.1f}" x2="{TYPE_X-14}" y2="{ly:.1f}" '
              f'stroke="{INK}" stroke-width="2"/>')
 
-    t(TYPE_X, ly - 46, "ALL FIRE", 46, DISPLAY, RED, "bold", ls="-1")
-    t(TYPE_X, ly - 8, f"{FIRE_PCT}%", 46, DISPLAY, RED, "bold", ls="-1")
-    t(TYPE_X, ly + 24, "289,121 incidents", 19, MONO, INK, "normal", ls="0.6")
+    # The legend. Every region of the square gets an entry, and the entries sum to
+    # the denominator, so nothing in the drawing is left unaccounted for.
+    KEY = [("RESCUE AND EMS", EMS_PCT, EMS_N, BLUE, None),
+           ("EVERYTHING ELSE", rest_pct, rest_n, STOCK, INK),
+           ("ALL FIRE", FIRE_PCT, FIRE_N, RED, None)]
+    ky = 196
+    for label, pct, n, fill, stroke in KEY:
+        p.append(f'<rect x="{TYPE_X}" y="{ky}" width="30" height="30" fill="{fill}" '
+                 f'stroke="{stroke or fill}" stroke-width="2"/>')
+        t(TYPE_X + 44, ky + 23, label, 23, DISPLAY, INK, "bold", ls="-0.4")
+        t(TYPE_X + 44, ky + 60, f"{pct:.2f}%", 30, DISPLAY,
+          RED if label == "ALL FIRE" else INK, "bold", ls="-0.8")
+        mono(TYPE_X + 44, ky + 84, f"{n:,} incidents", 17)
+        ky += 108
 
-    t(TYPE_X, Y0 + S - 92, "RESCUE AND EMS", 30, DISPLAY, BLUE, "bold", ls="-0.6")
-    t(TYPE_X, Y0 + S - 58, f"{EMS_PCT}%", 30, DISPLAY, BLUE, "bold", ls="-0.6")
-    t(TYPE_X, Y0 + S - 28, "13,217,940 incidents", 19, MONO, INK, "normal", ls="0.6")
+    mono(TYPE_X, ky + 8, "Fire sits inside everything else.", 17)
+    p.append(f'<rect x="{TYPE_X}" y="{ky+26}" width="22" height="22" fill="{OVER}"/>')
+    mono(TYPE_X + 32, ky + 43, "Where the fire square crosses the", 17)
+    mono(TYPE_X + 32, ky + 64, "rescue field, the two inks overprint.", 17)
 
-    # No region of the square may go unexplained. The field above the horizon is
-    # everything that is not rescue and EMS, and the fire square sits inside it.
-    rest = 100 - EMS_PCT
-    t(X0 + 26, Y0 + 46, f"EVERYTHING ELSE {rest:.2f}%", 22, MONO, INK, "bold", ls="1.4")
-    t(X0 + 26, Y0 + 74, "fire is the small square inside it", 18, MONO, INK,
-      "normal", ls="0.6")
-
-    t(M, Y0 + S + 52, "ONE SQUARE IS EVERY INCIDENT FLORIDA FILED. THE SMALL SQUARE "
-                      "IS FIRE, AT TRUE AREA.", 20, MONO, INK, "normal", ls="1.2")
-    t(M, Y0 + S + 84, "WHERE FIRE CROSSES THE RESCUE FIELD THE TWO INKS OVERPRINT.",
-      20, MONO, INK, "normal", ls="1.2")
-    t(M, Y0 + S + 116, GUARD.upper(), 20, MONO, RED, "bold", ls="1.2")
+    by = Y0 + S + 44
+    mono(M, by, "A building fire alone is 1 in 386 incidents.")
+    mono(M, by + 26, "A false alarm is 3.84 times more likely than any fire at all.")
+    mono(M, by + 54, GUARD.upper(), fill=RED, w="bold", ls=1.2)
+    mono(M, by + 80, "NFIRS basic incident module, pulled 2026-09-13. EMR Inc.", 17)
 
     svg = (f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" '
            f'viewBox="0 0 {W} {H}"><rect width="{W}" height="{H}" fill="{STOCK}"/>'

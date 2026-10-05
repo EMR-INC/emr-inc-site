@@ -101,10 +101,23 @@ UPDATE_CLOSE = ("Fair question. Maybe you would not. The file is not really for 
                 "you. It is for whoever goes looking in 2041 and finds out nobody "
                 "wrote it down.")
 
+# The figure is served, not attached. A CID attachment adds its weight to every
+# copy of a bulk send and is a spam signal, and the cid: reference did not
+# resolve in Gmail when it was tried. Pinned to a commit so the URL cannot drift.
+# On merge to main this becomes https://emr-inc.net/assets/field-notes/...
+FIGURE_URL = ("https://raw.githubusercontent.com/EMR-INC/emr-inc-site/"
+              "34bbe16bd843713f5692669486822be1d5a1bd98/assets/field-notes/"
+              "issue-01-figure.png")
+
 CTA = "See the platform"
 CTA_URL = "https://beta.expectvictims.com"
 CTA_UNDER = ("That link is the beta. Have a look before anyone else does.")
 PS = "Next week: the 3.84 false alarms you run for every fire. Bring coffee."
+
+MISSION_KICKER = "What we are doing"
+MISSION = ("EMR Inc. builds the exposure record the fire service never kept. "
+           "Shift by shift, from dispatch data rather than memory. It belongs to "
+           "the member, not the department.")
 
 
 def label(t):
@@ -181,7 +194,7 @@ def email_html(d, alt):
         f'font-weight:bold;letter-spacing:-1.5px;color:{STOCK};">{esc(BIG_UNDER)}</p>'
       + f'<p style="margin:18px 0 26px 0;font-family:{BODY};font-size:17px;line-height:27px;'
         f'color:{STOCK};">{esc(DEK)}</p>'
-      + f'<img src="01-figure.png" width="600" alt="{esc(alt)}" style="display:block;'
+      + f'<img src="{FIGURE_URL}" width="600" alt="{esc(alt)}" style="display:block;'
         f'width:100%;max-width:600px;height:auto;" border="0">'
       + f'<p style="margin:26px 0 0 0;font-family:{BODY};font-size:17px;line-height:27px;'
         f'color:{STOCK};">{esc(TURN)}</p>')
@@ -204,8 +217,16 @@ def email_html(d, alt):
         f'color:{INK};">{esc(CTA_UNDER)}</p>'
       + f'<p style="margin:26px 0 0 0;font-family:{BODY};font-size:15px;line-height:23px;'
         f'color:{INK};">{esc(PS)}</p>'
+      + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
+        f'border="0" bgcolor="{INK}" style="background-color:{INK};margin-top:30px;">'
+        f'<tr><td style="padding:24px 22px 26px 22px;">'
+        f'<p style="margin:0 0 8px 0;font-family:{MONO};font-size:11px;line-height:16px;'
+        f'font-weight:bold;letter-spacing:1.6px;text-transform:uppercase;color:{RED};">'
+        f'{esc(MISSION_KICKER)}</p>'
+        f'<p style="margin:0;font-family:{BODY};font-size:19px;line-height:29px;'
+        f'color:{STOCK};">{esc(MISSION)}</p></td></tr></table>'
       + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" '
-        f'style="border-top:3px solid {INK};margin-top:28px;"><tr>'
+        f'style="border-top:3px solid {INK};margin-top:26px;"><tr>'
         f'<td style="padding:12px 0 0 0;font-family:{MONO};font-size:11px;line-height:17px;'
         f'color:{INK};">Figure source: NFIRS basic incident module, pulled {PULLED}. '
         f'{esc(GUARD)}<br>{fmt(DENOMINATOR)} of {fmt(TOTAL_ROWS)} rows; {DROPPED} carry a '
@@ -221,6 +242,8 @@ def email_html(d, alt):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="x-apple-disable-message-reformatting">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
 <title>{esc(SUBJECT)}</title>
 <!--[if mso]><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->
 </head>
@@ -278,6 +301,9 @@ A building fire is 1 in {d['one_in']:.0f} incidents.
 
 {PS}
 
+{MISSION_KICKER.upper()}
+{wrap(MISSION)}
+
 --
 Figure source: NFIRS basic incident module, pulled {PULLED}. {GUARD}
 {fmt(DENOMINATOR)} of {fmt(TOTAL_ROWS)} rows; {DROPPED} carry a non numeric incident type.
@@ -290,7 +316,8 @@ def prose():
     """Every rendered string a reader sees, for the voice gate."""
     flat = [SUBJECT, PREHEADER, *LETTER, LETTER_SIGN, BIG, BIG_UNDER, DEK, TURN,
             UPDATE_LEDE, *[h for h, _ in UPDATE], *[b for _, b in UPDATE],
-            UPDATE_CLOSE, CTA, CTA_UNDER, PS, GUARD, "DEAR CHIEF.", "POST EMS WORLD."]
+            UPDATE_CLOSE, CTA, CTA_UNDER, PS, MISSION_KICKER, MISSION, GUARD,
+            "DEAR CHIEF.", "POST EMS WORLD."]
     return " ".join(flat)
 
 
