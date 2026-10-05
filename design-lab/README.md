@@ -24,6 +24,7 @@ commit them.
 | 02 | `studies/forms.py` | Which of the five primary structures suits which claim |
 | 03 | `studies/layout.py` | How else can a three section issue be held |
 | 04 | `studies/collage.py` | Where the line falls between field and data |
+| 05 | `studies/collage.py a.png b.png …` | Which candidate register survives greyscale |
 
 `lab.py` is the shared harness: the tokens, the colour maths including overprint,
 the gates, the two renderers and the contact sheet. A study that wants a new
@@ -56,6 +57,48 @@ is doing. Field, accent or endpoint is fine. A second data category is not.
 
 Worth noting the reference spreads its two inks 39.1 apart where the system's
 red and blue sit 1.6 apart.
+
+## Four candidate registers, measured identically
+
+```
+python3 studies/collage.py a.webp b.webp c.webp d.webp
+```
+
+Every ink placed by its greyscale value, on one ruler. The eye cannot do this,
+which is the point.
+
+| reference | ground | inks | verdict |
+| --- | --- | --- | --- |
+| 1 · blue and hot orange | light 220.0 | 81.4, 108.4 | **blue vs orange 27.0** |
+| 2 · hi-vis and orange-red | light 224.1 | 212.5, 111.2 | **hi-vis vs its own ground 11.6** |
+| 3 · blue and coral | light 220.3 | 75.7, 146.2 | every pair separates, worst 70.5 |
+| 4 · hi-vis on dark navy | **dark 94.6** | 19.5, 204.9 | every pair separates, worst 75.1 |
+
+Two of the four survive. Reference 3 lands its two inks at 76 and 146 against a
+220 ground, which is close to the two band structure study 01 derived from first
+principles, arrived at by eye.
+
+**Reference 2's hi-vis yellow is 11.6 points from the cream it sits on.** On a
+colour screen it is the loudest thing in the frame. In greyscale the triangle
+disappears into the paper. That is the failure no amount of looking at a colour
+screen will show you, and it is why the sheets render twice.
+
+**Reference 4 inverts the ground**, which is not a deviation but a different and
+legitimate build. It costs headroom: a dark ground leaves 140.6 points to the
+type that sits on it, which fits one chromatic band rather than two. A register
+worth having for a single accent, not for two categories.
+
+## Tooth on the field, nothing on the data
+
+The rule that holds across all four, and the one `design_system.md` already
+states: screen print tooth, registration shift and rough edges may affect nondata
+fields only, and may never distort text, values, nodes, axes or legends.
+
+Study 04 draws it correctly and then wrongly. Putting the tooth through the data
+breaks three separate things: a torn edge moves the bar end so length stops
+encoding the value, two series separated by dot pitch and hue is colour carrying
+meaning alone, and labels on a screen lose contrast at small sizes and in every
+greyscale client.
 
 ## What came out of study 01
 

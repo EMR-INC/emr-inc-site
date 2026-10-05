@@ -294,5 +294,90 @@ def main():
     print(f"  {sheet.with_name(sheet.stem + '-mono.png')}")
 
 
+
+
+# --------------------------------------------------------------- comparison ---
+
+def panel_compare(refs, labels, w=1180, h=640):
+    """
+    Four candidate registers on one ruler.
+
+    The point of measuring them identically is that the eye cannot do this. A
+    hi-vis yellow on cream looks loud and is nearly invisible once hue is gone,
+    and no amount of looking at a colour screen will tell you.
+    """
+    s = [lab.svg_open(w, h)]
+    s.append(lab.text(M, 40, "05 · FOUR REGISTERS ON ONE RULER", 15, INK,
+                      lab.DISPLAY, "bold", spacing=1.2))
+    s.append(lab.text(w - M, 40, "every ink placed by its greyscale value", 12, INK,
+                      lab.MONO, anchor="end"))
+
+    x0, x1 = M + 118, w - M - 40
+    def px(v):
+        return x0 + (v / 255) * (x1 - x0)
+
+    for i, (ref, name) in enumerate(zip(refs, labels)):
+        y = 96 + i * 124
+        s.append(lab.text(M, y + 6, name, 13, INK, lab.MONO, weight="bold"))
+        s.append(lab.text(M, y + 24, "dark ground" if ref["dark_ground"] else "light ground",
+                          11, INK, lab.MONO))
+        hr = ref["headroom"]
+        s.append(lab.text(M, y + 40, f"{hr['bands']} band(s) fit", 11,
+                          TOKENS["red"] if hr["bands"] < 2 else INK, lab.MONO))
+        # the ruler
+        s.append(lab.line(x0, y + 46, x1, y + 46, INK, 1))
+        for v in (0, 64, 128, 192, 255):
+            s.append(lab.line(px(v), y + 42, px(v), y + 50, INK, 1))
+        for ink_name, hexv in ref["inks"].items():
+            if ref["shares"][ink_name] < 0.01:
+                continue    # a tenth of a percent is a sampling artefact, not an ink
+            g = gray(hexv)
+            s.append(lab.rect(px(g) - 17, y + 2, 34, 36, hexv,
+                              stroke=INK, stroke_width=1.5))
+            s.append(lab.text(px(g), y + 68, f"{g:.0f}", 11, INK, lab.MONO,
+                              anchor="middle"))
+        # every failing pair that is not ground against an ink
+        fails = [(k, v) for k, v in ref["pairs"].items() if v < lab.MONO_FLOOR]
+        txt = ("every pair separates" if not fails else
+               "collides: " + ", ".join(f"{k} {v:.0f}" for k, v in fails[:3]))
+        s.append(lab.text(x0, y + 90, txt, 11,
+                          INK if not fails else TOKENS["red"], lab.MONO,
+                          weight="bold" if fails else "normal"))
+    s.append(lab.text(M, h - 58, "Two swatches at the same mark are the same colour "
+                      "once hue is gone, whatever they look like here.", 12, INK,
+                      lab.MONO))
+    s.append(lab.text(M, h - 36, "A swatch sitting on its own ground's mark has "
+                      "disappeared into the paper.", 12, TOKENS["red"], lab.MONO,
+                      weight="bold"))
+    s.append(lab.svg_close())
+    return "".join(s)
+
+
+def compare(paths):
+    """python3 studies/collage.py a.webp b.webp c.webp"""
+    OUT.mkdir(parents=True, exist_ok=True)
+    refs = [lab.sample_reference(p) for p in paths]
+    names = [Path(p).name for p in paths]
+    panel = lab.Panel(panel_compare(refs, names), 1180, 640,
+                      "Four registers compared", "measured identically")
+    sheet = lab.contact_sheet([panel], OUT / "05-references.png", cols=1, scale=0.9)
+
+    print(f"\n  study 05 · candidate registers compared\n  {'=' * 64}")
+    for ref, name in zip(refs, names):
+        print(f"\n  {name}   {'DARK ground' if ref['dark_ground'] else 'light ground'}")
+        for line in lab.describe_reference(ref):
+            print("  " + line)
+    clean = [n for r, n in zip(refs, names)
+             if not any(v < lab.MONO_FLOOR for v in r["pairs"].values())]
+    print(f"\n  registers where every ink pair separates: "
+          f"{', '.join(clean) if clean else 'none'}")
+    print(f"\n  {sheet}")
+    print(f"  {sheet.with_name(sheet.stem + '-mono.png')}")
+
+
 if __name__ == "__main__":
-    main()
+    # One path studies that register. Several compares them.
+    if len(sys.argv) > 2:
+        compare(sys.argv[1:])
+    else:
+        main()

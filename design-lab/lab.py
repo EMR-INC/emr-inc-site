@@ -354,66 +354,115 @@ def render_html(html: str, w: int, h: int, out: Path, bg: str = None) -> Path:
 
 # -------------------------------------------------------------- references ---
 
-def sample_reference(path, sat=0.55, warm_hue=30, cool=(200, 260)) -> dict:
+def sample_reference(path, n_inks=3, sat=0.42, min_share=0.01) -> dict:
     """
-    The inks a reference image is actually made of.
+    The inks a reference is actually made of, without assuming what they are.
 
-    Quantising the whole image does not work for this: a hot accent covering five
-    percent gets averaged into a muddy blend with whatever it sits next to. The
-    first attempt at this returned #88506E, a purple that appears nowhere in the
-    picture. So pull by saturation and hue family instead, and take the median of
-    each family rather than the mean, which a few dark pixels would drag.
+    Two earlier versions of this were wrong in instructive ways. Quantising the
+    whole image averaged a small hot accent into its neighbours and returned a
+    purple that appears nowhere in the picture. Then hardcoding "ground is the
+    light desaturated pixels" broke the moment a reference arrived with a dark
+    navy ground, which is not an edge case but a different and legitimate way to
+    build the same system.
 
-    Returns the inks plus every pairwise separation, so a new reference can be
-    judged on the same terms as the last one.
+    So: find the ground as the most common low saturation colour whatever its
+    value, then take the saturated families by hue, widest first. Median per
+    family, because a few dark pixels drag a mean.
     """
     import colorsys
     from PIL import Image
 
     im = Image.open(path).convert("RGB")
     px = list(im.resize((320, 320), Image.LANCZOS).getdata())
-    fam = {"cool": [], "warm": [], "ground": []}
+
+    flat, sats = [], []
     for r, g, b in px:
         h, sv, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
-        deg = h * 360
-        if sv > sat and cool[0] <= deg <= cool[1]:
-            fam["cool"].append((r, g, b))
-        elif sv > sat and (deg <= warm_hue or deg >= 345):
-            fam["warm"].append((r, g, b))
-        elif sv < 0.18 and v > 0.80:
-            fam["ground"].append((r, g, b))
+        (sats if sv > sat else flat).append(((r, g, b), h * 360, v))
+
+    # Ground: the densest band of low saturation pixels, light or dark.
+    ground = None
+    if flat:
+        bins = {}
+        for col, _, v in flat:
+            bins.setdefault(int(v * 8), []).append(col)
+        pick = max(bins.values(), key=len)
+        pick.sort(key=sum)
+        ground = hx(pick[len(pick) // 2])
+        ground_share = len(pick) / len(px)
+
+    # Saturated inks, grouped into 24 degree hue buckets.
+    buckets = {}
+    for col, deg, _ in sats:
+        buckets.setdefault(int(deg // 24), []).append(col)
+    # Drop families too small to be an ink. A bucket holding a tenth of a percent
+    # is an antialiasing seam or a jpeg artefact, and counting one as an ink made
+    # a register look like it had a failing pair when the failure was against
+    # something nobody put there.
+    ranked = [(b, pts) for b, pts in
+              sorted(buckets.items(), key=lambda kv: -len(kv[1]))
+              if len(pts) / len(px) >= min_share][:n_inks]
 
     inks, shares = {}, {}
-    for name, pts in fam.items():
-        if not pts:
-            continue
+    if ground:
+        inks["ground"] = ground
+        shares["ground"] = ground_share
+    for i, (b, pts) in enumerate(ranked):
         pts.sort(key=sum)
-        inks[name] = hx(pts[len(pts) // 2])
-        shares[name] = len(pts) / len(px)
+        inks[f"ink {i + 1}"] = hx(pts[len(pts) // 2])
+        shares[f"ink {i + 1}"] = len(pts) / len(px)
 
-    pairs = {}
-    names = list(inks)
+    pairs, names = {}, list(inks)
     for i, a in enumerate(names):
         for b in names[i + 1:]:
             pairs[f"{a} vs {b}"] = separation(inks[a], inks[b])
-    return {"path": str(path), "inks": inks, "shares": shares, "pairs": pairs}
+    dark_ground = ground is not None and gray(ground) < 128
+    return {"path": str(path), "inks": inks, "shares": shares, "pairs": pairs,
+            "dark_ground": dark_ground,
+            "headroom": tonal_headroom(ground) if ground else None}
+
+
+def tonal_headroom(ground: str, floor: int = None) -> dict:
+    """
+    How many chromatic bands fit between this ground and the ink that sits on it.
+
+    Study 01 worked this out for stock and ink. A reference with a dark ground
+    has a different answer, which is the whole reason a dark ground is worth
+    considering rather than a deviation to be corrected.
+    """
+    floor = floor or MONO_FLOOR
+    g = gray(ground)
+    # The far end is whatever the type has to be: ink on a light ground, stock
+    # on a dark one.
+    far = gray(TOKENS["ink"]) if g >= 128 else gray(TOKENS["stock"])
+    span = abs(g - far)
+    bands = max(0, int(span // floor) - 1)
+    step = span / (bands + 1) if bands else 0
+    lo = min(g, far)
+    return {"span": span, "bands": bands,
+            "values": [lo + step * (i + 1) for i in range(bands)]}
 
 
 def describe_reference(ref: dict) -> list[str]:
-    """The reading, in words, including what the numbers do and do not mean."""
+    """The reading in words, including what the numbers do and do not mean."""
     out = []
     for name, hexv in ref["inks"].items():
-        out.append(f"  {name:7s} {hexv}  grey {gray(hexv):6.1f}  "
-                   f"{ref['shares'][name] * 100:5.1f}% of the image")
+        out.append(f"  {name:8s} {hexv}  grey {gray(hexv):6.1f}  "
+                   f"{ref['shares'][name] * 100:5.1f}%")
     out.append("")
     for label, sep in ref["pairs"].items():
-        ok = sep >= MONO_FLOOR
-        out.append(f"  {label:20s} {sep:6.1f}  {'passes' if ok else 'FAILS'}")
-    cw = ref["pairs"].get("cool vs warm")
-    if cw is not None and cw < MONO_FLOOR:
+        out.append(f"  {label:22s} {sep:6.1f}  "
+                   f"{'passes' if sep >= MONO_FLOOR else 'FAILS'}")
+    hr = ref.get("headroom")
+    if hr:
+        out += ["", f"  ground to type is {hr['span']:.1f} points, which fits "
+                    f"{hr['bands']} chromatic band(s)"]
+    fails = [k for k, v in ref["pairs"].items() if v < MONO_FLOOR
+             and "ground" not in k]
+    if fails:
         out += ["",
-                "  The two inks cannot be told apart in greyscale. That is only a",
-                "  problem if the reference asks them to be. Check what the accent",
-                "  is doing: if it is field, an accent or an endpoint it is fine,",
-                "  and if it is a second data category it is not."]
+                "  Inks that cannot be told apart in greyscale: "
+                + ", ".join(fails) + ".",
+                "  Only a problem if the reference asks them to be. Field, accent",
+                "  or endpoint is fine. A second data category is not."]
     return out
