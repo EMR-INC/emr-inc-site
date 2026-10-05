@@ -536,21 +536,14 @@ function sendScheduledIssue() {
 
 /** Send a named issue now, ignoring its date. For a manual catch up. */
 function sendIssueNow(issueId) {
-  if (!issueId) throw new Error('sendIssueNow needs an issue id, e.g. "issue-01"');
-  var ss = SpreadsheetApp.getActive();
-  var sh = ss.getSheetByName(ISSUES_SHEET);
-  var values = sh.getDataRange().getValues();
-  var col = headerIndex_(values[0], ISSUE_HEADERS, ISSUES_SHEET);
-  for (var i = 1; i < values.length; i++) {
-    if (String(values[i][col['Issue']] || '').trim() === issueId) {
-      return sendIssue_({row: i + 1, id: issueId,
-                         subject: String(values[i][col['Subject']] || '').trim(),
-                         sendOn: values[i][col['Send on']],
-                         status: String(values[i][col['Status']] || '').toLowerCase(),
-                         col: col});
-    }
-  }
-  throw new Error('No row for "' + issueId + '" on the ' + ISSUES_SHEET + ' sheet.');
+  // This one keeps requiring an argument, unlike sendTestToSelf. The Run button
+  // passing none is the safety: a real send to the whole list should not be one
+  // misclick away in the editor.
+  if (!issueId) throw new Error('sendIssueNow needs an issue id, e.g. "issue-01". '
+                              + 'The editor Run button cannot pass one, which is '
+                              + 'deliberate: set the Send on date and let the '
+                              + 'trigger do it, or call this from another function.');
+  return sendIssue_(issueByIdOrThrow_(issueId));
 }
 
 function sendIssue_(issue) {
@@ -645,24 +638,56 @@ function dryRunNextIssue() {
   try { sendIssue_(issue); } finally { CONFIG.DRY_RUN = was; }
 }
 
+/** A row on the issues sheet, by id. Throws rather than guessing. */
+function issueByIdOrThrow_(issueId) {
+  var sh = SpreadsheetApp.getActive().getSheetByName(ISSUES_SHEET);
+  if (!sh) throw new Error('No sheet named "' + ISSUES_SHEET + '". Run setup().');
+  var values = sh.getDataRange().getValues();
+  var col = headerIndex_(values[0], ISSUE_HEADERS, ISSUES_SHEET);
+  for (var i = 1; i < values.length; i++) {
+    if (String(values[i][col['Issue']] || '').trim() === issueId) {
+      return issueFromRow_(values[i], i + 1, col);
+    }
+  }
+  throw new Error('No row for "' + issueId + '" on the ' + ISSUES_SHEET + ' sheet.');
+}
+
+/** The last row carrying an issue id. What you almost always mean by "this one". */
+function newestIssueOrThrow_() {
+  var sh = SpreadsheetApp.getActive().getSheetByName(ISSUES_SHEET);
+  if (!sh) throw new Error('No sheet named "' + ISSUES_SHEET + '". Run setup().');
+  var values = sh.getDataRange().getValues();
+  var col = headerIndex_(values[0], ISSUE_HEADERS, ISSUES_SHEET);
+  for (var i = values.length - 1; i >= 1; i--) {
+    if (String(values[i][col['Issue']] || '').trim()) {
+      return issueFromRow_(values[i], i + 1, col);
+    }
+  }
+  throw new Error('The ' + ISSUES_SHEET + ' sheet has no issues on it yet.');
+}
+
+function issueFromRow_(row, rowNumber, col) {
+  return {
+    row:     rowNumber,
+    id:      String(row[col['Issue']] || '').trim(),
+    subject: String(row[col['Subject']] || '').trim(),
+    sendOn:  row[col['Send on']],
+    status:  String(row[col['Status']] || '').trim().toLowerCase(),
+    col:     col
+  };
+}
+
 /** Send one copy to yourself using the real pipeline, before the list. */
 function sendTestToSelf(issueId) {
-  var issue = null;
-  if (issueId) {
-    issue = {id: issueId, subject: '', row: 0, col: null};
-    var sh = SpreadsheetApp.getActive().getSheetByName(ISSUES_SHEET);
-    var values = sh.getDataRange().getValues();
-    var col = headerIndex_(values[0], ISSUE_HEADERS, ISSUES_SHEET);
-    for (var i = 1; i < values.length; i++) {
-      if (String(values[i][col['Issue']] || '').trim() === issueId) {
-        issue.subject = String(values[i][col['Subject']] || '').trim();
-      }
-    }
-  } else {
-    issue = dueIssue_();
-    if (!issue) throw new Error('Nothing due. Pass an issue id, e.g. '
-                              + 'sendTestToSelf("issue-01")');
-  }
+  // No argument is the normal case, because the editor's Run button cannot pass
+  // one. So the default has to be something sensible rather than an error: the
+  // newest row on the sheet, whatever its date or status. A test is exactly when
+  // the issue is still on hold with no date, so requiring a DUE issue here made
+  // the function unrunnable at the one moment it is wanted.
+  var issue = issueId ? issueByIdOrThrow_(issueId) : newestIssueOrThrow_();
+  Logger.log('Testing %s ("%s"). %s', issue.id, issue.subject,
+             issueId ? 'Asked for by id.'
+                     : 'Newest row on the sheet, since no id was given.');
 
   var files = issueFiles_(issue.id);
   assertSendable_(issue, files.html, files.text);

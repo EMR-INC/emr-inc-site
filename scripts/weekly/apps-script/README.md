@@ -61,8 +61,17 @@ email to the whole list.
    `WEBAPP_URL` are all set.
 5. Run `listIssues()`. It prints the schedule and, for each row, whether both
    parts are actually in the folder yet. Run it before a send date, not after.
-6. Run `sendTestToSelf('issue-01')`. Confirm the figure renders and the
-   unsubscribe link works.
+6. Run `sendTestToSelf()`. Confirm the figure renders and the unsubscribe link
+   works.
+
+   The editor's Run button cannot pass arguments, so every function meant to be
+   run from it takes none. `sendTestToSelf()` with no argument tests the newest
+   row on the issues sheet, whatever its date or status, which is the state an
+   issue is actually in when you want to test it: on hold, no date set.
+
+   `sendIssueNow('issue-02')` is the deliberate exception. It still requires an
+   argument, so that a real send to the whole list is not one misclick away in
+   the editor.
 7. Run `dryRunNextIssue()` and read the log sheet. It runs every gate and every
    selection decision, writes nothing to the issues sheet and sends nothing.
 8. Set `DRY_RUN: false`, then run `installWeeklyTrigger()`.
