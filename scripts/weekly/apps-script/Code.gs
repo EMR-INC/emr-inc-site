@@ -27,6 +27,7 @@ var CONFIG = {
   CONTACTS_SHEET: 'Contacts',
   EMAIL_HEADER:   'Email',
   SOURCE_HEADER:  'Source',
+  CONSENT_HEADER: 'Consent to be contacted',
 
   // Why each recipient is getting this, keyed by the CRM Source column. The list
   // is not one cohort: rows 102 to 128 are EMS World attendees and the rest came
@@ -36,11 +37,18 @@ var CONFIG = {
   // Keys are matched case insensitively as substrings of the Source cell. The
   // first dry run logs every distinct Source it saw with a count, so fill this in
   // from that rather than from a guess.
+  // Filled from a dry run against the real sheet, not guessed. The EMS World
+  // cohort carries Source "MyLEADS Mobile", which is the badge scanner used at
+  // the booth, so that is the string that has to match.
   PROVENANCE: {
     'off-road transport survey':
       'You are receiving this because you took part in the EMR Inc. off road transport survey.',
+    'myleads':
+      'You are receiving this because we met at EMS World Expo.',
     'ems world':
-      'You are receiving this because we met at EMS World Expo.'
+      'You are receiving this because we met at EMS World Expo.',
+    'contact form':
+      'You are receiving this because you contacted EMR Inc. through our website.'
   },
   PROVENANCE_DEFAULT:
     'You are receiving this because you are on the EMR Inc. contact list.',
@@ -153,12 +161,14 @@ function getRecipients_() {
   var emailCol = headers.indexOf(CONFIG.EMAIL_HEADER);
   if (emailCol === -1) throw new Error('No "' + CONFIG.EMAIL_HEADER + '" column');
   var sourceCol = headers.indexOf(CONFIG.SOURCE_HEADER);
+  var consentCol = headers.indexOf(CONFIG.CONSENT_HEADER);
 
   var unsub = readColumnSet_(ss, UNSUB_SHEET, 0);
   var already = readSentSet_(ss);
 
   var seen = {}, out = [], sources = {}, skipped = {blank: 0, invalid: 0, dupe: 0,
-                                      unsubscribed: 0, alreadySent: 0};
+                                      unsubscribed: 0, alreadySent: 0,
+                                      consentRefused: 0};
   for (var i = 1; i < values.length; i++) {
     var raw = String(values[i][emailCol] || '').trim().toLowerCase();
     if (!raw) { skipped.blank++; continue; }
@@ -167,11 +177,26 @@ function getRecipients_() {
     seen[raw] = true;
     if (unsub[raw]) { skipped.unsubscribed++; continue; }
     if (already[raw]) { skipped.alreadySent++; continue; }
+    // An unchecked consent box is a refusal and outranks everything else here.
+    if (consentCol !== -1 && consentRefused_(values[i][consentCol])) {
+      skipped.consentRefused++; continue;
+    }
     var src = sourceCol === -1 ? '' : String(values[i][sourceCol] || '').trim();
     sources[src || '(blank)'] = (sources[src || '(blank)'] || 0) + 1;
     out.push({email: raw, source: src});
   }
   return {recipients: out, skipped: skipped, sources: sources};
+}
+
+/**
+ * True only for an explicit refusal. "Not recorded" means the question was never
+ * asked, which is a different thing and is not treated as a no here.
+ */
+function consentRefused_(consent) {
+  var c = String(consent || '').trim().toLowerCase();
+  if (!c) return false;
+  if (c.indexOf('not recorded') === 0) return false;
+  return /(not given|declined|opt[\s-]?out|unsubscrib|^no\b)/.test(c);
 }
 
 /** Match the Source cell against the provenance map, case insensitively. */

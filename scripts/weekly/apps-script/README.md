@@ -45,10 +45,26 @@ It also dedupes on lowercased email, skips malformed addresses, skips anyone on
 the unsubscribe sheet, and skips anyone already logged `sent` **for this issue**,
 so a re-run after a failure resumes rather than double sending.
 
-## The list is two cohorts, not one
+## Dry run against the real sheet, 2026-10-05
 
-Rows 102 to 128 of `Contacts` are EMS World attendees. Everything above them came
-from the off road stretcher survey. A single hardcoded "why you are getting this"
+127 deliverable contacts out of 128 rows. No blanks, no malformed addresses, no
+duplicates. One exclusion, covered below.
+
+| Source | Count | Line they get |
+| --- | --- | --- |
+| `Off-Road Transport Survey` | 105 | took part in the off road transport survey |
+| `MyLEADS Mobile` | 21 | we met at EMS World Expo |
+| `Contact form` | 1 | contacted EMR Inc. through our website |
+
+**The EMS World cohort carries Source `MyLEADS Mobile`**, the badge scanner used
+at the booth, not the string "EMS World". That is why the map is filled from a
+dry run rather than from a guess.
+
+Row 102 to 128 is close but not exact: that range holds 20 MyLEADS rows, 5 survey
+rows and 1 contact form row, and a 21st MyLEADS row sits at 129. Source is the
+reliable discriminator, not the row number.
+
+## The list is more than one cohort A single hardcoded "why you are getting this"
 sentence would therefore be a false statement to one group or the other, so the
 line is per recipient: `{{WHY_YOU_GET_THIS}}` is filled from the CRM `Source`
 column through the `PROVENANCE` map in `CONFIG`.
@@ -60,6 +76,16 @@ unmatched falls back to `PROVENANCE_DEFAULT` rather than failing the send.
 The first dry run logs every distinct `Source` value it saw with a count, and
 names any that fell through to the default. Fill `PROVENANCE` from that output
 rather than from a guess about what the cells contain.
+
+## One contact is excluded outright
+
+Row 107 came through the contact form with Consent reading
+**"Not given (box not checked)"**. That is an explicit refusal, so
+`consentRefused_()` drops them before anything else is considered. "Not recorded"
+is treated differently: it means the question was never asked, which is not the
+same as a no.
+
+Of 128 rows, exactly **one** reads "Yes".
 
 ## The consent problem, which is not a code problem
 
