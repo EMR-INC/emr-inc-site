@@ -23,10 +23,39 @@ commit them.
 | 01 | `studies/palette.py` | Should the palette be expanded, and with what |
 | 02 | `studies/forms.py` | Which of the five primary structures suits which claim |
 | 03 | `studies/layout.py` | How else can a three section issue be held |
+| 04 | `studies/collage.py` | Where the line falls between field and data |
 
 `lab.py` is the shared harness: the tokens, the colour maths including overprint,
 the gates, the two renderers and the contact sheet. A study that wants a new
 capability should add it there rather than carry its own copy.
+
+## Measuring a reference
+
+Study 04 takes any image and reports its inks on the same terms, so collage
+looks can be compared rather than argued about:
+
+```
+python3 studies/collage.py path/to/reference.png
+```
+
+It pulls inks by saturation and hue family and takes the median of each, because
+quantising the whole image averages a small hot accent into a blend that appears
+nowhere in the picture. The first attempt returned `#88506E`, a purple nothing in
+the image was.
+
+The first reference measured: ground `#E9D9C1` at grey 219.0, cool `#1644BB` at
+67.8, warm `#F53807` at 106.9. Cool against ground 151.2 and warm against ground
+112.1 both pass. **Cool against warm is 39.1 and fails.**
+
+That is not a verdict on the image, which works. It never asks those two inks to
+be told apart: every photograph, drawing and arc is the blue, and the warm is
+torn strips, a triangle and one circle. A field accent, never a category. Which
+is study 01's finding reached from the other direction, and the test to apply to
+the next reference: when the two inks collide in greyscale, ask what the accent
+is doing. Field, accent or endpoint is fine. A second data category is not.
+
+Worth noting the reference spreads its two inks 39.1 apart where the system's
+red and blue sit 1.6 apart.
 
 ## What came out of study 01
 

@@ -350,3 +350,70 @@ def render_html(html: str, w: int, h: int, out: Path, bg: str = None) -> Path:
     if not out.exists():
         sys.exit(f"render failed: {out}")
     return out
+
+
+# -------------------------------------------------------------- references ---
+
+def sample_reference(path, sat=0.55, warm_hue=30, cool=(200, 260)) -> dict:
+    """
+    The inks a reference image is actually made of.
+
+    Quantising the whole image does not work for this: a hot accent covering five
+    percent gets averaged into a muddy blend with whatever it sits next to. The
+    first attempt at this returned #88506E, a purple that appears nowhere in the
+    picture. So pull by saturation and hue family instead, and take the median of
+    each family rather than the mean, which a few dark pixels would drag.
+
+    Returns the inks plus every pairwise separation, so a new reference can be
+    judged on the same terms as the last one.
+    """
+    import colorsys
+    from PIL import Image
+
+    im = Image.open(path).convert("RGB")
+    px = list(im.resize((320, 320), Image.LANCZOS).getdata())
+    fam = {"cool": [], "warm": [], "ground": []}
+    for r, g, b in px:
+        h, sv, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
+        deg = h * 360
+        if sv > sat and cool[0] <= deg <= cool[1]:
+            fam["cool"].append((r, g, b))
+        elif sv > sat and (deg <= warm_hue or deg >= 345):
+            fam["warm"].append((r, g, b))
+        elif sv < 0.18 and v > 0.80:
+            fam["ground"].append((r, g, b))
+
+    inks, shares = {}, {}
+    for name, pts in fam.items():
+        if not pts:
+            continue
+        pts.sort(key=sum)
+        inks[name] = hx(pts[len(pts) // 2])
+        shares[name] = len(pts) / len(px)
+
+    pairs = {}
+    names = list(inks)
+    for i, a in enumerate(names):
+        for b in names[i + 1:]:
+            pairs[f"{a} vs {b}"] = separation(inks[a], inks[b])
+    return {"path": str(path), "inks": inks, "shares": shares, "pairs": pairs}
+
+
+def describe_reference(ref: dict) -> list[str]:
+    """The reading, in words, including what the numbers do and do not mean."""
+    out = []
+    for name, hexv in ref["inks"].items():
+        out.append(f"  {name:7s} {hexv}  grey {gray(hexv):6.1f}  "
+                   f"{ref['shares'][name] * 100:5.1f}% of the image")
+    out.append("")
+    for label, sep in ref["pairs"].items():
+        ok = sep >= MONO_FLOOR
+        out.append(f"  {label:20s} {sep:6.1f}  {'passes' if ok else 'FAILS'}")
+    cw = ref["pairs"].get("cool vs warm")
+    if cw is not None and cw < MONO_FLOOR:
+        out += ["",
+                "  The two inks cannot be told apart in greyscale. That is only a",
+                "  problem if the reference asks them to be. Check what the accent",
+                "  is doing: if it is field, an accent or an endpoint it is fine,",
+                "  and if it is a second data category it is not."]
+    return out

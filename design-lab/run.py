@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-STUDIES = ["palette", "forms", "layout"]
+STUDIES = ["palette", "forms", "layout", "collage"]
 
 def main():
     want = sys.argv[1:] or STUDIES
