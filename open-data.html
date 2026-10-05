@@ -565,6 +565,124 @@ details li {
 .radio-timeline p {margin:8px 0 0;font-size:16px}
 .radio-duration {border-top:2px solid var(--ink);padding-top:20px}
 @media(max-width:760px) {.radio-context {grid-template-columns:1fr}.radio-mark-field {gap:8px}}
+
+/* FIELD NOTES · radio collage / live daily series */
+.daily-section.daily-section--fieldnote{
+  padding:clamp(42px,7vw,104px) clamp(20px,5vw,72px);
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 4% 9%,rgba(213,34,42,.12) 0 2px,transparent 3px) 0 0/18px 18px,
+    var(--stock);
+  border-bottom:3px solid var(--ink);
+}
+.daily-poster-top{
+  width:min(100%,1440px);margin:0 auto clamp(42px,7vw,88px);
+  display:grid;grid-template-columns:minmax(260px,.88fr) minmax(0,1.25fr);
+  gap:clamp(30px,6vw,96px);align-items:center;
+}
+.daily-collage-frame{
+  position:relative;isolation:isolate;transform:rotate(-2deg);
+  margin:0;background:var(--ink);border:3px solid var(--ink);
+  box-shadow:16px 18px 0 var(--blue),-8px -8px 0 var(--red);
+}
+.daily-collage-frame::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(135deg,rgba(16,33,59,.06),transparent 42%,rgba(213,34,42,.09));
+  mix-blend-mode:multiply;
+}
+.daily-collage-frame img{display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:cover}
+.daily-photo-tag{
+  position:absolute;z-index:2;left:-16px;top:20px;padding:11px 14px;
+  color:var(--stock);background:var(--red);border:2px solid var(--ink);
+  box-shadow:5px 5px 0 var(--yellow);
+  font:700 11px/1.1 'Courier New',monospace;letter-spacing:.12em;text-transform:uppercase;
+  transform:rotate(-4deg)
+}
+.daily-heading{position:relative;z-index:1}
+.daily-eyebrow,.daily-ledger-label{
+  margin:0 0 18px;font:700 11px/1.4 'Courier New',monospace;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--red)
+}
+.daily-heading h2{
+  max-width:10ch;margin:0;font:900 clamp(52px,9.2vw,142px)/.79 'Archivo Black','Arial Black',Arial,sans-serif;
+  letter-spacing:-.075em;text-transform:uppercase;color:var(--ink)
+}
+.daily-heading h2 em{
+  display:block;width:max-content;max-width:100%;margin-top:.16em;padding:.12em .16em .2em;
+  color:var(--stock);background:var(--red);font:italic 400 .48em/.94 Georgia,'Times New Roman',serif;
+  letter-spacing:-.045em;text-transform:none;box-decoration-break:clone;-webkit-box-decoration-break:clone;
+  transform:rotate(-1deg)
+}
+.daily-copy{
+  max-width:52ch;margin:28px 0 0;padding-left:16px;border-left:4px solid var(--blue);
+  font:700 13px/1.65 'Courier New',monospace
+}
+.daily-ledger{
+  position:relative;width:min(100%,1440px);margin:0 auto;padding:clamp(20px,3.5vw,46px);
+  color:var(--stock);background:var(--ink);border:3px solid var(--ink);
+  box-shadow:12px 12px 0 var(--red);overflow:hidden
+}
+.daily-ledger::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.18;
+  background:repeating-linear-gradient(135deg,transparent 0 9px,rgba(241,235,221,.22) 9px 10px)
+}
+.daily-ledger-head,.daily-field,.daily-fineprint{position:relative;z-index:1}
+.daily-ledger-head{
+  display:flex;justify-content:space-between;align-items:flex-end;gap:20px;
+  padding-bottom:18px;border-bottom:1px solid rgba(241,235,221,.55)
+}
+.daily-ledger-label{margin:0;color:var(--yellow)}
+.daily-window-note{margin:8px 0 0;font:600 10px/1.5 'Courier New',monospace;color:rgba(241,235,221,.75)}
+.daily-total{
+  color:var(--stock);font:900 clamp(40px,7vw,82px)/.85 'Archivo Black','Arial Black',Arial,sans-serif;
+  letter-spacing:-.07em;white-space:nowrap
+}
+.daily-section .daily-field{
+  height:clamp(290px,34vw,430px);min-height:0;margin-top:20px;padding:20px 0 12px;
+  display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:clamp(8px,1.8vw,26px);
+  align-items:stretch;border-bottom:3px solid var(--stock)
+}
+.daily-section .day-column{
+  min-width:0;height:100%;display:grid;grid-template-rows:1fr auto auto;
+  align-items:end;gap:10px
+}
+.daily-section .day-bar{
+  position:relative;width:100%;align-self:end;min-height:10px;
+  border:2px solid var(--stock);background:var(--blue);box-shadow:8px -8px 0 var(--yellow);
+  transform:skewY(-3deg);transform-origin:bottom
+}
+.daily-section .day-column:nth-child(3n + 2) .day-bar{background:var(--red)}
+.daily-section .day-column:nth-child(3n) .day-bar{background:var(--green)}
+.daily-section .day-count,.daily-section .day-label{
+  color:var(--stock);font:700 11px/1.2 'Courier New',monospace;text-align:center
+}
+.daily-section .day-count{font-size:clamp(12px,1.5vw,18px);font-weight:900}
+.daily-section .day-label{color:rgba(241,235,221,.78)}
+.daily-fineprint{
+  margin:16px 0 0;color:rgba(241,235,221,.84);
+  font:600 10px/1.6 'Courier New',monospace;max-width:100ch
+}
+@media(max-width:760px){
+  .daily-poster-top{grid-template-columns:1fr;gap:34px}
+  .daily-collage-frame{width:min(72%,360px);margin:0 auto 0 14px}
+  .daily-heading{margin:-20px 0 0 6px}
+  .daily-heading h2{font-size:clamp(52px,14vw,96px)}
+  .daily-ledger-head{align-items:flex-start}
+  .daily-section .daily-field{height:auto;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px 10px}
+  .daily-section .day-column{height:155px}
+}
+@media(max-width:420px){
+  .daily-section.daily-section--fieldnote{padding-left:16px;padding-right:20px}
+  .daily-collage-frame{width:78%}
+  .daily-ledger{padding:18px 14px}
+  .daily-section .daily-field{gap:14px 7px}
+  .daily-section .day-column{height:135px;gap:7px}
+  .daily-section .day-label{font-size:10px}
+  .daily-window-note{max-width:25ch}
+}
+@media(prefers-reduced-motion:reduce){
+  .daily-collage-frame,.daily-section .day-bar{transform:none}
+}
 </style>
 <link rel="stylesheet" href="assets/rescue-one/study.css">
 <script src="assets/rescue-one/study.js" defer></script>
@@ -655,12 +773,26 @@ details li {
     </div>
   </section>
 
-  <section class="daily-section" aria-labelledby="daily_title">
-    <div class="daily-head">
-      <h2 id="daily_title">The seven<br>day field.</h2>
-      <p class="daily-copy" id="window_copy">Each column is one calendar date touched by the rolling seven-day window. Height is the count of transcript-derived alert candidates.</p>
+  <section class="daily-section daily-section--fieldnote" aria-labelledby="daily_title">
+    <div class="daily-poster-top">
+      <div class="daily-collage-frame" aria-hidden="true">
+        <span class="daily-photo-tag">Radio / field record</span>
+        <img src="/assets/field-notes/radio-carries-collage.webp" alt="" loading="lazy" decoding="async">
+      </div>
+      <div class="daily-heading">
+        <p class="daily-eyebrow">EMR Inc. &nbsp;·&nbsp; Field notes / 01</p>
+        <h2 id="daily_title">You hear<br>the calls.<em>The radio carries the rest.</em></h2>
+        <p class="daily-copy" id="window_copy">One rolling 168-hour window, grouped by calendar date; the edge dates may be partial. Each bar counts transcript-derived alert candidates.</p>
+      </div>
     </div>
-    <div class="daily-field" id="daily_field" role="img" aria-label="Sep 27: 211; Sep 28: 430; Sep 29: 347; Sep 30: 430; Oct 1: 474; Oct 2: 409; Oct 3: 397; Oct 4: 158"><div class='day-column'><div class='day-bar' style='height:44.51%'></div><strong class='day-count'>211</strong><span class='day-label'>Sep 27</span></div><div class='day-column'><div class='day-bar' style='height:90.72%'></div><strong class='day-count'>430</strong><span class='day-label'>Sep 28</span></div><div class='day-column'><div class='day-bar' style='height:73.21%'></div><strong class='day-count'>347</strong><span class='day-label'>Sep 29</span></div><div class='day-column'><div class='day-bar' style='height:90.72%'></div><strong class='day-count'>430</strong><span class='day-label'>Sep 30</span></div><div class='day-column'><div class='day-bar' style='height:100.00%'></div><strong class='day-count'>474</strong><span class='day-label'>Oct 1</span></div><div class='day-column'><div class='day-bar' style='height:86.29%'></div><strong class='day-count'>409</strong><span class='day-label'>Oct 2</span></div><div class='day-column'><div class='day-bar' style='height:83.76%'></div><strong class='day-count'>397</strong><span class='day-label'>Oct 3</span></div><div class='day-column'><div class='day-bar' style='height:33.33%'></div><strong class='day-count'>158</strong><span class='day-label'>Oct 4</span></div></div>
+    <div class="daily-ledger">
+      <div class="daily-ledger-head">
+        <div><p class="daily-ledger-label">01 / Public alert candidates</p><p class="daily-window-note">Window 2026-09-27T12:07:25-04:00 through 2026-10-04T12:07:25-04:00. Refreshed 2026-10-04T16:39:50Z.</p></div>
+        <strong class="daily-total">2,856</strong>
+      </div>
+      <div class="daily-field" id="daily_field" role="img" aria-label="Sep 27: 211; Sep 28: 430; Sep 29: 347; Sep 30: 430; Oct 1: 474; Oct 2: 409; Oct 3: 397; Oct 4: 158"><div class='day-column'><div class='day-bar' style='height:44.51%'></div><strong class='day-count'>211</strong><span class='day-label'>Sep 27</span></div><div class='day-column'><div class='day-bar' style='height:90.72%'></div><strong class='day-count'>430</strong><span class='day-label'>Sep 28</span></div><div class='day-column'><div class='day-bar' style='height:73.21%'></div><strong class='day-count'>347</strong><span class='day-label'>Sep 29</span></div><div class='day-column'><div class='day-bar' style='height:90.72%'></div><strong class='day-count'>430</strong><span class='day-label'>Sep 30</span></div><div class='day-column'><div class='day-bar' style='height:100.00%'></div><strong class='day-count'>474</strong><span class='day-label'>Oct 1</span></div><div class='day-column'><div class='day-bar' style='height:86.29%'></div><strong class='day-count'>409</strong><span class='day-label'>Oct 2</span></div><div class='day-column'><div class='day-bar' style='height:83.76%'></div><strong class='day-count'>397</strong><span class='day-label'>Oct 3</span></div><div class='day-column'><div class='day-bar' style='height:33.33%'></div><strong class='day-count'>158</strong><span class='day-label'>Oct 4</span></div></div>
+      <p class="daily-fineprint">One bar per calendar date touched by the rolling 168-hour window; the edge dates can be partial days. Transcript-derived candidates are not verified CAD incidents or confirmed responses.</p>
+    </div>
   </section>
 
   <section class="rescue-study" id="rescue-one" aria-labelledby="rescue-title">
