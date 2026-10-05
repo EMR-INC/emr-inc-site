@@ -5,24 +5,39 @@
  * sends, so the figure never reaches the inbox. MailApp does not sanitise, so
  * the email arrives as built.
  *
+ * This is a weekly sender, not a one shot. Nothing about an individual issue
+ * lives in this file. An issue is a row on the "Field Notes Issues" sheet plus
+ * two files in a Drive folder, named by convention:
+ *
+ *     field-notes-<issue>.html
+ *     field-notes-<issue>.txt
+ *
+ * Shipping next week means dropping two files in the folder and typing one row.
+ * No code edit, no redeploy. A time driven trigger fires sendScheduledIssue()
+ * once a week, it takes the oldest issue whose send date has passed, and it
+ * stops when there is nothing due.
+ *
  * It refuses to send until the things that make a bulk send lawful and honest
  * are actually in place. See assertSendable_(). That is deliberate: this list
  * was collected from a stretcher survey and column Q of every row reads
  * "Not recorded (survey did not ask)". Nobody on it asked for a newsletter.
  *
- * First run: setup(). Then sendIssue() with DRY_RUN true and read the log.
+ * First run: setup(), then installWeeklyTrigger(). Check it with listIssues()
+ * and dryRunNextIssue() before DRY_RUN comes off.
  */
 
 // ---------------------------------------------------------------- config ---
 
 var CONFIG = {
-  ISSUE_ID:      'issue-01',
-  SUBJECT:       'Your engine has a better file than your firefighters',
+  // The Drive folder holding every built issue. Files are found by name, so a
+  // new issue needs no config change. "Field Notes issues", beside the CRM.
+  ISSUES_FOLDER_ID: '1uctXc8UgDpEZLHOUkf285UWeIWTAlpZf',
 
-  // The built email. Kept in Drive, not in the public repo: the site root is
-  // served by GitHub Pages, so anything committed there is world readable.
-  HTML_FILE_ID:  '',          // Drive file id of 01-email.html
-  TEXT_FILE_ID:  '',          // Drive file id of 01-email.txt
+  // When the weekly trigger fires. Apps Script triggers are not to the minute:
+  // atHour(9) means some time in the 9am hour, in the script's timezone (File,
+  // Project properties). Change these, then run installWeeklyTrigger() again.
+  SEND_WEEKDAY:   'TUESDAY',
+  SEND_HOUR:      9,
 
   CONTACTS_SHEET: 'Contacts',
   EMAIL_HEADER:   'Email',
@@ -30,16 +45,14 @@ var CONFIG = {
   CONSENT_HEADER: 'Consent to be contacted',
 
   // Why each recipient is getting this, keyed by the CRM Source column. The list
-  // is not one cohort: rows 102 to 128 are EMS World attendees and the rest came
-  // from the off road stretcher survey, so a single hardcoded sentence would be
-  // a false statement to one group or the other.
+  // is not one cohort: part of it came from the EMS World booth and the rest from
+  // the off road stretcher survey, so a single hardcoded sentence would be a
+  // false statement to one group or the other.
   //
-  // Keys are matched case insensitively as substrings of the Source cell. The
-  // first dry run logs every distinct Source it saw with a count, so fill this in
-  // from that rather than from a guess.
-  // Filled from a dry run against the real sheet, not guessed. The EMS World
-  // cohort carries Source "MyLEADS Mobile", which is the badge scanner used at
-  // the booth, so that is the string that has to match.
+  // Keys are matched case insensitively as substrings of the Source cell. Filled
+  // from a dry run against the real sheet, not guessed. The EMS World cohort
+  // carries Source "MyLEADS Mobile", which is the badge scanner used at the
+  // booth, so that is the string that has to match.
   PROVENANCE: {
     'off-road transport survey':
       'You are receiving this because you took part in the EMR Inc. off road transport survey.',
@@ -54,14 +67,20 @@ var CONFIG = {
     'You are receiving this because you are on the EMR Inc. contact list.',
 
   SENDER_NAME:    'EMR Inc. Field Notes',
-  REPLY_TO:       '',         // a mailbox a person actually reads
+  REPLY_TO:       'michael.harvey@emr-inc.net',
+  SITE_URL:       'https://emr-inc.net',
 
-  // CAN-SPAM 15 USC 7704(a)(5): a commercial message must carry a valid
-  // physical postal address. There is no lawful send without this.
-  POSTAL_ADDRESS: '',         // e.g. 'EMR Inc., 1234 Example Blvd, Lakewood Ranch, FL 34202'
+  // CAN-SPAM 15 USC 7704(a)(5): a commercial message must carry a valid physical
+  // postal address. A website is not one, so emr-inc.net does not satisfy this.
+  // A street address, a PO box the sender is registered for, or the registered
+  // agent address on the Delaware filing all work. Nothing on the site publishes
+  // one today, so it has to be typed in here.
+  POSTAL_ADDRESS: '',
 
-  // Deployed web app url of this script, which is what the unsubscribe link
-  // points at. Fill it after the first Deploy.
+  // The unsubscribe endpoint. This has to be THIS script's own deployment url
+  // (script.google.com/macros/s/.../exec), not emr-inc.net: the apex is static
+  // GitHub Pages and cannot record an unsubscribe. Deploy, New deployment, Web
+  // app, execute as me, access anyone, then paste the url it gives you.
   WEBAPP_URL:     '',
 
   DRY_RUN:        true,       // writes the log, sends nothing
@@ -69,8 +88,13 @@ var CONFIG = {
   THROTTLE_MS:    1200
 };
 
-var LOG_SHEET = 'Field Notes Log';
-var UNSUB_SHEET = 'Field Notes Unsubscribed';
+var LOG_SHEET    = 'Field Notes Log';
+var UNSUB_SHEET  = 'Field Notes Unsubscribed';
+var ISSUES_SHEET = 'Field Notes Issues';
+
+// Column order on the Issues sheet. Read by name, not by index, so a reordered
+// or extra column does not silently send the wrong thing.
+var ISSUE_HEADERS = ['Issue', 'Subject', 'Send on', 'Status', 'Sent', 'Last run'];
 
 // ----------------------------------------------------------------- setup ---
 
@@ -78,13 +102,24 @@ function setup() {
   var ss = SpreadsheetApp.getActive();
   ensureSheet_(ss, LOG_SHEET, ['Timestamp', 'Issue', 'Email', 'Status', 'Source']);
   ensureSheet_(ss, UNSUB_SHEET, ['Email', 'Timestamp', 'Source']);
+  var issues = ensureSheet_(ss, ISSUES_SHEET, ISSUE_HEADERS);
+
+  // Seed the first row so the shape of an issue is obvious without reading this
+  // file. Only when the sheet is empty, so setup() stays safe to run again.
+  if (issues.getLastRow() < 2) {
+    issues.appendRow(['issue-01',
+                      'Your engine has a better file than your firefighters',
+                      '', 'hold', '', '']);
+    issues.getRange(2, 3).setNumberFormat('yyyy-mm-dd');
+  }
 
   var props = PropertiesService.getScriptProperties();
   if (!props.getProperty('UNSUB_SECRET')) {
     props.setProperty('UNSUB_SECRET', Utilities.getUuid() + Utilities.getUuid());
   }
-  Logger.log('Sheets ready. Unsubscribe secret set. Fill CONFIG, deploy as a web '
-           + 'app (execute as me, access anyone), then paste the url into WEBAPP_URL.');
+  Logger.log('Sheets ready. Unsubscribe secret set. Next: fill POSTAL_ADDRESS, '
+           + 'deploy as a web app (execute as me, access anyone), paste the url '
+           + 'into WEBAPP_URL, then run installWeeklyTrigger().');
 }
 
 function ensureSheet_(ss, name, headers) {
@@ -97,13 +132,186 @@ function ensureSheet_(ss, name, headers) {
   return sh;
 }
 
+// --------------------------------------------------------------- trigger ---
+
+/**
+ * Install the weekly trigger. Safe to run again: it clears the old one first,
+ * so changing SEND_WEEKDAY or SEND_HOUR does not leave two triggers firing.
+ */
+function installWeeklyTrigger() {
+  removeTriggers_();
+  var day = ScriptApp.WeekDay[CONFIG.SEND_WEEKDAY];
+  if (!day) {
+    throw new Error('SEND_WEEKDAY must be a day name like TUESDAY, got "'
+                  + CONFIG.SEND_WEEKDAY + '"');
+  }
+  ScriptApp.newTrigger('sendScheduledIssue')
+    .timeBased().onWeekDay(day).atHour(CONFIG.SEND_HOUR).create();
+  Logger.log('Weekly trigger installed: %s around %s:00, script timezone %s. '
+           + 'It sends whichever issue is due and does nothing when none is.',
+             CONFIG.SEND_WEEKDAY, CONFIG.SEND_HOUR,
+             Session.getScriptTimeZone());
+}
+
+function removeTriggers_() {
+  var n = 0;
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    var fn = t.getHandlerFunction();
+    if (fn === 'sendScheduledIssue' || fn === 'resumeIssue') {
+      ScriptApp.deleteTrigger(t); n++;
+    }
+  });
+  return n;
+}
+
+/** Stop the weekly send without touching anything else. */
+function uninstallTriggers() {
+  Logger.log('Removed %s trigger(s). Nothing will send until '
+           + 'installWeeklyTrigger() runs again.', removeTriggers_());
+}
+
+/**
+ * A single catch up run, a day out. The daily mail quota is the reason this
+ * exists: a list longer than MAX_PER_RUN cannot go in one firing, and waiting a
+ * whole week for the rest would ship half an issue.
+ */
+function scheduleResume_() {
+  ScriptApp.newTrigger('resumeIssue').timeBased().after(25 * 60 * 60 * 1000).create();
+}
+
+function resumeIssue() {
+  // One shot. Clear it first so a failure cannot leave a trigger behind.
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'resumeIssue') ScriptApp.deleteTrigger(t);
+  });
+  sendScheduledIssue();
+}
+
+// ---------------------------------------------------------------- issues ---
+
+/**
+ * The oldest issue whose send date has passed and which is not finished or on
+ * hold. Returns null when nothing is due, which is the normal state on most
+ * firings and must not be an error.
+ */
+function dueIssue_() {
+  var ss = SpreadsheetApp.getActive();
+  var sh = ss.getSheetByName(ISSUES_SHEET);
+  if (!sh) throw new Error('No sheet named "' + ISSUES_SHEET + '". Run setup().');
+
+  // Headers are checked before the empty check, not after. A renamed or deleted
+  // column on an otherwise empty sheet would otherwise read as "nothing due",
+  // and the first you would hear of it is a Tuesday that quietly did nothing.
+  var values = sh.getDataRange().getValues();
+  var col = headerIndex_(values[0], ISSUE_HEADERS, ISSUES_SHEET);
+  if (values.length < 2) return null;
+
+  var now = new Date(), best = null;
+
+  for (var i = 1; i < values.length; i++) {
+    var id = String(values[i][col['Issue']] || '').trim();
+    if (!id) continue;
+    var status = String(values[i][col['Status']] || '').trim().toLowerCase();
+    if (status === 'sent' || status === 'hold' || status === 'skip') continue;
+
+    var when = values[i][col['Send on']];
+    if (!(when instanceof Date)) continue;   // no date set means not scheduled
+    if (when.getTime() > now.getTime()) continue;
+
+    if (!best || when.getTime() < best.sendOn.getTime()) {
+      best = {
+        row:     i + 1,
+        id:      id,
+        subject: String(values[i][col['Subject']] || '').trim(),
+        sendOn:  when,
+        status:  status,
+        col:     col
+      };
+    }
+  }
+  return best;
+}
+
+/** Map header name to column index, failing loudly on a missing column. */
+function headerIndex_(headerRow, required, sheetName) {
+  var headers = headerRow.map(function (h) { return String(h).trim(); });
+  var col = {};
+  required.forEach(function (name) {
+    var i = headers.indexOf(name);
+    if (i === -1) {
+      throw new Error('Sheet "' + sheetName + '" has no "' + name + '" column. '
+                    + 'Expected: ' + required.join(', '));
+    }
+    col[name] = i;
+  });
+  return col;
+}
+
+/**
+ * The two built files for an issue, found by name. Convention rather than a
+ * pasted file id: a hardcoded id is one more thing to edit every week, and
+ * getting it wrong sends last week's email to the whole list.
+ */
+function issueFiles_(issueId) {
+  if (!CONFIG.ISSUES_FOLDER_ID) {
+    throw new Error('ISSUES_FOLDER_ID is empty.');
+  }
+  var folder = DriveApp.getFolderById(CONFIG.ISSUES_FOLDER_ID);
+  return {
+    html: readOne_(folder, 'field-notes-' + issueId + '.html'),
+    text: readOne_(folder, 'field-notes-' + issueId + '.txt')
+  };
+}
+
+function readOne_(folder, name) {
+  var it = folder.getFilesByName(name);
+  if (!it.hasNext()) {
+    throw new Error('No file named "' + name + '" in the issues folder. Build the '
+                  + 'issue and upload both parts before the send date.');
+  }
+  var file = it.next();
+  if (it.hasNext()) {
+    throw new Error('More than one file named "' + name + '" in the issues folder. '
+                  + 'Delete the duplicate: there is no way to tell which is the '
+                  + 'one you meant.');
+  }
+  return file.getBlob().getDataAsString('UTF-8');
+}
+
+/** What is scheduled, and whether its files are actually there yet. */
+function listIssues() {
+  var ss = SpreadsheetApp.getActive();
+  var sh = ss.getSheetByName(ISSUES_SHEET);
+  if (!sh || sh.getLastRow() < 2) { Logger.log('No issues scheduled.'); return; }
+
+  var values = sh.getDataRange().getValues();
+  var col = headerIndex_(values[0], ISSUE_HEADERS, ISSUES_SHEET);
+  for (var i = 1; i < values.length; i++) {
+    var id = String(values[i][col['Issue']] || '').trim();
+    if (!id) continue;
+    var files = 'both parts present';
+    try { issueFiles_(id); } catch (err) { files = 'PROBLEM: ' + err.message; }
+    var when = values[i][col['Send on']];
+    Logger.log('%s | %s | %s | sent %s | %s',
+               id,
+               when instanceof Date
+                 ? Utilities.formatDate(when, Session.getScriptTimeZone(), 'yyyy-MM-dd')
+                 : '(no date)',
+               String(values[i][col['Status']] || '(ready)'),
+               String(values[i][col['Sent']] || 0),
+               files);
+  }
+  var due = dueIssue_();
+  Logger.log(due ? 'Due now: ' + due.id : 'Nothing due right now.');
+}
+
 // ------------------------------------------------------------ fail closed ---
 
 /**
  * Everything that must be true before a single message goes out. Each check is
  * here because its absence is a real problem, not a style preference.
  */
-function assertSendable_(html, text) {
+function assertSendable_(issue, html, text) {
   var problems = [];
 
   if (!CONFIG.POSTAL_ADDRESS) {
@@ -117,8 +325,8 @@ function assertSendable_(html, text) {
   if (!CONFIG.REPLY_TO) {
     problems.push('REPLY_TO is empty. A bulk send needs a monitored reply address.');
   }
-  if (!CONFIG.HTML_FILE_ID || !CONFIG.TEXT_FILE_ID) {
-    problems.push('HTML_FILE_ID or TEXT_FILE_ID is empty.');
+  if (!issue.subject) {
+    problems.push('Issue ' + issue.id + ' has no Subject on the issues sheet.');
   }
   if (html.indexOf('{{UNSUBSCRIBE_URL}}') === -1) {
     problems.push('The HTML has no {{UNSUBSCRIBE_URL}} placeholder, so recipients '
@@ -137,7 +345,9 @@ function assertSendable_(html, text) {
   }
 
   // The scope guard travels with the figure. If it is gone, the email states a
-  // Florida only finding with nothing marking it as Florida only.
+  // Florida only finding with nothing marking it as Florida only. This check
+  // applies to every issue drawing on that table, which is why it lives in the
+  // sender rather than in one issue's build script.
   if (html.toLowerCase().indexOf('florida only') === -1
       || html.toLowerCase().indexOf('not a national record') === -1) {
     problems.push('The scope guard is missing from the HTML. This data is Florida '
@@ -151,7 +361,7 @@ function assertSendable_(html, text) {
 
 // ------------------------------------------------------------- recipients ---
 
-function getRecipients_() {
+function getRecipients_(issueId) {
   var ss = SpreadsheetApp.getActive();
   var sh = ss.getSheetByName(CONFIG.CONTACTS_SHEET);
   if (!sh) throw new Error('No sheet named ' + CONFIG.CONTACTS_SHEET);
@@ -164,7 +374,7 @@ function getRecipients_() {
   var consentCol = headers.indexOf(CONFIG.CONSENT_HEADER);
 
   var unsub = readColumnSet_(ss, UNSUB_SHEET, 0);
-  var already = readSentSet_(ss);
+  var already = readSentSet_(ss, issueId);
 
   var seen = {}, out = [], sources = {}, skipped = {blank: 0, invalid: 0, dupe: 0,
                                       unsubscribed: 0, alreadySent: 0,
@@ -219,13 +429,16 @@ function readColumnSet_(ss, sheetName, col) {
   return set;
 }
 
-/** Only this issue counts, so a later issue is not blocked by an earlier one. */
-function readSentSet_(ss) {
+/**
+ * Who already got THIS issue. Scoped to one issue on purpose: it is what makes a
+ * part sent issue resumable, and what stops week two being blocked by week one.
+ */
+function readSentSet_(ss, issueId) {
   var sh = ss.getSheetByName(LOG_SHEET);
   var set = {};
   if (!sh || sh.getLastRow() < 2) return set;
   sh.getRange(2, 1, sh.getLastRow() - 1, 4).getValues().forEach(function (r) {
-    if (String(r[1]).trim() === CONFIG.ISSUE_ID && String(r[3]).trim() === 'sent') {
+    if (String(r[1]).trim() === issueId && String(r[3]).trim() === 'sent') {
       set[String(r[2]).trim().toLowerCase()] = true;
     }
   });
@@ -247,7 +460,13 @@ function unsubUrl_(email) {
        + '&t=' + encodeURIComponent(unsubToken_(email));
 }
 
-/** One click unsubscribe endpoint. Deploy: execute as me, access anyone. */
+/**
+ * One click unsubscribe endpoint. Deploy: execute as me, access anyone.
+ *
+ * The token is an HMAC of the address, so it is per recipient and not guessable,
+ * and it stays valid across issues. That is the point: an unsubscribe link in a
+ * year old email still works.
+ */
 function doGet(e) {
   var email = String((e.parameter && e.parameter.e) || '').trim().toLowerCase();
   var token = String((e.parameter && e.parameter.t) || '').trim();
@@ -257,7 +476,7 @@ function doGet(e) {
     var ss = SpreadsheetApp.getActive();
     var sh = ensureSheet_(ss, UNSUB_SHEET, ['Email', 'Timestamp', 'Source']);
     if (!readColumnSet_(ss, UNSUB_SHEET, 0)[email]) {
-      sh.appendRow([email, new Date(), 'one click, ' + CONFIG.ISSUE_ID]);
+      sh.appendRow([email, new Date(), 'one click']);
     }
   }
   var msg = ok
@@ -279,22 +498,62 @@ function escapeHtml_(s) {
 
 // ------------------------------------------------------------------ send ---
 
-function sendIssue() {
-  var html = DriveApp.getFileById(CONFIG.HTML_FILE_ID).getBlob().getDataAsString('UTF-8');
-  var text = DriveApp.getFileById(CONFIG.TEXT_FILE_ID).getBlob().getDataAsString('UTF-8');
-  assertSendable_(html, text);
+/**
+ * The trigger entry point. Finds the due issue, sends what the quota allows,
+ * and books a catch up run if the list did not fit.
+ *
+ * Doing nothing is the common case and is not a failure: an unconditional throw
+ * here would mail a Google error report every single week.
+ */
+function sendScheduledIssue() {
+  var issue = dueIssue_();
+  if (!issue) {
+    Logger.log('Nothing due. Checked "%s" for a row with a past send date and no '
+             + 'sent, hold or skip status.', ISSUES_SHEET);
+    return;
+  }
+  Logger.log('Due: %s ("%s"), scheduled %s', issue.id, issue.subject,
+             Utilities.formatDate(issue.sendOn, Session.getScriptTimeZone(),
+                                  'yyyy-MM-dd'));
+  sendIssue_(issue);
+}
 
-  var r = getRecipients_();
+/** Send a named issue now, ignoring its date. For a manual catch up. */
+function sendIssueNow(issueId) {
+  if (!issueId) throw new Error('sendIssueNow needs an issue id, e.g. "issue-01"');
+  var ss = SpreadsheetApp.getActive();
+  var sh = ss.getSheetByName(ISSUES_SHEET);
+  var values = sh.getDataRange().getValues();
+  var col = headerIndex_(values[0], ISSUE_HEADERS, ISSUES_SHEET);
+  for (var i = 1; i < values.length; i++) {
+    if (String(values[i][col['Issue']] || '').trim() === issueId) {
+      return sendIssue_({row: i + 1, id: issueId,
+                         subject: String(values[i][col['Subject']] || '').trim(),
+                         sendOn: values[i][col['Send on']],
+                         status: String(values[i][col['Status']] || '').toLowerCase(),
+                         col: col});
+    }
+  }
+  throw new Error('No row for "' + issueId + '" on the ' + ISSUES_SHEET + ' sheet.');
+}
+
+function sendIssue_(issue) {
+  var files = issueFiles_(issue.id);
+  var html = files.html, text = files.text;
+  assertSendable_(issue, html, text);
+
+  var r = getRecipients_(issue.id);
   var ss = SpreadsheetApp.getActive();
   var log = ensureSheet_(ss, LOG_SHEET, ['Timestamp', 'Issue', 'Email', 'Status', 'Source']);
 
   var quota = MailApp.getRemainingDailyQuota();
   var limit = Math.min(CONFIG.MAX_PER_RUN, r.recipients.length, quota);
+  var remaining = r.recipients.length - limit;
 
-  Logger.log('%s candidates, sending %s. Skipped: %s. Quota left today: %s. DRY_RUN=%s',
-             r.recipients.length, limit, JSON.stringify(r.skipped), quota, CONFIG.DRY_RUN);
-  // Shows exactly which Source strings exist, so PROVENANCE can be filled from
-  // the data instead of guessed at.
+  Logger.log('%s: %s candidates, sending %s, %s left for a catch up run. '
+           + 'Skipped: %s. Quota left today: %s. DRY_RUN=%s',
+             issue.id, r.recipients.length, limit, remaining,
+             JSON.stringify(r.skipped), quota, CONFIG.DRY_RUN);
   Logger.log('Sources seen: %s', JSON.stringify(r.sources));
   for (var k in r.sources) {
     if (provenanceFor_(k) === CONFIG.PROVENANCE_DEFAULT && k !== '(blank)') {
@@ -303,7 +562,7 @@ function sendIssue() {
     }
   }
 
-  var rows = [];
+  var rows = [], sent = 0;
   for (var i = 0; i < limit; i++) {
     var to = r.recipients[i].email;
     var why = provenanceFor_(r.recipients[i].source);
@@ -317,7 +576,7 @@ function sendIssue() {
       if (!CONFIG.DRY_RUN) {
         MailApp.sendEmail({
           to: to,
-          subject: CONFIG.SUBJECT,
+          subject: issue.subject,
           body: plain,
           htmlBody: body,
           name: CONFIG.SENDER_NAME,
@@ -325,36 +584,86 @@ function sendIssue() {
         });
         Utilities.sleep(CONFIG.THROTTLE_MS);
       }
-      rows.push([new Date(), CONFIG.ISSUE_ID, to,
+      sent++;
+      rows.push([new Date(), issue.id, to,
                  CONFIG.DRY_RUN ? 'dry-run' : 'sent', r.recipients[i].source]);
     } catch (err) {
-      rows.push([new Date(), CONFIG.ISSUE_ID, to, 'failed', String(err)]);
+      rows.push([new Date(), issue.id, to, 'failed', String(err)]);
     }
   }
   if (rows.length) {
     log.getRange(log.getLastRow() + 1, 1, rows.length, 5).setValues(rows);
   }
-  Logger.log('Done. %s rows written to "%s".', rows.length, LOG_SHEET);
+
+  // Status on the issues sheet is the record of what shipped. A dry run must not
+  // write it, or the real send would see "sent" and skip the issue entirely.
+  if (!CONFIG.DRY_RUN) {
+    markIssue_(issue, remaining > 0 ? 'sending' : 'sent', sent,
+               remaining > 0
+                 ? sent + ' sent, ' + remaining + ' queued for a catch up run'
+                 : sent + ' sent, issue complete');
+    if (remaining > 0) scheduleResume_();
+  }
+  Logger.log('Done. %s rows written to "%s".%s', rows.length, LOG_SHEET,
+             remaining > 0 && !CONFIG.DRY_RUN
+               ? ' Catch up run booked for about 25 hours out.' : '');
+}
+
+/** Write status, a running sent count and a note back onto the issues sheet. */
+function markIssue_(issue, status, sentThisRun, note) {
+  var sh = SpreadsheetApp.getActive().getSheetByName(ISSUES_SHEET);
+  var prior = Number(sh.getRange(issue.row, issue.col['Sent'] + 1).getValue()) || 0;
+  sh.getRange(issue.row, issue.col['Status'] + 1).setValue(status);
+  sh.getRange(issue.row, issue.col['Sent'] + 1).setValue(prior + sentThisRun);
+  sh.getRange(issue.row, issue.col['Last run'] + 1).setValue(
+    Utilities.formatDate(new Date(), Session.getScriptTimeZone(),
+                         'yyyy-MM-dd HH:mm') + ' | ' + note);
+}
+
+/** Every gate and every selection decision, writing nothing and sending nothing. */
+function dryRunNextIssue() {
+  var issue = dueIssue_();
+  if (!issue) { Logger.log('Nothing due. Set a past date on an issues row.'); return; }
+  var was = CONFIG.DRY_RUN;
+  CONFIG.DRY_RUN = true;
+  try { sendIssue_(issue); } finally { CONFIG.DRY_RUN = was; }
 }
 
 /** Send one copy to yourself using the real pipeline, before the list. */
-function sendTestToSelf() {
-  var html = DriveApp.getFileById(CONFIG.HTML_FILE_ID).getBlob().getDataAsString('UTF-8');
-  var text = DriveApp.getFileById(CONFIG.TEXT_FILE_ID).getBlob().getDataAsString('UTF-8');
-  assertSendable_(html, text);
+function sendTestToSelf(issueId) {
+  var issue = null;
+  if (issueId) {
+    issue = {id: issueId, subject: '', row: 0, col: null};
+    var sh = SpreadsheetApp.getActive().getSheetByName(ISSUES_SHEET);
+    var values = sh.getDataRange().getValues();
+    var col = headerIndex_(values[0], ISSUE_HEADERS, ISSUES_SHEET);
+    for (var i = 1; i < values.length; i++) {
+      if (String(values[i][col['Issue']] || '').trim() === issueId) {
+        issue.subject = String(values[i][col['Subject']] || '').trim();
+      }
+    }
+  } else {
+    issue = dueIssue_();
+    if (!issue) throw new Error('Nothing due. Pass an issue id, e.g. '
+                              + 'sendTestToSelf("issue-01")');
+  }
+
+  var files = issueFiles_(issue.id);
+  assertSendable_(issue, files.html, files.text);
   var me = Session.getActiveUser().getEmail();
   MailApp.sendEmail({
     to: me,
-    subject: '[TEST] ' + CONFIG.SUBJECT,
-    body: text.replace(/\{\{UNSUBSCRIBE_URL\}\}/g, unsubUrl_(me))
+    subject: '[TEST] ' + issue.subject,
+    body: files.text.replace(/\{\{UNSUBSCRIBE_URL\}\}/g, unsubUrl_(me))
               .replace(/\{\{POSTAL_ADDRESS\}\}/g, CONFIG.POSTAL_ADDRESS)
               .replace(/\{\{WHY_YOU_GET_THIS\}\}/g, CONFIG.PROVENANCE_DEFAULT),
-    htmlBody: html.replace(/\{\{UNSUBSCRIBE_URL\}\}/g, unsubUrl_(me))
+    htmlBody: files.html.replace(/\{\{UNSUBSCRIBE_URL\}\}/g, unsubUrl_(me))
                   .replace(/\{\{POSTAL_ADDRESS\}\}/g, escapeHtml_(CONFIG.POSTAL_ADDRESS))
                   .replace(/\{\{WHY_YOU_GET_THIS\}\}/g,
                            escapeHtml_(CONFIG.PROVENANCE_DEFAULT)),
     name: CONFIG.SENDER_NAME,
     replyTo: CONFIG.REPLY_TO
   });
-  Logger.log('Test sent to %s', me);
+  Logger.log('Test of %s sent to %s. Nothing was written to the issues sheet.',
+             issue.id, me);
 }

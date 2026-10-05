@@ -14,20 +14,69 @@ and with the figure served from emr-inc.net. The same sanitizer drops
 
 `MailApp` does not sanitize. The email arrives as built.
 
+## It is weekly, and nothing about an issue lives in the code
+
+An issue is **one row on a sheet plus two files in a Drive folder**. There is no
+issue id in `Code.gs`, no pasted Drive file ids, and no code edit between weeks.
+
+The `Field Notes Issues` sheet:
+
+| Issue | Subject | Send on | Status | Sent | Last run |
+| --- | --- | --- | --- | --- | --- |
+| `issue-01` | Your engine has a better file than your firefighters | 2026-10-06 | | | |
+| `issue-02` | The 3.84 false alarms you run for every fire | 2026-10-13 | | | |
+
+The files, in the **Field Notes issues** Drive folder
+(`1uctXc8UgDpEZLHOUkf285UWeIWTAlpZf`), named by convention:
+
+    field-notes-issue-01.html
+    field-notes-issue-01.txt
+
+Shipping next week is: build it, drop two files in the folder, type one row.
+
+`Status` is the control. Blank means ready. `hold` or `skip` means leave it
+alone. `sending` means a run was cut short by the mail quota and a catch up is
+booked. `sent` is written by the script when the issue is complete, and is what
+stops it going out twice. `Sent` and `Last run` are written by the script.
+
+Lookup is by filename rather than by a pasted file id on purpose. A hardcoded id
+is one more thing to edit every week, and getting it wrong sends last week's
+email to the whole list.
+
 ## Setup
 
 1. Open the CRM sheet, Extensions, Apps Script. Paste `Code.gs`.
-2. Run `setup()` once. It creates the log and unsubscribe sheets and generates
-   the HMAC secret used to sign unsubscribe links.
+2. Run `setup()` once. It creates the log, unsubscribe and issues sheets and
+   generates the HMAC secret used to sign unsubscribe links.
 3. Deploy, New deployment, Web app. Execute as **me**, access **anyone**. Copy
    the url into `CONFIG.WEBAPP_URL`. This is what the unsubscribe link hits.
-4. Upload `01-email.html` and `01-email.txt` to Drive, put their file ids into
-   `CONFIG.HTML_FILE_ID` and `CONFIG.TEXT_FILE_ID`. They live in Drive rather
-   than the repo because the site root is public.
-5. Fill `POSTAL_ADDRESS` and `REPLY_TO`.
-6. Run `sendTestToSelf()`. Confirm the figure renders and the unsubscribe link
-   works.
-7. Run `sendIssue()` with `DRY_RUN: true`, read the log sheet, then flip it.
+4. Fill `POSTAL_ADDRESS`. `REPLY_TO`, `SITE_URL` and `ISSUES_FOLDER_ID` are
+   already set.
+5. Run `listIssues()`. It prints the schedule and, for each row, whether both
+   parts are actually in the folder yet. Run it before a send date, not after.
+6. Run `sendTestToSelf('issue-01')`. Confirm the figure renders and the
+   unsubscribe link works.
+7. Run `dryRunNextIssue()` and read the log sheet. It runs every gate and every
+   selection decision, writes nothing to the issues sheet and sends nothing.
+8. Set `DRY_RUN: false`, then run `installWeeklyTrigger()`.
+
+Day and hour come from `SEND_WEEKDAY` and `SEND_HOUR`. Apps Script time triggers
+are not to the minute: `atHour(9)` means some time in the 9am hour, in the
+script's timezone. `installWeeklyTrigger()` clears the old trigger first, so it
+is safe to run again after changing either. `uninstallTriggers()` stops the
+weekly send without touching anything else.
+
+### What happens on a firing
+
+`sendScheduledIssue()` takes the **oldest** issue whose send date has passed and
+whose status is not `sent`, `hold` or `skip`, and sends it. When nothing is due
+it logs that and returns. That matters: an unconditional throw would mail a
+Google error report every single week.
+
+A missed week is not skipped. The date is a "not before", so an issue whose date
+passed while the trigger was off goes out on the next firing.
+
+`sendIssueNow('issue-02')` sends a named issue immediately, ignoring its date.
 
 ## What it refuses to do
 
@@ -40,6 +89,15 @@ and with the figure served from emr-inc.net. The same sanitizer drops
 - `REPLY_TO`. A bulk send needs a monitored reply address.
 - The scope guard. If "Florida only" and "not a national record" are not both in
   the HTML, the email states a Florida finding with nothing marking it as one.
+  This check lives in the sender rather than in one issue's build script because
+  it has to hold for every issue drawing on that table, including ones written
+  months from now.
+- A `Subject` on the issue's row, and both parts present in the Drive folder. A
+  duplicate filename in the folder is also a refusal: there is no way to tell
+  which of two `field-notes-issue-02.html` files was the one you meant.
+- A complete header row on the issues sheet. Headers are read by name and checked
+  before the empty check, so a renamed column fails loudly instead of reading as
+  "nothing due" and quietly skipping a Tuesday.
 
 It also dedupes on lowercased email, skips malformed addresses, skips anyone on
 the unsubscribe sheet, and skips anyone already logged `sent` **for this issue**,
@@ -64,9 +122,10 @@ Row 102 to 128 is close but not exact: that range holds 20 MyLEADS rows, 5 surve
 rows and 1 contact form row, and a 21st MyLEADS row sits at 129. Source is the
 reliable discriminator, not the row number.
 
-## The list is more than one cohort A single hardcoded "why you are getting this"
-sentence would therefore be a false statement to one group or the other, so the
-line is per recipient: `{{WHY_YOU_GET_THIS}}` is filled from the CRM `Source`
+## The list is more than one cohort
+
+A single hardcoded "why you are getting this" sentence would be a false statement
+to one group or the other, so the line is per recipient: `{{WHY_YOU_GET_THIS}}` is filled from the CRM `Source`
 column through the `PROVENANCE` map in `CONFIG`.
 
 Matching is a case insensitive substring test, so `EMS World`, `EMS World Expo
@@ -112,3 +171,10 @@ approve anything external before it ships. This script does not clear anything.
 account. `MAX_PER_RUN` defaults to 90 so a consumer account cannot overrun, and
 the script also reads `MailApp.getRemainingDailyQuota()` and takes the lower of
 the two.
+
+On a consumer account the current list does not fit in one run, so the send is
+resumable. A run that cannot finish marks the issue `sending`, books a one shot
+catch up trigger about 25 hours out, and the catch up run picks up where it left
+off: anyone already logged `sent` for that issue is skipped. Simulated against
+the real 127 contact list with a 90 cap, it goes 90 then 37, 127 distinct
+addresses, no duplicates, and the week after that correctly finds nothing due.
