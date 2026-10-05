@@ -325,6 +325,18 @@ function assertSendable_(issue, html, text) {
   if (!CONFIG.WEBAPP_URL) {
     problems.push('WEBAPP_URL is empty, so the unsubscribe link has nowhere to go. '
                 + 'Deploy this script as a web app first.');
+  } else if (!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/
+               .test(CONFIG.WEBAPP_URL)) {
+    // Shape only. It cannot prove the endpoint answers, but it catches the two
+    // url forms that silently do not: the /macros/u/<n>/s/... form the browser
+    // shows when several Google accounts are signed in, which is per account and
+    // not the deployment url, and a url with the /exec suffix missing. Either
+    // one would send the whole list an unsubscribe link that goes nowhere, and
+    // nothing downstream would notice.
+    problems.push('WEBAPP_URL is not a web app exec url. It must look exactly '
+                + 'like https://script.google.com/macros/s/<id>/exec, with no '
+                + '"/u/<number>/" in it and ending in /exec. Got: '
+                + CONFIG.WEBAPP_URL);
   }
   if (!CONFIG.REPLY_TO) {
     problems.push('REPLY_TO is empty. A bulk send needs a monitored reply address.');
