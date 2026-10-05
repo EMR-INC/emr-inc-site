@@ -124,6 +124,19 @@ UPDATE_CLOSE = ("Fair question. Maybe you would not. The file is not really for 
 # The sender attaches the png as cid:figure. See issueFiles_() in Code.gs.
 FIGURE_CID = "figure"
 
+# The masthead image, optional. Same cid mechanism and the same reason: a hosted
+# header would be unpublished or blocked exactly as the figure was.
+#
+# It sits ABOVE the wordmark rather than replacing it. The publication name and
+# issue number stay as live text, so a recipient with images off still knows what
+# this is and which issue, and a screen reader reads a name rather than a
+# filename. The image is decorative, which is also why its alt text describes it
+# in one line instead of restating the masthead.
+HEADER_CID = "header"
+HEADER_ALT = ("Torn paper collage in blue and orange on cream: a fire station "
+              "with the apparatus bay open, a hose coupling, a radio and turnout "
+              "gear.")
+
 CTA = "See the platform"
 CTA_URL = "https://beta.expectvictims.com"
 CTA_UNDER = ("That link is the beta. Have a look before anyone else does.")
@@ -147,6 +160,9 @@ def rule():
             f'width="100%" cellpadding="0" cellspacing="0" border="0" '
             f'style="border-top:2px solid {INK};"><tr><td style="font-size:0;'
             f'line-height:0;">&nbsp;</td></tr></table></td></tr>')
+
+
+WITH_HEADER = True
 
 
 def email_html(d, alt):
@@ -182,8 +198,19 @@ def email_html(d, alt):
                 f'cellspacing="0" border="0" style="width:600px;max-width:600px;">'
                 f'<tr><td style="padding:{pad};">{inner}</td></tr></table></td></tr>')
 
+    # Spans the full 600px column. Not literally full bleed: it sits inside the
+    # section cell, so it keeps that cell's 24px above it and the outer 12px at
+    # each side. That is deliberate. A torn edge jammed against the viewport edge
+    # reads as a rendering fault rather than as a torn edge, and the 12px gutter
+    # is what stops the email touching the sides on a phone.
+    header_img = (
+      f'<img src="cid:{HEADER_CID}" width="600" alt="{esc(HEADER_ALT)}" '
+      f'style="display:block;width:100%;max-width:600px;height:auto;" border="0">'
+      if WITH_HEADER else '')
+
     masthead = (
-      f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
+      header_img
+      + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
       f'border="0" style="border-top:4px solid {INK};"><tr>'
       f'<td align="left" style="padding:9px 0 9px 0;font-family:{DISPLAY};font-size:14px;'
       f'font-weight:bold;letter-spacing:1.3px;color:{INK};">EMR INC. FIELD NOTES</td>'

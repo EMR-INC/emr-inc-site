@@ -31,7 +31,8 @@ The files, in the **Field Notes issues** Drive folder
 
     field-notes-issue-01.html
     field-notes-issue-01.txt
-    field-notes-issue-01.png      the figure, optional
+    field-notes-issue-01.png             the figure, optional
+    field-notes-issue-01-header.jpg      the masthead, optional (.jpg .jpeg .png)
 
 ## The figure rides inside the message
 
@@ -64,6 +65,21 @@ broken image in 127 inboxes with nothing downstream to catch it. Non 200, empty,
 or anything whose first eight bytes are not the PNG magic number is refused and
 nothing is written. An existing copy is trashed first, since two files of one
 name is a refusal at send time.
+
+The masthead works the same way and is found under any of `.jpg`, `.jpeg` or
+`.png`, because a header comes out of an image tool rather than a build script
+and insisting on one extension would mean renaming a file every week.
+
+It sits above the wordmark rather than replacing it. The publication name and
+issue number stay as live text, so a recipient with images off still knows what
+this is and which issue, and a screen reader reads a name rather than a filename.
+
+A header is refused above `HEADER_MAX_BYTES`, 1,200,000. That is not a client
+limit, since Gmail's clip is on the HTML part and does not count attachments. It
+is because the thing ships 127 times: the first header uploaded was a 7,253,033
+byte full resolution render, which is 921 MB of outbound mail and over the 25 MB
+MailApp allows per message. Keep the full resolution file if you want it, named
+so it cannot match the convention.
 
 The sender refuses if the two disagree: a `cid:` reference with no png is a
 broken image in every inbox, and a png nothing references is dead weight on 127

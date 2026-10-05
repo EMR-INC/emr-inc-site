@@ -112,6 +112,16 @@ var ISSUES_SHEET = 'Field Notes Issues';
 // which is what assertSendable_ checks.
 var FIGURE_CID = 'figure';
 
+// The masthead image, optional, and whatever format the export produced. A
+// header comes out of an image tool rather than a build script, so insisting on
+// .png would mean renaming a .jpg every week and eventually forgetting.
+var HEADER_CID = 'header';
+var HEADER_EXTS = ['.jpg', '.jpeg', '.png'];
+
+// 1,200,000 bytes, about 1.1 MB. Generous enough for a real photographic
+// masthead and far below the 7.25 MB a full resolution render came in at.
+var HEADER_MAX_BYTES = 1200000;
+
 // Column order on the Issues sheet. Read by name, not by index, so a reordered
 // or extra column does not silently send the wrong thing.
 var ISSUE_HEADERS = ['Issue', 'Subject', 'Send on', 'Status', 'Sent', 'Last run'];
@@ -278,10 +288,28 @@ function issueFiles_(issueId) {
   }
   var folder = DriveApp.getFolderById(CONFIG.ISSUES_FOLDER_ID);
   return {
-    html:  readOne_(folder, 'field-notes-' + issueId + '.html'),
-    text:  readOne_(folder, 'field-notes-' + issueId + '.txt'),
-    image: imageOrNull_(folder, 'field-notes-' + issueId + '.png')
+    html:   readOne_(folder, 'field-notes-' + issueId + '.html'),
+    text:   readOne_(folder, 'field-notes-' + issueId + '.txt'),
+    image:  imageOrNull_(folder, 'field-notes-' + issueId + '.png', FIGURE_CID),
+    header: headerOrNull_(folder, issueId)
   };
+}
+
+/** The masthead, under whichever extension the export produced. */
+function headerOrNull_(folder, issueId) {
+  var base = 'field-notes-' + issueId + '-header', found = null;
+  for (var i = 0; i < HEADER_EXTS.length; i++) {
+    var blob = imageOrNull_(folder, base + HEADER_EXTS[i], HEADER_CID);
+    if (blob) {
+      if (found) {
+        throw new Error('Two headers for ' + issueId + ' in the issues folder, '
+                      + 'under different extensions. Delete one: there is no way '
+                      + 'to tell which you meant.');
+      }
+      found = blob;
+    }
+  }
+  return found;
 }
 
 /**
@@ -297,7 +325,7 @@ function issueFiles_(issueId) {
  * Null is allowed, for an issue with no figure. assertSendable_ is what insists
  * the two agree.
  */
-function imageOrNull_(folder, name) {
+function imageOrNull_(folder, name, cid) {
   var it = folder.getFilesByName(name);
   if (!it.hasNext()) return null;
   var file = it.next();
@@ -306,7 +334,7 @@ function imageOrNull_(folder, name) {
                   + 'folder. Delete the duplicate.');
   }
   var blob = file.getBlob();
-  blob.setName(FIGURE_CID);
+  blob.setName(cid);
   return blob;
 }
 
@@ -358,7 +386,7 @@ function listIssues() {
  * Everything that must be true before a single message goes out. Each check is
  * here because its absence is a real problem, not a style preference.
  */
-function assertSendable_(issue, html, text, image) {
+function assertSendable_(issue, html, text, image, header) {
   var problems = [];
 
   if (!CONFIG.POSTAL_ADDRESS) {
@@ -416,6 +444,28 @@ function assertSendable_(issue, html, text, image) {
     problems.push('There is a field-notes-' + issue.id + '.png in the issues '
                 + 'folder but the HTML never references cid:' + FIGURE_CID + ', '
                 + 'so it would ride along unseen on every message.');
+  }
+
+  var wantsHeader = html.indexOf('cid:' + HEADER_CID) !== -1;
+  if (wantsHeader && !header) {
+    problems.push('The HTML references cid:' + HEADER_CID + ' but there is no '
+                + 'field-notes-' + issue.id + '-header file in the issues folder '
+                + '(' + HEADER_EXTS.join(', ') + '), so the masthead would be a '
+                + 'broken image.');
+  }
+  if (!wantsHeader && header) {
+    problems.push('There is a header image for ' + issue.id + ' in the issues '
+                + 'folder but the HTML never references cid:' + HEADER_CID + ', '
+                + 'so it would ride along unseen on every message.');
+  }
+  // A header is the heaviest thing in the message and it ships 127 times. This
+  // is a warning threshold, not a client limit: Gmail's 102,400 byte clip is on
+  // the HTML part only and does not count attachments.
+  if (header && header.getBytes().length > HEADER_MAX_BYTES) {
+    problems.push('The header is ' + header.getBytes().length + ' bytes, over the '
+                + HEADER_MAX_BYTES + ' this refuses to send. Export it narrower '
+                + 'or at a lower quality. The full resolution render is for '
+                + 'archive, not for 127 inboxes.');
   }
 
   // The scope guard travels with the figure. If it is gone, the email states a
@@ -607,7 +657,7 @@ function sendIssueNow(issueId) {
 function sendIssue_(issue) {
   var files = issueFiles_(issue.id);
   var html = files.html, text = files.text;
-  assertSendable_(issue, html, text, files.image);
+  assertSendable_(issue, html, text, files.image, files.header);
 
   var r = getRecipients_(issue.id);
   var ss = SpreadsheetApp.getActive();
@@ -649,7 +699,8 @@ function sendIssue_(issue) {
           name: CONFIG.SENDER_NAME,
           replyTo: CONFIG.REPLY_TO
         };
-        if (files.image) message.inlineImages = inlineImages_(files.image);
+        var imgs = inlineImages_(files);
+        if (Object.keys(imgs).length) message.inlineImages = imgs;
         MailApp.sendEmail(message);
         Utilities.sleep(CONFIG.THROTTLE_MS);
       }
@@ -678,10 +729,11 @@ function sendIssue_(issue) {
                ? ' Catch up run booked for about 25 hours out.' : '');
 }
 
-/** The inlineImages map MailApp wants, keyed by the cid the HTML references. */
-function inlineImages_(blob) {
+/** The inlineImages map MailApp wants, keyed by the cids the HTML references. */
+function inlineImages_(files) {
   var map = {};
-  map[FIGURE_CID] = blob;
+  if (files.image) map[FIGURE_CID] = files.image;
+  if (files.header) map[HEADER_CID] = files.header;
   return map;
 }
 
@@ -808,7 +860,7 @@ function sendTestToSelf(issueId) {
                      : 'Newest row on the sheet, since no id was given.');
 
   var files = issueFiles_(issue.id);
-  assertSendable_(issue, files.html, files.text, files.image);
+  assertSendable_(issue, files.html, files.text, files.image, files.header);
   var me = Session.getActiveUser().getEmail();
   var message = {
     to: me,
@@ -823,9 +875,11 @@ function sendTestToSelf(issueId) {
     name: CONFIG.SENDER_NAME,
     replyTo: CONFIG.REPLY_TO
   };
-  if (files.image) message.inlineImages = inlineImages_(files.image);
+  var imgs = inlineImages_(files);
+  if (Object.keys(imgs).length) message.inlineImages = imgs;
   MailApp.sendEmail(message);
-  Logger.log('Test of %s sent to %s, figure %s. Nothing was written to the '
-           + 'issues sheet.', issue.id, me,
-             files.image ? 'attached inline' : 'ABSENT');
+  Logger.log('Test of %s sent to %s. Figure %s, header %s. Nothing was written '
+           + 'to the issues sheet.', issue.id, me,
+             files.image ? 'attached inline' : 'ABSENT',
+             files.header ? files.header.getBytes().length + ' bytes inline' : 'none');
 }
