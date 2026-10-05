@@ -72,10 +72,10 @@ var CONFIG = {
 
   // CAN-SPAM 15 USC 7704(a)(5): a commercial message must carry a valid physical
   // postal address. A website is not one, so emr-inc.net does not satisfy this.
-  // A street address, a PO box the sender is registered for, or the registered
-  // agent address on the Delaware filing all work. Nothing on the site publishes
-  // one today, so it has to be typed in here.
-  POSTAL_ADDRESS: '',
+  // This is the registered agent address on the Delaware filing, File No.
+  // 10300393. It goes in the footer of every issue and on the unsubscribe page,
+  // so it is public once the first issue ships.
+  POSTAL_ADDRESS: 'EMR Inc., 131 Continental Drive, Suite 305, Newark, DE 19713',
 
   // The unsubscribe endpoint. This has to be THIS script's own deployment url
   // (script.google.com/macros/s/.../exec), not emr-inc.net: the apex is static
