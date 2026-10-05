@@ -700,7 +700,18 @@ function sendIssue_(issue) {
     }
   }
 
+  // Flushed in batches rather than once at the end. Apps Script kills a consumer
+  // execution at 6 minutes, and a run that dies mid loop would have SENT those
+  // messages with nothing written to the log. The next run reads the log to know
+  // who already got it, so an unflushed batch is a second copy to real people.
+  // Twenty is the most that can be lost, instead of all ninety.
   var rows = [], sent = 0;
+  function flush() {
+    if (!rows.length) return;
+    log.getRange(log.getLastRow() + 1, 1, rows.length, 5).setValues(rows);
+    rows = [];
+  }
+
   for (var i = 0; i < limit; i++) {
     var to = r.recipients[i].email;
     var why = provenanceFor_(r.recipients[i].source);
@@ -731,10 +742,9 @@ function sendIssue_(issue) {
     } catch (err) {
       rows.push([new Date(), issue.id, to, 'failed', String(err)]);
     }
+    if (rows.length >= 20) flush();
   }
-  if (rows.length) {
-    log.getRange(log.getLastRow() + 1, 1, rows.length, 5).setValues(rows);
-  }
+  flush();
 
   // Status on the issues sheet is the record of what shipped. A dry run must not
   // write it, or the real send would see "sent" and skip the issue entirely.
