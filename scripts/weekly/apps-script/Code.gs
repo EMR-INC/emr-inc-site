@@ -39,6 +39,17 @@ var CONFIG = {
   SEND_WEEKDAY:   'TUESDAY',
   SEND_HOUR:      9,
 
+  // Where importFigure() fetches a figure from, keyed by issue id. raw
+  // .githubusercontent.com sends "content-security-policy: default-src 'none';
+  // sandbox", which stops a BROWSER rendering it and is why it cannot be used as
+  // an <img> src. UrlFetchApp is a server side fetch, so that header does not
+  // apply: it reads the bytes fine. The figure then lives in Drive and travels
+  // inside the message, so nothing at send time depends on GitHub.
+  FIGURE_SOURCE: {
+    'issue-01': 'https://raw.githubusercontent.com/EMR-INC/emr-inc-site/main/'
+              + 'assets/field-notes/issue-01-figure.png'
+  },
+
   CONTACTS_SHEET: 'Contacts',
   EMAIL_HEADER:   'Email',
   SOURCE_HEADER:  'Source',
@@ -692,6 +703,57 @@ function dryRunNextIssue() {
   var was = CONFIG.DRY_RUN;
   CONFIG.DRY_RUN = true;
   try { sendIssue_(issue); } finally { CONFIG.DRY_RUN = was; }
+}
+
+/**
+ * Fetch an issue's figure into the Drive issues folder, so nobody has to find
+ * the file and drag it in. No argument means the newest row on the sheet,
+ * because the editor's Run button cannot pass one.
+ *
+ * It verifies what came back rather than trusting a 200: a redirect to a login
+ * page or an error page is still a 200 with a body, and saved as a .png it would
+ * be a broken image in 127 inboxes that nothing downstream would catch.
+ */
+function importFigure(issueId) {
+  var issue = issueId ? issueByIdOrThrow_(issueId) : newestIssueOrThrow_();
+  var url = CONFIG.FIGURE_SOURCE[issue.id];
+  if (!url) {
+    throw new Error('No FIGURE_SOURCE entry for "' + issue.id + '". Add the url '
+                  + 'to CONFIG.FIGURE_SOURCE, or put the png in the issues '
+                  + 'folder by hand as field-notes-' + issue.id + '.png');
+  }
+
+  var res = UrlFetchApp.fetch(url, {muteHttpExceptions: true});
+  var code = res.getResponseCode();
+  if (code !== 200) {
+    throw new Error('Fetching the figure returned HTTP ' + code + ' from ' + url);
+  }
+
+  var bytes = res.getBlob().getBytes();
+  // PNG magic number. Anything else means we were handed a page, not an image.
+  var MAGIC = [-119, 80, 78, 71, 13, 10, 26, 10];
+  if (bytes.length < MAGIC.length) {
+    throw new Error('The figure came back empty from ' + url);
+  }
+  for (var i = 0; i < MAGIC.length; i++) {
+    if (bytes[i] !== MAGIC[i]) {
+      throw new Error('What came back from ' + url + ' is not a PNG. First bytes: '
+                    + bytes.slice(0, 8).join(',') + '. Saving it would be a broken '
+                    + 'image in every inbox.');
+    }
+  }
+
+  var name = 'field-notes-' + issue.id + '.png';
+  var folder = DriveApp.getFolderById(CONFIG.ISSUES_FOLDER_ID);
+  // Replace rather than add. Two files of one name is a refusal at send time.
+  var existing = folder.getFilesByName(name), replaced = 0;
+  while (existing.hasNext()) { existing.next().setTrashed(true); replaced++; }
+
+  var blob = res.getBlob().setName(name);
+  folder.createFile(blob);
+  Logger.log('Imported %s into the issues folder: %s bytes%s. Run listIssues() '
+           + 'to confirm, then sendTestToSelf().', name, bytes.length,
+             replaced ? ', replacing ' + replaced + ' older copy' : '');
 }
 
 /** A row on the issues sheet, by id. Throws rather than guessing. */

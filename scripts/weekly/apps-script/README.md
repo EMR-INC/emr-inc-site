@@ -48,6 +48,23 @@ And a working url would still be blocked by default in Gmail and Outlook for a
 large share of recipients. An inline image carries no tracking risk, so clients
 show it without asking.
 
+`importFigure()` pulls the png into the folder so nobody has to find the file
+and drag it in. No argument means the newest issue, since the editor's Run button
+cannot pass one. The source url per issue is `CONFIG.FIGURE_SOURCE`.
+
+It fetches from raw.githubusercontent.com, which sends
+`content-security-policy: default-src 'none'; sandbox`. That header is why the
+raw url cannot be an `<img>` src: it stops a browser rendering it. `UrlFetchApp`
+is a server side fetch, so the header does not apply and the bytes come back
+fine. The png then lives in Drive, and nothing at send time depends on GitHub.
+
+It verifies what came back rather than trusting a 200, because a redirect to a
+login or error page is also a 200 with a body, and saved as a .png it would be a
+broken image in 127 inboxes with nothing downstream to catch it. Non 200, empty,
+or anything whose first eight bytes are not the PNG magic number is refused and
+nothing is written. An existing copy is trashed first, since two files of one
+name is a refusal at send time.
+
 The sender refuses if the two disagree: a `cid:` reference with no png is a
 broken image in every inbox, and a png nothing references is dead weight on 127
 messages. A figure is optional, so an issue with no png and no `cid:` reference
