@@ -147,6 +147,29 @@ MISSION = ("EMR Inc. builds the exposure record the fire service never kept. "
            "Shift by shift, from dispatch data rather than memory. It belongs to "
            "the member, not the department.")
 
+# A second door. The button above points at one beta; this points at everything
+# else, for the reader who wants the research rather than the app. It sits inside
+# the mission panel on purpose: that block is already the "who we are" block, so
+# it does not compete with the beta CTA for the same click.
+#
+# The lead is prose and goes through assert_voice(). The domain does not, for the
+# same reason CTA_URL does not: an address is not prose, and the hyphen in
+# "EMR-Inc.net" is part of the name rather than a hyphen the style rule is about.
+SUITE_LEAD = "Find out more about our full product and research suite at"
+SUITE_DOMAIN = "EMR-Inc.net"
+SUITE_URL = "https://emr-inc.net"
+
+# A named human to write back to. The sender already sets replyTo, so Reply works
+# without this, but a visible address is what makes a reader believe a person is
+# on the other end, and it survives being forwarded out of the original thread.
+#
+# The subject is prefilled so replies land sorted by issue. If a client drops the
+# query string it degrades to a blank compose to the right address, which is why
+# the subject carries no information the message needs.
+ASK_LEAD = "Questions, or an argument with any of this, go straight to"
+ASK_EMAIL = "michael.harvey@emr-inc.net"
+ASK_URL = f"mailto:{ASK_EMAIL}?subject=Field%20Notes%20{ISSUE}"
+
 
 def label(t):
     return (f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
@@ -266,7 +289,15 @@ def email_html(d, alt):
         f'font-weight:bold;letter-spacing:1.6px;text-transform:uppercase;color:{RED};">'
         f'{esc(MISSION_KICKER)}</p>'
         f'<p style="margin:0;font-family:{BODY};font-size:19px;line-height:29px;'
-        f'color:{STOCK};">{esc(MISSION)}</p></td></tr></table>'
+        f'color:{STOCK};">{esc(MISSION)}</p>'
+        f'<p style="margin:15px 0 0 0;font-family:{BODY};font-size:16px;'
+        f'line-height:25px;color:{STOCK};">{esc(SUITE_LEAD)}<br>'
+        f'<a href="{SUITE_URL}" style="color:{STOCK};text-decoration:underline;">'
+        f'{esc(SUITE_DOMAIN)}</a></p>'
+        f'<p style="margin:9px 0 0 0;font-family:{BODY};font-size:16px;'
+        f'line-height:25px;color:{STOCK};">{esc(ASK_LEAD)}<br>'
+        f'<a href="{ASK_URL}" style="color:{STOCK};text-decoration:underline;">'
+        f'{esc(ASK_EMAIL)}</a></p></td></tr></table>'
       + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" '
         f'style="border-top:3px solid {INK};margin-top:26px;"><tr>'
         f'<td style="padding:12px 0 0 0;font-family:{MONO};font-size:11px;line-height:17px;'
@@ -347,6 +378,9 @@ A building fire is 1 in {d['one_in']:.0f} incidents.
 {MISSION_KICKER.upper()}
 {wrap(MISSION)}
 
+{SUITE_LEAD} {SUITE_URL}
+{ASK_LEAD} {ASK_EMAIL}
+
 --
 Figure source: NFIRS basic incident module, pulled {PULLED}. {GUARD}
 {fmt(DENOMINATOR)} of {fmt(TOTAL_ROWS)} rows; {DROPPED} carry a non numeric incident type.
@@ -362,7 +396,8 @@ def prose():
     """Every rendered string a reader sees, for the voice gate."""
     flat = [SUBJECT, PREHEADER, *LETTER, LETTER_SIGN, BIG, BIG_UNDER, DEK, TURN,
             UPDATE_LEDE, *[h for h, _ in UPDATE], *[b for _, b in UPDATE],
-            UPDATE_CLOSE, CTA, CTA_UNDER, PS, MISSION_KICKER, MISSION, GUARD,
+            UPDATE_CLOSE, CTA, CTA_UNDER, PS, MISSION_KICKER, MISSION,
+            SUITE_LEAD, ASK_LEAD, GUARD,
             "DEAR CHIEF.", "POST EMS WORLD."]
     return " ".join(flat)
 
