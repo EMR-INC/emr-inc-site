@@ -101,13 +101,28 @@ UPDATE_CLOSE = ("Fair question. Maybe you would not. The file is not really for 
                 "you. It is for whoever goes looking in 2041 and finds out nobody "
                 "wrote it down.")
 
-# Served from the apex, not attached and not from raw.githubusercontent. A CID
-# attachment rides every copy of a bulk send and the cid: reference did not
-# resolve in Gmail. GitHub raw is worse: it sends "content-security-policy:
-# default-src 'none'; sandbox", which is GitHub blocking hotlinking, so Gmail's
-# image proxy refuses it outright. Per .vercelignore the apex is GitHub Pages
-# publishing the whole main root, so the asset is live once main deploys.
-FIGURE_URL = "https://emr-inc.net/assets/field-notes/issue-01-figure.png"
+# An earlier note here said a cid: reference "did not resolve in Gmail". That was
+# wrong, and worth recording as wrong. Those were sends through the Gmail API,
+# whose sanitizer deletes the whole <img> element. Nothing was left for the cid
+# to resolve to. MailApp does not sanitize, so cid works there as it does
+# everywhere else. GitHub raw really is unusable, for a different reason: it
+# sends "content-security-policy: default-src 'none'; sandbox", so Gmail's image
+# proxy refuses it.
+#
+# The figure travels INSIDE the message as an inline attachment, not as a link
+# to a hosted file. Two reasons, both learned the hard way.
+#
+# One, a hosted url has to actually be published. assets/ pushed to main does not
+# reach emr-inc.net: the site deploys only from the open_data_daily workflow,
+# which fires on a schedule or on pushes touching three unrelated paths. The
+# figure sat on main, unpublished and 404ing, while the email pointed at it.
+#
+# Two, even a working url is blocked by default in Gmail and Outlook for a large
+# share of recipients, so the figure would silently vanish for people we never
+# hear from. An inline image carries no tracking risk and is shown without asking.
+#
+# The sender attaches the png as cid:figure. See issueFiles_() in Code.gs.
+FIGURE_CID = "figure"
 
 CTA = "See the platform"
 CTA_URL = "https://beta.expectvictims.com"
@@ -194,7 +209,7 @@ def email_html(d, alt):
         f'font-weight:bold;letter-spacing:-1.5px;color:{STOCK};">{esc(BIG_UNDER)}</p>'
       + f'<p style="margin:18px 0 26px 0;font-family:{BODY};font-size:17px;line-height:27px;'
         f'color:{STOCK};">{esc(DEK)}</p>'
-      + f'<img src="{FIGURE_URL}" width="600" alt="{esc(alt)}" style="display:block;'
+      + f'<img src="cid:{FIGURE_CID}" width="600" alt="{esc(alt)}" style="display:block;'
         f'width:100%;max-width:600px;height:auto;" border="0">'
       + f'<p style="margin:26px 0 0 0;font-family:{BODY};font-size:17px;line-height:27px;'
         f'color:{STOCK};">{esc(TURN)}</p>')

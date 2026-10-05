@@ -31,6 +31,27 @@ The files, in the **Field Notes issues** Drive folder
 
     field-notes-issue-01.html
     field-notes-issue-01.txt
+    field-notes-issue-01.png      the figure, optional
+
+## The figure rides inside the message
+
+`<img src="cid:figure">`, attached per message, not linked to a hosted file.
+Two things went wrong with the hosted version and both are invisible from the
+sending end.
+
+The url was never published. `assets/` pushed to `main` does not reach
+emr-inc.net: the site deploys only from the `open_data_daily` workflow, which
+fires on a schedule or on pushes touching three unrelated paths. The figure sat
+on `main`, 404ing, while the email pointed at it.
+
+And a working url would still be blocked by default in Gmail and Outlook for a
+large share of recipients. An inline image carries no tracking risk, so clients
+show it without asking.
+
+The sender refuses if the two disagree: a `cid:` reference with no png is a
+broken image in every inbox, and a png nothing references is dead weight on 127
+messages. A figure is optional, so an issue with no png and no `cid:` reference
+is fine.
 
 Shipping next week is: build it, drop two files in the folder, type one row.
 

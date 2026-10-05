@@ -96,6 +96,11 @@ var LOG_SHEET    = 'Field Notes Log';
 var UNSUB_SHEET  = 'Field Notes Unsubscribed';
 var ISSUES_SHEET = 'Field Notes Issues';
 
+// The content id the HTML references as <img src="cid:figure">. Set by
+// build_issue01.py; the two have to agree or the figure silently vanishes,
+// which is what assertSendable_ checks.
+var FIGURE_CID = 'figure';
+
 // Column order on the Issues sheet. Read by name, not by index, so a reordered
 // or extra column does not silently send the wrong thing.
 var ISSUE_HEADERS = ['Issue', 'Subject', 'Send on', 'Status', 'Sent', 'Last run'];
@@ -262,9 +267,36 @@ function issueFiles_(issueId) {
   }
   var folder = DriveApp.getFolderById(CONFIG.ISSUES_FOLDER_ID);
   return {
-    html: readOne_(folder, 'field-notes-' + issueId + '.html'),
-    text: readOne_(folder, 'field-notes-' + issueId + '.txt')
+    html:  readOne_(folder, 'field-notes-' + issueId + '.html'),
+    text:  readOne_(folder, 'field-notes-' + issueId + '.txt'),
+    image: imageOrNull_(folder, 'field-notes-' + issueId + '.png')
   };
+}
+
+/**
+ * The figure, carried inside the message rather than linked.
+ *
+ * A linked image has two failure modes neither we nor the recipient control.
+ * It has to be published, and assets pushed to main do not reach emr-inc.net:
+ * the site deploys only from the open_data_daily workflow. The figure sat on
+ * main, unpublished and 404ing, while the email pointed at it. And even a
+ * working url is blocked by default in Gmail and Outlook for a large share of
+ * recipients, so it would vanish silently for people we never hear from.
+ *
+ * Null is allowed, for an issue with no figure. assertSendable_ is what insists
+ * the two agree.
+ */
+function imageOrNull_(folder, name) {
+  var it = folder.getFilesByName(name);
+  if (!it.hasNext()) return null;
+  var file = it.next();
+  if (it.hasNext()) {
+    throw new Error('More than one file named "' + name + '" in the issues '
+                  + 'folder. Delete the duplicate.');
+  }
+  var blob = file.getBlob();
+  blob.setName(FIGURE_CID);
+  return blob;
 }
 
 function readOne_(folder, name) {
@@ -315,7 +347,7 @@ function listIssues() {
  * Everything that must be true before a single message goes out. Each check is
  * here because its absence is a real problem, not a style preference.
  */
-function assertSendable_(issue, html, text) {
+function assertSendable_(issue, html, text, image) {
   var problems = [];
 
   if (!CONFIG.POSTAL_ADDRESS) {
@@ -358,6 +390,21 @@ function assertSendable_(issue, html, text) {
   }
   if (text.indexOf('{{UNSUBSCRIBE_URL}}') === -1) {
     problems.push('The plain text part has no {{UNSUBSCRIBE_URL}} placeholder.');
+  }
+
+  // The figure and the HTML have to agree. A cid reference with no attachment is
+  // a broken image in every inbox, and an attachment nothing points at is dead
+  // weight on 127 messages. Neither announces itself, so both are checked here.
+  var wantsFigure = html.indexOf('cid:' + FIGURE_CID) !== -1;
+  if (wantsFigure && !image) {
+    problems.push('The HTML references cid:' + FIGURE_CID + ' but there is no '
+                + 'field-notes-' + issue.id + '.png in the issues folder, so the '
+                + 'figure would be a broken image.');
+  }
+  if (!wantsFigure && image) {
+    problems.push('There is a field-notes-' + issue.id + '.png in the issues '
+                + 'folder but the HTML never references cid:' + FIGURE_CID + ', '
+                + 'so it would ride along unseen on every message.');
   }
 
   // The scope guard travels with the figure. If it is gone, the email states a
@@ -549,7 +596,7 @@ function sendIssueNow(issueId) {
 function sendIssue_(issue) {
   var files = issueFiles_(issue.id);
   var html = files.html, text = files.text;
-  assertSendable_(issue, html, text);
+  assertSendable_(issue, html, text, files.image);
 
   var r = getRecipients_(issue.id);
   var ss = SpreadsheetApp.getActive();
@@ -583,14 +630,16 @@ function sendIssue_(issue) {
                     .replace(/\{\{WHY_YOU_GET_THIS\}\}/g, why);
     try {
       if (!CONFIG.DRY_RUN) {
-        MailApp.sendEmail({
+        var message = {
           to: to,
           subject: issue.subject,
           body: plain,
           htmlBody: body,
           name: CONFIG.SENDER_NAME,
           replyTo: CONFIG.REPLY_TO
-        });
+        };
+        if (files.image) message.inlineImages = inlineImages_(files.image);
+        MailApp.sendEmail(message);
         Utilities.sleep(CONFIG.THROTTLE_MS);
       }
       sent++;
@@ -616,6 +665,13 @@ function sendIssue_(issue) {
   Logger.log('Done. %s rows written to "%s".%s', rows.length, LOG_SHEET,
              remaining > 0 && !CONFIG.DRY_RUN
                ? ' Catch up run booked for about 25 hours out.' : '');
+}
+
+/** The inlineImages map MailApp wants, keyed by the cid the HTML references. */
+function inlineImages_(blob) {
+  var map = {};
+  map[FIGURE_CID] = blob;
+  return map;
 }
 
 /** Write status, a running sent count and a note back onto the issues sheet. */
@@ -690,9 +746,9 @@ function sendTestToSelf(issueId) {
                      : 'Newest row on the sheet, since no id was given.');
 
   var files = issueFiles_(issue.id);
-  assertSendable_(issue, files.html, files.text);
+  assertSendable_(issue, files.html, files.text, files.image);
   var me = Session.getActiveUser().getEmail();
-  MailApp.sendEmail({
+  var message = {
     to: me,
     subject: '[TEST] ' + issue.subject,
     body: files.text.replace(/\{\{UNSUBSCRIBE_URL\}\}/g, unsubUrl_(me))
@@ -704,7 +760,10 @@ function sendTestToSelf(issueId) {
                            escapeHtml_(CONFIG.PROVENANCE_DEFAULT)),
     name: CONFIG.SENDER_NAME,
     replyTo: CONFIG.REPLY_TO
-  });
-  Logger.log('Test of %s sent to %s. Nothing was written to the issues sheet.',
-             issue.id, me);
+  };
+  if (files.image) message.inlineImages = inlineImages_(files.image);
+  MailApp.sendEmail(message);
+  Logger.log('Test of %s sent to %s, figure %s. Nothing was written to the '
+           + 'issues sheet.', issue.id, me,
+             files.image ? 'attached inline' : 'ABSENT');
 }
