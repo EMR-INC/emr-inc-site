@@ -1,11 +1,20 @@
 # Working files that should not be served from emr-inc.net.
 
-# NOTE, 2026-09-29: this file governs the VERCEL deployment, which serves the
-# subdomains only. The emr-inc.net apex is GitHub Pages, publishing the whole
-# `main` root straight from the branch, so nothing can be withheld from the apex
-# by listing it here. Withholding a file from emr-inc.net means keeping it out of
-# the branch. This was learned the hard way while unpublishing the dispatch
-# capture: an entry here looked like it had worked and had not.
+# NOTE, 2026-10-05: this file governs the VERCEL deployment, which serves the
+# apex as well as the subdomains. An earlier note here said the apex was GitHub
+# Pages publishing the whole `main` root. That is wrong, and it cost a day: the
+# issue 01 figure was pushed to main on the strength of it and 404ed, because
+# Vercel serves emr-inc.net and nothing had deployed. A Vercel 404 page, not a
+# Pages one, is what proved it.
+#
+# Two things follow. An entry here DOES withhold a file from emr-inc.net. And a
+# push to main does NOT publish: Vercel's git integration is not connected, and
+# the only thing that deploys is .github/workflows/open_data_daily.yml, on its
+# schedule or on a push touching one of the three paths it watches. Committing
+# an asset is not publishing it.
+#
+# Keeping a file out of the branch is still the only way to withhold it from
+# anyone who can read the repository, which is what the dispatch capture needed.
 
 DESIGN-BRIEF.md
 MIGRATION.md
@@ -13,3 +22,4 @@ build-standalone.py
 *-standalone.html
 experiments/
 dns/
+design-lab/
