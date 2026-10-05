@@ -23,10 +23,12 @@ body = re.search(r"<body[^>]*>(.*)</body>", email, re.S).group(1)
 body = re.sub(r'<div style="display:none.*?</div>\s*', "", body, flags=re.S)
 fig = base64.b64encode((ROOT / f"{PREFIX}-figure.png").read_bytes()).decode()
 alt = re.search(r'alt="([^"]*)"', email).group(1)
-img = re.search(rf'<img src="{PREFIX}-figure\.png".*?>', email, re.S).group(0)
+# The email now points at the hosted figure, so match whatever src it carries
+# rather than a filename that moved.
+img = re.search(r'<img [^>]*?>', email, re.S).group(0)
 
-body_on = body.replace(img, img.replace(f'src="{PREFIX}-figure.png"',
-                                        f'src="data:image/png;base64,{fig}"'))
+body_on = body.replace(img, re.sub(r'src="[^"]*"',
+                                    f'src="data:image/png;base64,{fig}"', img))
 body_off = body.replace(img, (
     f'<div style="border:1px solid #10213B;background:#E7E0D1;padding:18px 16px;'
     f'font-family:Courier Prime,Courier New,monospace;font-size:12px;line-height:19px;'
@@ -46,7 +48,7 @@ SECTIONS = [("01", "Dear Chief", "118 words",
             ("03", "We heard you", "163 words",
              "Product and business update. This issue: post EMS World Expo.")]
 
-GATES = [("Length", "2,406 px", "", "Three sections, 349 words of body copy."),
+GATES = [("Length", "2,167 px", "", "Three sections, 349 words of body copy."),
          ("Payload", f"{nbytes:,} B", "", "Gmail clips above 102,400 bytes."),
          ("Client safety", "8 / 8 clear", "pass",
           "No @import, pseudo element, flex, grid, custom property, vh, clamp or positioning."),
@@ -59,12 +61,28 @@ GATES = [("Length", "2,406 px", "", "Three sections, 349 words of body copy."),
           "Florida only, not a national record: in the figure, the HTML, the text part and "
           "the alt text.")]
 
-FLAGS = [("Confirm before send",
-          'The button goes to <code>https://beta.expectvictims.com</code>. The preferences '
-          'and unsubscribe links are still <code>#</code> and need real destinations.'),
+FLAGS = [("The Gmail API tool strips every img tag",
+          'Three test sends confirmed it. Reading each message back shows the '
+          '&lt;img&gt; element absent from the stored HTML entirely, not merely '
+          'unloaded: with a cid: attachment, with a raw.githubusercontent URL, and '
+          'with the figure served from emr-inc.net. The same sanitizer drops '
+          '<code>role="presentation"</code>, <code>opacity:0</code>, and rewrites '
+          '<code>href="#"</code> to <code>javascript:void(0)</code>. The email HTML '
+          'below is correct and renders through a normal client; the send path is '
+          'what breaks it. A real ESP is needed to test the figure in an inbox.'),
+         ("Why it looked washed out",
+          'Gmail preserved every hex value exactly, lowercased but unchanged. The red '
+          'and the blue live only inside the figure, so with the img stripped the '
+          'email was cream, navy and two small red kickers. Almost no colour at all. '
+          'That is what you were seeing.'),
+         ("Gmail wraps every link",
+          'The CTA arrives as <code>google.com/url?q=</code>, which shows an '
+          'interstitial because the link domain (beta.expectvictims.com) does not '
+          'match the sending domain (emr-inc.net). Fixing it is a DNS and reputation '
+          'job: align the domains, or redirect through emr-inc.net.'),
          ("One characterisation to check",
           'Section 03 renders your "grouchy boomer" as <strong>one of the old heads</strong>. '
-          'You described the person; the phrasing is mine. Change it if it misses.')]
+          'You described the person; the phrasing is mine.')]
 
 PAGE = r'''<title>Field Notes Issue 01</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

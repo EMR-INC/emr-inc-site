@@ -101,13 +101,13 @@ UPDATE_CLOSE = ("Fair question. Maybe you would not. The file is not really for 
                 "you. It is for whoever goes looking in 2041 and finds out nobody "
                 "wrote it down.")
 
-# The figure is served, not attached. A CID attachment adds its weight to every
-# copy of a bulk send and is a spam signal, and the cid: reference did not
-# resolve in Gmail when it was tried. Pinned to a commit so the URL cannot drift.
-# On merge to main this becomes https://emr-inc.net/assets/field-notes/...
-FIGURE_URL = ("https://raw.githubusercontent.com/EMR-INC/emr-inc-site/"
-              "34bbe16bd843713f5692669486822be1d5a1bd98/assets/field-notes/"
-              "issue-01-figure.png")
+# Served from the apex, not attached and not from raw.githubusercontent. A CID
+# attachment rides every copy of a bulk send and the cid: reference did not
+# resolve in Gmail. GitHub raw is worse: it sends "content-security-policy:
+# default-src 'none'; sandbox", which is GitHub blocking hotlinking, so Gmail's
+# image proxy refuses it outright. Per .vercelignore the apex is GitHub Pages
+# publishing the whole main root, so the asset is live once main deploys.
+FIGURE_URL = "https://emr-inc.net/assets/field-notes/issue-01-figure.png"
 
 CTA = "See the platform"
 CTA_URL = "https://beta.expectvictims.com"
@@ -232,9 +232,11 @@ def email_html(d, alt):
         f'{esc(GUARD)}<br>{fmt(DENOMINATOR)} of {fmt(TOTAL_ROWS)} rows; {DROPPED} carry a '
         f'non numeric incident type.<br>EMR Inc. &#183; Emergency Medical Resolutions. '
         f'Individual records belong to the member.<br>'
-        f'<a href="#" style="color:{INK};text-decoration:underline;">Manage preferences</a> '
-        f'&#183; <a href="#" style="color:{INK};text-decoration:underline;">Unsubscribe</a>'
-        f'</td></tr></table>')
+        f'{{{{POSTAL_ADDRESS}}}}<br>'
+        f'You are receiving this because you took part in the EMR Inc. off road '
+        f'transport survey. '
+        f'<a href="{{{{UNSUBSCRIBE_URL}}}}" style="color:{INK};text-decoration:underline;">'
+        f'Unsubscribe</a></td></tr></table>')
 
     return f'''<!doctype html>
 <html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -308,7 +310,10 @@ A building fire is 1 in {d['one_in']:.0f} incidents.
 Figure source: NFIRS basic incident module, pulled {PULLED}. {GUARD}
 {fmt(DENOMINATOR)} of {fmt(TOTAL_ROWS)} rows; {DROPPED} carry a non numeric incident type.
 EMR Inc. Individual records belong to the member.
-Manage preferences / Unsubscribe
+{{{{POSTAL_ADDRESS}}}}
+
+You are receiving this because you took part in the EMR Inc. off road transport
+survey. To stop receiving Field Notes: {{{{UNSUBSCRIBE_URL}}}}
 """
 
 
@@ -343,6 +348,17 @@ def assert_voice():
     return len(BANNED)
 
 
+def assert_sendable(h, t):
+    """The Apps Script sender refuses to run without these, so the build must
+    never hand it an artifact that cannot lawfully go to a list."""
+    for name, doc in (("email.html", h), ("email.txt", t)):
+        for token in ("{{UNSUBSCRIBE_URL}}", "{{POSTAL_ADDRESS}}"):
+            if token not in doc:
+                sys.exit(f"{name} is missing {token}; it could not be sent to a list")
+    if 'href="#"' in h:
+        sys.exit('email.html still carries a href="#" placeholder link')
+
+
 def assert_email_safe(h):
     bad = [why for pat, why in FORBIDDEN if re.search(pat, h, re.I)]
     if bad:
@@ -366,6 +382,7 @@ def main():
     eh, et = email_html(d, alt), email_txt(d)
     assert_guard(figure_svg=svg, email_html=eh, email_txt=et, alt=alt)
     nbanned = assert_voice()
+    assert_sendable(eh, et)
     nbytes = assert_email_safe(eh)
 
     (ROOT / "01-email.html").write_text(eh)
@@ -387,6 +404,7 @@ def main():
     print(f"  voice gate: {nbanned} banned terms, no hyphen, em dash or '!'")
     print(f"  email.html {nbytes:,} bytes (Gmail clips at 102,400)")
     print(f"  guard in figure, html, txt and alt text")
+    print(f"  unsubscribe and postal address placeholders present")
 
 
 if __name__ == "__main__":
