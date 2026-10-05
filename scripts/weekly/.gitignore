@@ -1,0 +1,10 @@
+# Generated. Every one of these is reproduced by running the build scripts, and
+# the rendered email is unsent marketing copy that would otherwise sit at a
+# guessable URL on a public Pages root.
+*.png
+*.svg
+*.html
+*.txt
+__pycache__/
+*.pyc
+!README.md
