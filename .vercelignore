@@ -1,11 +1,33 @@
 # Working files that should not be served from emr-inc.net.
 
-# NOTE, 2026-09-29: this file governs the VERCEL deployment, which serves the
-# subdomains only. The emr-inc.net apex is GitHub Pages, publishing the whole
-# `main` root straight from the branch, so nothing can be withheld from the apex
-# by listing it here. Withholding a file from emr-inc.net means keeping it out of
-# the branch. This was learned the hard way while unpublishing the dispatch
-# capture: an entry here looked like it had worked and had not.
+# CORRECTED, 2026-10-08. The 2026-09-29 note that stood here said the apex was
+# GitHub Pages and that nothing could be withheld from emr-inc.net by listing it
+# in this file. The first half is wrong, so the second half was too. Measured:
+#
+#   emr-inc.net        -> 216.150.1.1, 216.150.16.193   Vercel
+#   www.emr-inc.net    -> 216.150.1.1, 216.150.1.129    Vercel
+#   emr-inc.github.io  -> 2606:50c0:800x::153           GitHub Pages, a DIFFERENT host
+#
+# and the Vercel project `emr-inc-site` holds both `emr-inc.net` and
+# `www.emr-inc.net` as project domains. So VERCEL SERVES THE APEX, this file does
+# govern what emr-inc.net serves, and an entry here does withhold a file from it.
+#
+# ⚠️ BUT THE OLD NOTE'S ADVICE STILL HOLDS, FOR A DIFFERENT REASON. An entry here
+# is not how you unpublish anything, because:
+#   1. THIS REPOSITORY IS PUBLIC. Every committed file is world-readable on
+#      github.com whatever Vercel serves, and stays in the history after a delete.
+#   2. GitHub Pages is ALSO enabled on this repo and builds every push to `main`
+#      independently of Vercel. It is not in the apex's serving path, but it is a
+#      second published copy of the branch root.
+# So: withholding a file from the public still means keeping it out of the branch,
+# and removing one already committed still means a history purge. That is what the
+# dispatch capture needed on 2026-09-29, and why the entry tried first "looked
+# like it had worked and had not" — it had worked, for Vercel, and the file was
+# still readable by the two routes above.
+#
+# Pages being enabled and pointed at a custom domain whose DNS goes to Vercel is
+# its own loose end: worth deciding whether Pages should be switched off at all,
+# rather than left building a parallel copy nobody reads.
 
 DESIGN-BRIEF.md
 MIGRATION.md
