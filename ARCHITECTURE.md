@@ -165,8 +165,9 @@ outbound mail asks union officers to trust a link.
 Files on `main` after the merge: `index.html`, `research.html`,
 `call-sign.html`, `member-research.html`, `contact.html` and
 `internal/research.html`, plus `styles.css` (30 KB, the whole design system) and
-`reveal.js`. Since the survey, four more: `open-data.html`, `dispatch-views.html`,
-`pel-method.html` and their data and template files.
+`reveal.js`. Since the survey, two more: `open-data.html` and
+`dispatch-views.html`, with their data and template files. A third,
+`pel-method.html`, was added and withdrawn on 2026-10-10: see below.
 
 ### Internal links, rechecked 2026-10-10
 
@@ -188,16 +189,42 @@ look alike because they are not built alike.
 
 | | Hand written | Generated |
 |---|---|---|
-| Pages | `index.html`, `call-sign.html`, `member-research.html`, `contact.html`, `dispatch-views.html` | `research.html`, `open-data.html`, `pel-method.html` |
+| Pages | `index.html`, `call-sign.html`, `member-research.html`, `contact.html`, `dispatch-views.html` | `research.html`, `open-data.html` |
 | Styling | `styles.css`, which implements OHPAH-DESIGN `design_system.md` **v1.1**, the retired navy, ivory, steel and beam palette | self contained CSS implementing **v3.0**, the stock and ink diagrammatic modernism palette |
 | Figures | written into the markup | read from a committed JSON file at build time |
 | Edit | the `.html` | the template plus the builder, never the output |
 
-The two generated pages have pipeline documents of their own:
-`docs/OPEN_DATA_PIPELINE.md` and `docs/PEL_METHOD_PIPELINE.md`. The second one
-crosses repositories: the term list and the citation records live in
-`EMR-INC/the-lab` and reach this repo as a committed `data/pel-method.json`,
-because a static site with no build step cannot import a TypeScript package.
+The generated pages have a pipeline document of their own:
+`docs/OPEN_DATA_PIPELINE.md`.
+
+### The event load method file, published and withdrawn on 2026-10-10
+
+`pel-method.html` shipped at 17:06 UTC and was removed the same hour. It
+carried the event load method: eight event classes, seventy six radio terms,
+and the research citations behind them. It was withdrawn on the owner's
+instruction to make it sign in only.
+
+**Moving it under `internal/` would not have achieved that, and the reason was
+already written in this repository.** The note at the top of `.vercelignore`,
+dated 2026-10-08, measures it: this repository is public, so every committed
+file is world-readable on github.com whatever Vercel serves; GitHub Pages is
+enabled and builds every push to `main` as a second published copy; and
+`middleware.js` exists only on Vercel, so `internal/` means nothing to Pages.
+Confirmed again on 2026-10-10: `emr-inc.github.io/emr-inc-site/pel-method.html`
+and `.../data/pel-method.json` both returned 200 while the files were on `main`.
+
+So the files were removed from the branch entirely rather than relocated. Two
+things that removal does **not** do, and that remain open:
+
+1. **The content is still in this repository's history** and is reachable by
+   commit. Unpublishing it needs a history purge, which rewrites `main`.
+2. **GitHub Pages is still enabled** and still builds a parallel copy of every
+   push. `.vercelignore` already flags this as a loose end worth deciding on.
+   Nothing in this repo can switch it off; it is a repository setting.
+
+The sources moved to `EMR-INC/the-lab`, which is private, under
+`apps/lab/src/method/`. `docs/method_page.md` there replaces the pipeline
+document that used to sit here.
 
 The design system's own rule is that a legacy surface may stay as it is until
 it is touched, and moves to v3.0 once it is. That is why a new page is in the
