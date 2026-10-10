@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>document.documentElement.className += ' js';</script>
+<title>The Lab &middot; EMR Inc.</title>
+<meta name="description" content="The Lab is the EMR Inc. research environment. Team only, behind a sign in. The research libraries, the event classes and the scoring method live inside it; nothing from it is published here.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=DM+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<!-- Vercel Web Analytics -->
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     THE LAB · THE PUBLIC DOOR, AND ONLY THE DOOR
+
+     Laid out like call-sign.html on purpose. That page is the working model
+     for this shape: a public page carrying the standing claims and one button
+     out to an application on its own domain, with the sign in stated before
+     the button rather than discovered after it.
+
+     ⚠️ THIS PAGE IS PUBLIC AND HOLDS NOTHING FROM INSIDE THE LAB. No term
+     list, no event class, no citation record, no figure, no member. All of
+     that lives behind the sign in at lab.emr-inc.net and stays there.
+
+     ⚠️ AND THAT IS NOT A STYLE RULE, IT IS THE LESSON OF 2026-10-10. The
+     event load method file was published at /pel-method and withdrawn the
+     same hour. Moving it under internal/ would not have been enough: THIS
+     REPOSITORY IS PUBLIC, GitHub Pages builds a second copy of every push to
+     main, and middleware.js exists only on Vercel. The page and its payload
+     were both readable at emr-inc.github.io while the files were on the
+     branch. See the note at the top of .vercelignore, which said so two days
+     before it happened, and section 5 of ARCHITECTURE.md.
+
+     So: anything that must be gated does not come to this repository at all.
+     It lives in EMR-INC/the-lab, which is private, and is served by the app.
+     A link is the only thing this page may carry.
+
+     NAV + FOOTER are duplicated from index.html rather than included, because
+     this is a static site with no template step. call-sign.html said "if a
+     FOURTH page arrives, stop and add the include." Counting the hand written
+     pages this is the fifth, and the copy is made again. The include is now
+     overdue and is recorded in ARCHITECTURE.md as outstanding work; it is not
+     done here because a template step is a change to how every page builds
+     and does not belong in the same commit as a new page.
+     ════════════════════════════════════════════════════════════════════ -->
+<nav class="nav">
+  <div class="container nav__inner">
+    <div class="nav__links">
+      <a class="nav__link" href="/">Home</a>
+      <a class="nav__link" href="research.html">Research</a>
+      <a class="nav__link" href="https://expectvictims.com">Expect Victims</a>
+      <a class="nav__link" href="https://expectfire.com">Expect Fire</a>
+      <a class="nav__link" href="call-sign.html">CALL/SIGN: DASHBOARD</a>
+      <a class="nav__link" href="lab.html">The Lab</a>
+      <a class="nav__link" href="contact.html">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero hero--short field-navy">
+  <div class="container stack-24">
+    <p class="t-label" style="color: var(--steel-150);">EMR Inc. &nbsp;&middot;&nbsp; Research environment</p>
+    <h1 class="t-display" style="max-width: 20ch;">The Lab.</h1>
+    <p class="t-body measure" style="color: var(--steel-150);">
+      Where the measurement work is done. The research libraries, the event
+      classes, the scoring method and the records they run against all live
+      inside it. This page is the door. Nothing from inside it is published
+      here.
+    </p>
+    <div class="btn-row">
+      <a class="btn btn--line" href="https://lab.emr-inc.net">Open The Lab</a>
+    </div>
+    <p class="t-small" style="color: var(--steel-400);">
+      Sign in required. Access is held on a named list and is not requested
+      here.
+    </p>
+  </div>
+</header>
+
+<!-- WHAT IT IS --------------------------------------------------------------
+     The standing claims only. Every sentence below has to survive a reader
+     who works at a department and a reader who works at a union, so none of
+     them describes a finding, a figure, a partner or a pilot.
+     ------------------------------------------------------------------------ -->
+<section class="section field-white">
+  <div class="container stack-40">
+
+    <div class="stack-16 reveal">
+      <p class="t-label" style="color: var(--steel-400);">What it is</p>
+      <h2 class="t-display measure">A working environment, not a publication.</h2>
+    </div>
+
+    <div class="grid-2">
+      <p class="t-body measure reveal">
+        The Lab is where a question becomes a method and a method becomes a
+        number. Research libraries are read inside it, an event is categorised
+        against stated criteria, and the result carries the rule that produced
+        it and the source behind that rule.
+      </p>
+      <p class="t-body measure reveal">
+        It is a separate environment with its own sign in, on its own domain,
+        holding its own records. That separation is the design. The public
+        site has no login on any page, so nothing that needs one belongs on
+        it.
+      </p>
+    </div>
+
+    <div class="rows reveal">
+      <div class="row">
+        <p class="t-data row__key">Who reaches it</p>
+        <p class="t-body">
+          Named members of the EMR Inc. team. The list is held in the
+          environment's own database, the application cannot read it, and an
+          unanswered access question is refused rather than allowed.
+        </p>
+      </div>
+      <div class="row">
+        <p class="t-data row__key">What it holds</p>
+        <p class="t-body">
+          Research libraries, event classes and the criteria that route an
+          event to one. The documents stay inside: an index of them on a public
+          page is an index of what to go looking for.
+        </p>
+      </div>
+      <div class="row">
+        <p class="t-data row__key">What it does not do</p>
+        <p class="t-body">
+          It states no clinical finding, makes no prediction and assigns no
+          status to a person. A figure describes exposure already recorded. It
+          does not forecast anything, and nothing in it is a diagnosis.
+        </p>
+      </div>
+      <div class="row">
+        <p class="t-data row__key">Where a member figure is read</p>
+        <p class="t-body">
+          Not here, and not by an employer. An individual member's record is
+          read by the member and the body that represents them. Departments
+          and employers use appropriate aggregate reporting.
+        </p>
+      </div>
+    </div>
+
+    <div class="notice reveal">
+      <p class="t-small">
+        Nothing on this page is a result. It describes an environment and links
+        to it. Work that has been run and can be cited goes on the research
+        page, with its source and its denominator stated.
+      </p>
+    </div>
+
+    <div class="btn-row reveal">
+      <a class="btn btn--solid" href="https://lab.emr-inc.net">Open The Lab</a>
+      <a class="btn btn--line-dark" href="research.html">See the research we have published</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- Footer duplicated by hand from index.html. See the note above the nav. -->
+<footer class="footer field-navy">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="stack-24">
+        <h2 style="margin: 0;">
+          <img class="footer__logo" src="assets/emr-inc-logo.png" alt="EMR Inc.">
+        </h2>
+        <p class="t-body measure" style="color: var(--steel-150);">
+          Emergency Medical Resolutions Inc. We build with IAFF locals and the members
+          they represent. Departments and employers can support implementation and use
+          appropriate aggregate reporting, while individual member records remain
+          controlled by the member.
+        </p>
+        <p class="t-label" style="color: var(--steel-400); margin-top: var(--s-16);">Contact</p>
+        <div class="footer__contact">
+          <a class="footer__contact-link" href="mailto:michael.harvey@emr-inc.net">michael.harvey@emr-inc.net</a>
+          <a class="footer__contact-link" href="https://instagram.com/ohpah.app">OHPAH.app on Instagram</a>
+          <a class="footer__contact-link" href="https://expectvictims.com">expectvictims.com</a>
+          <a class="footer__contact-link" href="https://expectfire.com">expectfire.com</a>
+          <a class="footer__contact-link" href="contact.html">Contact page</a>
+        </div>
+      </div>
+      <div class="rows">
+        <div class="row">
+          <p class="t-data row__key">Incorporated</p>
+          <p class="t-body">Delaware C corp, August 19, 2025</p>
+        </div>
+        <div class="row">
+          <p class="t-data row__key">Registration</p>
+          <p class="t-body">Foreign corporation registration in Florida, complete</p>
+        </div>
+        <div class="row">
+          <p class="t-data row__key">Built by</p>
+          <p class="t-body">Firefighters across multiple career departments</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__base stack-16">
+      <div class="footer__links">
+        <a class="footer__link" href="open-data.html">Open data</a>
+        <a class="footer__link" href="research.html">Research</a>
+        <a class="footer__link" href="member-research.html">Member research</a>
+        <a class="footer__link" href="https://expectvictims.com">Expect Victims</a>
+        <a class="footer__link" href="https://expectfire.com">Expect Fire</a>
+        <a class="footer__link" href="call-sign.html">CALL/SIGN: DASHBOARD</a>
+        <a class="footer__link" href="lab.html">The Lab</a>
+        <a class="footer__link" href="contact.html">Contact</a>
+      </div>
+      <p class="t-data" style="color: var(--steel-400);">
+        EMR Inc. &nbsp;&middot;&nbsp; emr-inc.net &nbsp;&middot;&nbsp; Delaware C corp &nbsp;&middot;&nbsp; File No. 10300393
+      </p>
+    </div>
+  </div>
+</footer>
+
+<script src="reveal.js"></script>
+</body>
+</html>
