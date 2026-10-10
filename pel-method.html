@@ -1,0 +1,655 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Event load &middot; Method &middot; EMR Inc.</title>
+<meta name="description" content="The method behind the EMR Inc. event load measure: eight event classes, the radio terms that open a candidate, the published sources behind each class, and what those sources say they do not support.">
+<link rel="canonical" href="https://emr-inc.net/pel-method">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700&family=Archivo+Black&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   EMR INC. · Event load method file
+   design_system.md v3.0 · diagrammatic modernism. Self contained, because
+   styles.css still implements v1.1 and this is a new surface.
+   Three chromatic inks only: red traces one route, blue is the record layer,
+   yellow is the crossed band. Nothing encodes a quantity in colour.
+   ========================================================================== */
+:root {
+  --stock: #F1EBDD;
+  --ink: #10213B;
+  --red: #D5222A;
+  --blue: #2363A0;
+  --yellow: #E5C500;
+  --dark: #161A20;
+  --white: #FFFFFF;
+  --s-4: 4px; --s-8: 8px; --s-16: 16px; --s-24: 24px;
+  --s-40: 40px; --s-64: 64px; --s-96: 96px;
+}
+* { box-sizing: border-box; }
+html { background: var(--stock); -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--stock);
+  color: var(--ink);
+  font: 400 17px/26px Archivo, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+
+/* TYPE ------------------------------------------------------------------- */
+.display, .h2, .h3 { margin: 0; font-family: "Archivo Black", "Arial Black", Archivo, sans-serif; }
+.display {
+  font-size: clamp(52px, 11vw, 112px); line-height: .88;
+  letter-spacing: -.035em; text-transform: uppercase;
+}
+.h2 { font-size: clamp(30px, 4.4vw, 48px); line-height: 1.06; letter-spacing: -.02em; }
+.h3 { font-size: clamp(21px, 2.4vw, 26px); line-height: 1.18; letter-spacing: -.01em; }
+.eyebrow, .data, .num {
+  font-family: "Courier Prime", "Courier New", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}
+.eyebrow { font-weight: 700; font-size: 12px; line-height: 16px; letter-spacing: .24em; text-transform: uppercase; }
+/* A locus is a full URL and a hash is one unbreakable token. Both have to wrap
+   rather than widen the page, which is the only way they fit a phone. */
+.data { font-size: 15px; line-height: 21px; overflow-wrap: anywhere; }
+.num { font-weight: 700; font-size: clamp(34px, 5vw, 56px); line-height: 1; letter-spacing: -.02em; }
+.body { margin: 0; }
+.small { margin: 0; font-size: 15px; line-height: 23px; }
+.measure { max-width: 65ch; }
+.hand { font: italic 400 19px/1.35 Georgia, "Times New Roman", serif; margin: 0; }
+.display + .script { margin-top: var(--s-16); }
+.script { font: italic 400 clamp(24px, 4vw, 44px)/.98 Georgia, serif; color: var(--red); margin: 0; }
+
+/* STRUCTURE -------------------------------------------------------------- */
+.wrap { max-width: 1200px; margin: 0 auto; padding-inline: clamp(24px, 5vw, 72px); }
+.section { padding-block: clamp(var(--s-40), 7vw, var(--s-96)); border-top: 2px solid var(--ink); }
+.section--open { border-top: 0; }
+.field-ink { background: var(--ink); color: var(--stock); }
+.field-white { background: var(--white); }
+.stack > * + * { margin-top: var(--s-24); }
+.stack-8 > * + * { margin-top: var(--s-8); }
+.stack-40 > * + * { margin-top: var(--s-40); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-40); }
+@media (max-width: 860px) { .grid-2 { grid-template-columns: 1fr; } }
+
+.mast {
+  display: flex; flex-wrap: wrap; gap: var(--s-16) var(--s-24);
+  justify-content: space-between; align-items: baseline;
+  padding: var(--s-16) clamp(24px, 5vw, 72px);
+  border-bottom: 2px solid var(--ink);
+  font-family: "Courier Prime", "Courier New", monospace;
+  font-weight: 700; font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+}
+.mast nav { display: flex; flex-wrap: wrap; gap: var(--s-16); }
+
+/* The first thing a reader is told, before any term or figure. */
+.flag {
+  border: 2px solid var(--ink);
+  border-left-width: 12px;
+  border-left-color: var(--yellow);
+  padding: var(--s-16) var(--s-24);
+  background: var(--white);
+}
+.field-ink .flag { background: transparent; border-color: var(--stock); border-left-color: var(--yellow); }
+
+/* ROWS · key on the left, in Courier Prime, as the data column ----------- */
+.rows { border-top: 1px solid currentColor; }
+.row {
+  display: grid; grid-template-columns: 220px 1fr; gap: var(--s-24);
+  padding: var(--s-16) 0; border-bottom: 1px solid currentColor;
+  min-height: 44px; align-items: start;
+}
+.row > * { min-width: 0; }
+@media (max-width: 720px) { .row { grid-template-columns: 1fr; gap: var(--s-8); } }
+.row__key {
+  font-family: "Courier Prime", "Courier New", monospace;
+  font-size: 13px; line-height: 20px; letter-spacing: .08em; text-transform: uppercase;
+}
+
+/* PANELS ----------------------------------------------------------------- */
+.panel { border: 2px solid var(--ink); padding: var(--s-24); background: var(--stock); }
+.panel--white { background: var(--white); }
+.panel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--s-16); }
+.note { border-left: 2px solid currentColor; padding-left: var(--s-16); }
+
+/* TABLES ----------------------------------------------------------------- */
+.scroller { overflow-x: auto; border: 2px solid currentColor; }
+table { width: 100%; border-collapse: collapse; background: var(--white); }
+.field-ink table { background: transparent; }
+caption { text-align: left; padding: var(--s-16); font: 700 12px/16px "Courier Prime", monospace; letter-spacing: .24em; text-transform: uppercase; border-bottom: 1px solid var(--ink); }
+th, td { padding: 12px var(--s-16); border-bottom: 1px solid var(--ink); text-align: left; vertical-align: top; min-height: 44px; }
+thead th { font: 700 12px/16px "Courier Prime", monospace; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
+tbody th { font: 400 15px/21px "Courier Prime", "Courier New", monospace; white-space: nowrap; }
+td.n { text-align: right; font-family: "Courier Prime", "Courier New", monospace; font-variant-numeric: tabular-nums; }
+tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
+
+/* STATUS MARKS · text plus shape, valid in monochrome -------------------- */
+.mark {
+  display: inline-flex; align-items: center; gap: 6px;
+  font: 700 12px/16px "Courier Prime", monospace; letter-spacing: .08em; text-transform: uppercase;
+  white-space: nowrap;
+}
+.mark::before {
+  content: ""; width: 12px; height: 12px; flex: none;
+  border: 2px solid currentColor;
+}
+.mark--insufficient::before { background: var(--yellow); border-radius: 50%; }
+.mark--corroboration::before { background: var(--blue); }
+.mark--boundary::before { background: transparent; }
+.mark--off::before { background: repeating-linear-gradient(45deg, currentColor 0 2px, transparent 2px 4px); }
+
+.legend { display: flex; flex-wrap: wrap; gap: var(--s-16) var(--s-24); padding: var(--s-16) 0; }
+
+/* FIGURES ---------------------------------------------------------------- */
+figure { margin: 0; }
+figcaption { margin-top: var(--s-16); }
+.fig-svg { width: 100%; min-width: 820px; height: auto; }
+.fig-svg text { font-family: "Courier Prime", "Courier New", monospace; }
+
+/* FOOTER ----------------------------------------------------------------- */
+.footer { background: var(--ink); color: var(--stock); padding-block: clamp(var(--s-40), 6vw, var(--s-64)); }
+.footer a { color: inherit; }
+.footer__links { display: flex; flex-wrap: wrap; gap: var(--s-16) var(--s-24); }
+</style>
+<!-- Vercel Web Analytics, as on every other page of this site. Aggregate page
+     views only. No script on this page does anything else: the figures and the
+     tables are rendered at build time, so the page is complete with JavaScript
+     switched off. -->
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     EVENT LOAD · METHOD FILE
+
+     ⚠️ GENERATED. Edit templates/pel-method.html, never pel-method.html.
+     data/build-pel-method.py renders this template against data/pel-method.json
+     and fails closed if a marker is unfilled, a count does not reconcile, a
+     class cites an identifier the file cannot resolve, or the payload is not
+     class 0.
+
+     ⚠️ NO FIGURE ON THIS PAGE IS TYPED BY HAND. Every count, term, class
+     route and citation comes out of data/pel-method.json, which
+     the-lab/tools/export-pel-method.mjs writes from
+     packages/scoring/src/publication.ts. That is the only place the term list
+     exists. If you find yourself typing a number into this template, the
+     chain is broken and the page has started lying.
+
+     ⚠️ THE LIST IS UNREVIEWED AND THE PAGE SAYS SO BEFORE IT SHOWS A TERM.
+     No clinical reviewer has read it, nothing is scored from it, and no
+     threshold exists. If the unreviewed flag is ever removed from the hero,
+     the page starts claiming something nobody has signed.
+
+     ⚠️ NO ORGANISATION IS NAMED. Not the pilot department, not the state
+     agency, not the data provider, not the union affiliate. None of them has
+     approved being named in public, and the export asserts that none of their
+     names is in the payload. Do not add one here to make the page sound more
+     advanced.
+
+     ⚠️ NO MEMBER GRAIN EVER REACHES THIS SITE. emr-inc.net has no login on
+     any public page. A member's own figure is read inside the union portal and
+     nowhere else. This page describes a method; it carries no result of
+     running one.
+     ════════════════════════════════════════════════════════════════════ -->
+
+<header class="mast">
+  <span>EMR Inc. &middot; Method file &middot; Event load</span>
+  <nav aria-label="Site">
+    <a href="/">Home</a>
+    <a href="research.html">Research</a>
+    <a href="open-data.html">Open data</a>
+    <a href="member-research.html">Member research</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+</header>
+
+<section class="section section--open">
+  <div class="wrap stack-40">
+    <div class="stack">
+      <p class="eyebrow">Event load &middot; how a class is decided</p>
+      <h1 class="display">A word is<br>not a finding.</h1>
+      <p class="script">So what is it?</p>
+      <p class="body measure">
+        EMR Inc. is building a measure of the events a firefighter has actually
+        been at: not a prediction, not a diagnosis and not a wellness score.
+        This page is the method behind it. It shows the 8 event
+        classes, the 76 radio terms that can open a candidate for
+        review, the published sources behind each class, and, at length, what
+        those sources say they do not support.
+      </p>
+      <div class="flag stack-8">
+        <p class="eyebrow">Read this first</p>
+        <p class="small measure">
+          <strong>Nothing on this page is scored, and nothing here is
+          validated.</strong> The term list is version
+          <span class="data">pel-keywords-v3-proposed</span>, authored
+          2026-10-06, and no clinical reviewer has read it. A matched
+          word opens a candidate for a person to review. It does not establish
+          that an event happened, it does not reach a member's record, and
+          there is no threshold for it to cross.
+          5 of the 8 classes rest on a
+          single empirical paper each once the definition they all share is set
+          aside.
+        </p>
+      </div>
+    </div>
+
+    <div class="rows">
+      <div class="row"><p class="row__key">Term list</p><p class="data">pel-keywords-v3-proposed &middot; authored 2026-10-06 &middot; reviewed: no</p></div>
+      <div class="row"><p class="row__key">List hash</p><p class="data">6c1c0c12329bfe10</p></div>
+      <div class="row"><p class="row__key">Terms</p><p class="data">76 across 6 of 8 classes, counted as 21 fact groups</p></div>
+      <div class="row"><p class="row__key">Sources</p><p class="data">8 records, 6 of them empirical. Research cutoff 2026-09-30</p></div>
+      <div class="row"><p class="row__key">Release status</p><p class="data">Internal research reference; not clinical validation</p></div>
+      <div class="row"><p class="row__key">Page built</p><p class="data">2026-10-10 from data/pel-method.json</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 1 · THE ROUTE ------------------------------------------------------- -->
+<section class="section field-white">
+  <div class="wrap stack-40">
+    <div class="stack">
+      <p class="eyebrow">01 &middot; The route</p>
+      <h2 class="h2 measure">Every path ends where the evidence stops.</h2>
+      <p class="body measure">
+        A term matching in a radio transcript is the weakest thing in this
+        system, and the drawing says so. Follow any line to its end and it
+        terminates at a stated fact, at a refusal, or at a gate that is closed
+        because nobody has been appointed to open it. There is no line from a
+        word to a score, because there is no score.
+      </p>
+      <p class="body measure">
+        22 of the 76 terms are words the
+        research itself names as insufficient on their own: a Mayday, a mass
+        casualty declaration, a pediatric dispatch, a resuscitation in
+        progress. They are in the list so that a reviewer sees what was said.
+        They carry no weight.
+      </p>
+    </div>
+
+    <figure class="stack-8">
+      <div class="scroller"><svg class="fig-svg" viewBox="0 0 960 452" role="img" aria-label="A branching diagram. A radio transmission reaches a term match. 54 terms sit on a corroboration route and open a candidate for review; 22 terms sit on an exclusion boundary, 22 of which the research names as insufficient on their own, and these open a review and carry no weight. A candidate either reaches a corroborated event fact, which requires passing a clinical review that currently has no reviewer appointed, or is refused for want of corroboration. A separate lane shows the private class, which has no term route and is reached only when a member volunteers a confirmation."><defs><marker id="pm-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#10213B"></path></marker><pattern id="pm-hatch" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="6" stroke="#10213B" stroke-width="2"></line></pattern></defs><rect x="8" y="30" width="152" height="88" fill="#F1EBDD" stroke="#10213B" stroke-width="2"></rect><text x="22" y="56" font-size="14" font-weight="700" fill="#10213B">Radio</text><text x="22" y="75" font-size="14" font-weight="700" fill="#10213B">transmission</text><text x="22" y="94" font-size="12" font-weight="400" fill="#10213B">one talkgroup</text><rect x="216" y="30" width="184" height="88" fill="#F1EBDD" stroke="#10213B" stroke-width="2"></rect><text x="230" y="56" font-size="14" font-weight="700" fill="#10213B">Term match</text><text x="252" y="75" font-size="12" font-weight="400" fill="#10213B">54 on a route</text><text x="252" y="92" font-size="12" font-weight="400" fill="#10213B">22 on a boundary</text><rect x="230" y="64" width="11" height="11" fill="#2363A0" stroke="#10213B" stroke-width="2"></rect><rect x="230" y="81" width="11" height="11" fill="none" stroke="#10213B" stroke-width="2"></rect><rect x="456" y="30" width="184" height="88" fill="#F1EBDD" stroke="#10213B" stroke-width="2"></rect><text x="470" y="56" font-size="14" font-weight="700" fill="#10213B">Candidate</text><text x="470" y="75" font-size="12" font-weight="400" fill="#10213B">a person reads</text><text x="470" y="92" font-size="12" font-weight="400" fill="#10213B">the record</text><rect x="696" y="30" width="120" height="88" fill="#E5C500" stroke="#10213B" stroke-width="2"></rect><text x="710" y="56" font-size="13" font-weight="700" fill="#10213B">Clinical</text><text x="710" y="74" font-size="13" font-weight="700" fill="#10213B">review</text><text x="710" y="92" font-size="12" font-weight="400" fill="#10213B">unassigned</text><rect x="872" y="30" width="80" height="88" fill="#2363A0" stroke="#10213B" stroke-width="2"></rect><text x="886" y="56" font-size="13" font-weight="700" fill="#F1EBDD">Event</text><text x="886" y="74" font-size="13" font-weight="700" fill="#F1EBDD">fact</text><line x1="160" y1="74" x2="212" y2="74" stroke="#D5222A" stroke-width="2.5" marker-end="url(#pm-arrow)"></line><line x1="400" y1="74" x2="452" y2="74" stroke="#D5222A" stroke-width="2.5" marker-end="url(#pm-arrow)"></line><text x="426" y="66" font-size="11" font-weight="700" fill="#10213B" text-anchor="middle">matches</text><line x1="640" y1="74" x2="692" y2="74" stroke="#D5222A" stroke-width="2.5" marker-end="url(#pm-arrow)"></line><text x="666" y="66" font-size="11" font-weight="700" fill="#10213B" text-anchor="middle">submits</text><line x1="816" y1="74" x2="868" y2="74" stroke="#10213B" stroke-width="2.5" marker-end="url(#pm-arrow)" stroke-dasharray="6 5"></line><line x1="832" y1="54" x2="856" y2="94" stroke="#D5222A" stroke-width="3"></line><line x1="856" y1="54" x2="832" y2="94" stroke="#D5222A" stroke-width="3"></line><text x="952" y="138" font-size="11" font-weight="700" fill="#10213B" text-anchor="end">No path completes today</text><line x1="308" y1="118" x2="308" y2="182" stroke="#D5222A" stroke-width="2.5" marker-end="url(#pm-arrow)"></line><rect x="216" y="184" width="184" height="96" fill="#F1EBDD" stroke="#10213B" stroke-width="2"></rect><text x="230" y="210" font-size="13" font-weight="700" fill="#10213B">Opens a review</text><text x="230" y="228" font-size="13" font-weight="700" fill="#10213B">and nothing else</text><text x="250" y="246" font-size="12" font-weight="400" fill="#10213B">22 terms named</text><text x="250" y="263" font-size="12" font-weight="400" fill="#10213B">insufficient alone</text><circle cx="228" cy="246" r="6" fill="#E5C500" stroke="#10213B" stroke-width="2"></circle><line x1="548" y1="118" x2="548" y2="182" stroke="#D5222A" stroke-width="2.5" marker-end="url(#pm-arrow)"></line><rect x="456" y="184" width="184" height="96" fill="#F1EBDD" stroke="#10213B" stroke-width="2"></rect><text x="470" y="210" font-size="13" font-weight="700" fill="#10213B">Refused</text><text x="470" y="228" font-size="12" font-weight="400" fill="#10213B">corroboration absent</text><text x="470" y="245" font-size="12" font-weight="400" fill="#10213B">and the class does</text><text x="470" y="262" font-size="12" font-weight="400" fill="#10213B">not attach</text><line x1="8" y1="318" x2="952" y2="318" stroke="#10213B" stroke-width="1" stroke-dasharray="3 4"></line><text x="8" y="342" font-size="11" font-weight="700" fill="#10213B">NO ROUTE FROM THE RADIO AT ALL</text><rect x="8" y="356" width="248" height="80" fill="#2363A0" stroke="#10213B" stroke-width="2"></rect><text x="22" y="382" font-size="14" font-weight="700" fill="#F1EBDD">Member&#x27;s own</text><text x="22" y="401" font-size="14" font-weight="700" fill="#F1EBDD">confirmation</text><text x="22" y="420" font-size="12" font-weight="400" fill="#F1EBDD">voluntary, private</text><line x1="256" y1="396" x2="324" y2="396" stroke="#2363A0" stroke-width="2.5" marker-end="url(#pm-arrow)"></line><rect x="328" y="356" width="340" height="80" fill="#F1EBDD" stroke="#10213B" stroke-width="2"></rect><text x="342" y="382" font-size="14" font-weight="700" fill="#10213B">A victim the member knew</text><text x="342" y="401" font-size="12" font-weight="400" fill="#10213B">never inferred, never shared</text></svg></div>
+      <figcaption class="stack-8">
+        <p class="small measure"><strong>What the figure shows.</strong> The
+        route from a radio transmission to the only three places it can end:
+        a corroborated event fact, a refusal, or a candidate waiting on a
+        review that has no reviewer. The private class at the bottom has no
+        term route at all and is reachable only when a member volunteers it.</p>
+        <div class="legend">
+          <span class="mark mark--corroboration">On a corroboration route</span>
+          <span class="mark mark--boundary">On an exclusion boundary</span>
+          <span class="mark mark--insufficient">Named insufficient</span>
+        </div>
+        <p class="small"><strong>Source</strong> PEL Evidence and Class Library
+        v1, EMR Inc. internal research reference, research cutoff 2026-09-30.
+        <strong>Unit</strong> one term, one class. <strong>Coverage</strong>
+        6 of 8 classes carry terms.
+        <strong>Missing</strong> two classes carry none, by decision, and the
+        reason is stated below. <strong>Status</strong> proposed, unreviewed.</p>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 2 · THE CLASSES ---------------------------------------------------- -->
+<section class="section">
+  <div class="wrap stack-40">
+    <div class="stack">
+      <p class="eyebrow">02 &middot; The classes</p>
+      <h2 class="h2 measure">Eight classes, each with a boundary written before the terms.</h2>
+      <p class="body measure">
+        Each class states what it requires before it can attach to anything,
+        and what is explicitly not enough. The second column is the one that
+        does the work: it is where the research declines to let a dispatch code
+        stand in for an experience.
+      </p>
+    </div>
+
+    <div class="scroller">
+      <table>
+        <caption>The eight event classes, their routes and their sources</caption>
+        <colgroup>
+          <col style="width:25%"><col style="width:22%"><col style="width:33%">
+          <col style="width:7%"><col style="width:13%">
+        </colgroup>
+        <thead>
+          <tr>
+            <th scope="col">Class</th>
+            <th scope="col">Requires</th>
+            <th scope="col">Not enough on its own</th>
+            <th scope="col">Terms</th>
+            <th scope="col">Sources</th>
+          </tr>
+        </thead>
+        <tbody><tr><th scope="row">member_casualty<br><span class="small">A member killed or seriously hurt</span></th><td>A death or serious injury, plus evidence of who witnessed it.</td><td>A Mayday opens a review. It does not establish that anything happened.</td><td class="n">10</td><td class="data">PC01 &middot; PC07</td></tr><tr><th scope="row">member_entrapment<br><span class="small">A member trapped or out of air</span></th><td>Entrapment, loss of air or an immediate life threat to the affected person.</td><td>A collapse or a flashover somewhere on the fireground does not establish exposure for everyone who responded.</td><td class="n">21</td><td class="data">PC02 &middot; PC07</td></tr><tr><th scope="row">pediatric_casualty<br><span class="small">A child killed or critically hurt</span></th><td>A corroborated event, and relevant in person witnessing.</td><td>A pediatric dispatch, a transport priority or an age on its own is not enough.</td><td class="n">13</td><td class="data">PC03 &middot; PC07</td></tr><tr><th scope="row">civilian_death<br><span class="small">A civilian death</span></th><td>Corroborated traumatic circumstances, and an actual witnessing route reviewed.</td><td>A death, an unsuccessful resuscitation or an expected natural death does not on its own establish the exposure route.</td><td class="n">14</td><td class="data">PC04 &middot; PC05 &middot; PC07</td></tr><tr><th scope="row">mass_casualty<br><span class="small">Multiple casualties at one incident</span></th><td>Confirmed casualties and responder contact, with the count uncertainty preserved.</td><td>A mass casualty dispatch or a staging assignment on its own is not enough.</td><td class="n">9</td><td class="data">PC04 &middot; PC05 &middot; PC07</td></tr><tr><th scope="row">human_remains<br><span class="small">Handling human remains</span></th><td>Documented recovery or handling, or repeated and extreme duty related contact.</td><td>Being assigned to the incident is not qualifying contact.</td><td class="n">9</td><td class="data">PC06 &middot; PC07</td></tr><tr><th scope="row">known_victim<br><span class="small">A victim the member knew</span></th><td>A voluntary private confirmation by the member, and nothing else.</td><td>Never infer a relationship, and never put a victim or member name or relationship in a shared record.</td><td class="n"><span class="small">none</span></td><td class="data">PC03 &middot; PC07</td></tr><tr><th scope="row">cumulative_aversive_detail<br><span class="small">Repeated exposure across many incidents</span></th><td>A pattern across incidents, which no single incident can show.</td><td>No validated threshold exists, and no synthetic incident is created to stand for a pattern.</td><td class="n"><span class="small">none</span></td><td class="data">PC01 &middot; PC05 &middot; PC07</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="panel stack-8">
+      <p class="eyebrow">Two classes have no terms, on purpose</p>
+      <p class="small"><strong>A victim the member knew</strong> <span class="data">known_victim</span>. Private only. Searching for relationship language would infer the relationship the library forbids inferring. Reaches a record only by voluntary private confirmation.</p><p class="small"><strong>Repeated exposure across many incidents</strong> <span class="data">cumulative_aversive_detail</span>. Repetition across incidents, which one narrative cannot show. The library carries no validated threshold and forbids creating a synthetic incident to represent a pattern.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · WHAT STANDS BEHIND EACH CLASS ---------------------------------- -->
+<section class="section field-white">
+  <div class="wrap stack-40">
+    <div class="stack">
+      <p class="eyebrow">03 &middot; The evidence, drawn</p>
+      <h2 class="h2 measure">One source is on all eight classes, and it is a definition.</h2>
+      <p class="body measure">
+        Every class cites the same official guidance page on what a traumatic
+        stressor is. That page is a definition, not a finding. Set it aside and
+        the picture changes: 5 of the 8
+        classes rest on one empirical paper each. The 21 terms about a member trapped or out of air stand on one source: 164 Australian firefighters, questionnaire study, 2000.
+      </p>
+      <p class="body measure">
+        That is not a reason to stop. It is the reason the page exists: a
+        reader can see the width of the evidence before anybody quotes a
+        number off it.
+      </p>
+    </div>
+
+    <figure class="stack-8">
+      <div class="scroller"><svg class="fig-svg" viewBox="0 0 960 532" role="img" aria-label="A comparison across the eight event classes. A member killed or seriously hurt: 10 terms, 1 empirical source plus the shared definition. A member trapped or out of air: 21 terms, 1 empirical source plus the shared definition. A child killed or critically hurt: 13 terms, 1 empirical source plus the shared definition. A civilian death: 14 terms, 2 empirical sources plus the shared definition. Multiple casualties at one incident: 9 terms, 2 empirical sources plus the shared definition. Handling human remains: 9 terms, 1 empirical source plus the shared definition. A victim the member knew: 0 terms, 1 empirical source plus the shared definition. Repeated exposure across many incidents: 0 terms, 2 empirical sources plus the shared definition."><defs><marker id="pm-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#10213B"></path></marker><pattern id="pm-hatch" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="6" stroke="#10213B" stroke-width="2"></line></pattern></defs><text x="8" y="26" font-size="11" font-weight="700" fill="#10213B" letter-spacing="1.6">CLASS</text><text x="330" y="26" font-size="11" font-weight="700" fill="#10213B" letter-spacing="1.6">TERMS</text><text x="610" y="26" font-size="11" font-weight="700" fill="#10213B" letter-spacing="1.6">SOURCES BEHIND IT</text><line x1="8" y1="40" x2="952" y2="40" stroke="#10213B" stroke-width="2"></line><text x="330" y="520" font-size="11" fill="#10213B">0</text><text x="560" y="520" font-size="11" fill="#10213B" text-anchor="end">21 terms</text><line x1="330" y1="54" x2="330" y2="506" stroke="#10213B" stroke-width="1"></line><line x1="560" y1="54" x2="560" y2="506" stroke="#10213B" stroke-width="1" stroke-dasharray="3 4"></line><line x1="8" y1="118" x2="952" y2="118" stroke="#10213B" stroke-width="1"></line><text x="8" y="92" font-size="13" font-weight="700" fill="#10213B">A member killed or seriously hurt</text><text x="8" y="107" font-size="11" fill="#10213B">member_casualty</text><rect x="330" y="83" width="109.5" height="16" fill="#10213B"></rect><text x="448" y="96" font-size="13" font-weight="700" fill="#10213B">10</text><rect x="610" y="82" width="18" height="18" fill="#2363A0" stroke="#10213B" stroke-width="2"></rect><text x="619" y="115" font-size="10" fill="#10213B" text-anchor="middle">PC01</text><rect x="640" y="82" width="18" height="18" fill="url(#pm-hatch)" stroke="#10213B" stroke-width="2"></rect><text x="649" y="115" font-size="10" fill="#10213B" text-anchor="middle">PC07</text><text x="680" y="96" font-size="12" fill="#10213B">1 empirical, 1 definition</text><line x1="8" y1="172" x2="952" y2="172" stroke="#10213B" stroke-width="1"></line><text x="8" y="146" font-size="13" font-weight="700" fill="#10213B">A member trapped or out of air</text><text x="8" y="161" font-size="11" fill="#10213B">member_entrapment</text><rect x="330" y="137" width="230.0" height="16" fill="#10213B"></rect><text x="568" y="150" font-size="13" font-weight="700" fill="#10213B">21</text><rect x="610" y="136" width="18" height="18" fill="#2363A0" stroke="#10213B" stroke-width="2"></rect><text x="619" y="169" font-size="10" fill="#10213B" text-anchor="middle">PC02</text><rect x="640" y="136" width="18" height="18" fill="url(#pm-hatch)" stroke="#10213B" stroke-width="2"></rect><text x="649" y="169" font-size="10" fill="#10213B" text-anchor="middle">PC07</text><text x="680" y="150" font-size="12" fill="#10213B">1 empirical, 1 definition</text><line x1="8" y1="226" x2="952" y2="226" stroke="#10213B" stroke-width="1"></line><text x="8" y="200" font-size="13" font-weight="700" fill="#10213B">A child killed or critically hurt</text><text x="8" y="215" font-size="11" fill="#10213B">pediatric_casualty</text><rect x="330" y="191" width="142.4" height="16" fill="#10213B"></rect><text x="480" y="204" font-size="13" font-weight="700" fill="#10213B">13</text><rect x="610" y="190" width="18" height="18" fill="#2363A0" stroke="#10213B" stroke-width="2"></rect><text x="619" y="223" font-size="10" fill="#10213B" text-anchor="middle">PC03</text><rect x="640" y="190" width="18" height="18" fill="url(#pm-hatch)" stroke="#10213B" stroke-width="2"></rect><text x="649" y="223" font-size="10" fill="#10213B" text-anchor="middle">PC07</text><text x="680" y="204" font-size="12" fill="#10213B">1 empirical, 1 definition</text><line x1="8" y1="280" x2="952" y2="280" stroke="#10213B" stroke-width="1"></line><text x="8" y="254" font-size="13" font-weight="700" fill="#10213B">A civilian death</text><text x="8" y="269" font-size="11" fill="#10213B">civilian_death</text><rect x="330" y="245" width="153.3" height="16" fill="#10213B"></rect><text x="491" y="258" font-size="13" font-weight="700" fill="#10213B">14</text><rect x="610" y="244" width="18" height="18" fill="#2363A0" stroke="#10213B" stroke-width="2"></rect><text x="619" y="277" font-size="10" fill="#10213B" text-anchor="middle">PC04</text><rect x="640" y="244" width="18" height="18" fill="#2363A0" stroke="#10213B" stroke-width="2"></rect><text x="649" y="277" font-size="10" fill="#10213B" text-anchor="middle">PC05</text><rect x="670" y="244" width="18" height="18" fill="url(#pm-hatch)" stroke="#10213B" stroke-width="2"></rect><text x="679" y="277" font-size="10" fill="#10213B" text-anchor="middle">PC07</text><text x="710" y="258" font-size="12" fill="#10213B">2 empirical, 1 definition</text><line x1="8" y1="334" x2="952" y2="334" stroke="#10213B" stroke-width="1"></line><text x="8" y="308" font-size="13" font-weight="700" fill="#10213B">Multiple casualties at one incident</text><text x="8" y="323" font-size="11" fill="#10213B">mass_casualty</text><rect x="330" y="299" width="98.6" height="16" fill="#10213B"></rect><text x="437" y="312" font-size="13" font-weight="700" fill="#10213B">9</text><rect x="610" y="298" width="18" height="18" fill="#2363A0" stroke="#10213B" stroke-width="2"></rect><text x="619" y="331" font-size="10" fill="#10213B" text-anchor="middle">PC04</text><rect x="640" y="298" width="18" height="18" fill="#2363A0" stroke="#10213B" stroke-width="2"></rect><text x="649" y="331" font-size="10" fill="#10213B" text-anchor="middle">PC05</text><rect x="670" y="298" width="18" height="18" fill="url(#pm-hatch)" stroke="#10213B" stroke-width="2"></rect><text x="679" y="331" font-size="10" fill="#10213B" text-anchor="middle">PC07</text><text x="710" y="312" font-size="12" fill="#10213B">2 empirical, 1 definition</text><line x1="8" y1="388" x2="952" y2="388" stroke="#10213B" stroke-width="1"></line><text x="8" y="362" font-size="13" font-weight="700" fill="#10213B">Handling human remains</text><text x="8" y="377" font-size="11" fill="#10213B">human_remains</text><rect x="330" y="353" width="98.6" height="16" fill="#10213B"></rect><text x="437" y="366" font-size="13" font-weight="700" fill="#10213B">9</text><rect x="610" y="352" width="18" height="18" fill="#2363A0" stroke="#10213B" stroke-width="2"></rect><text x="619" y="385" font-size="10" fill="#10213B" text-anchor="middle">PC06</text><rect x="640" y="352" width="18" height="18" fill="url(#pm-hatch)" stroke="#10213B" stroke-width="2"></rect><text x="649" y="385" font-size="10" fill="#10213B" text-anchor="middle">PC07</text><text x="680" y="366" font-size="12" fill="#10213B">1 empirical, 1 definition</text><line x1="8" y1="442" x2="952" y2="442" stroke="#10213B" stroke-width="1"></line><text x="8" y="416" font-size="13" font-weight="700" fill="#10213B">A victim the member knew</text><text x="8" y="431" font-size="11" fill="#10213B">known_victim</text><text x="330" y="420" font-size="12" font-weight="700" fill="#10213B">none, by decision</text><rect x="610" y="406" width="18" height="18" fill="#2363A0" stroke="#10213B" stroke-width="2"></rect><text x="619" y="439" font-size="10" fill="#10213B" text-anchor="middle">PC03</text><rect x="640" y="406" width="18" height="18" fill="url(#pm-hatch)" stroke="#10213B" stroke-width="2"></rect><text x="649" y="439" font-size="10" fill="#10213B" text-anchor="middle">PC07</text><text x="680" y="420" font-size="12" fill="#10213B">1 empirical, 1 definition</text><line x1="8" y1="496" x2="952" y2="496" stroke="#10213B" stroke-width="1"></line><text x="8" y="470" font-size="13" font-weight="700" fill="#10213B">Repeated exposure across many incidents</text><text x="8" y="485" font-size="11" fill="#10213B">cumulative_aversive_detail</text><text x="330" y="474" font-size="12" font-weight="700" fill="#10213B">none, by decision</text><rect x="610" y="460" width="18" height="18" fill="#2363A0" stroke="#10213B" stroke-width="2"></rect><text x="619" y="493" font-size="10" fill="#10213B" text-anchor="middle">PC01</text><rect x="640" y="460" width="18" height="18" fill="#2363A0" stroke="#10213B" stroke-width="2"></rect><text x="649" y="493" font-size="10" fill="#10213B" text-anchor="middle">PC05</text><rect x="670" y="460" width="18" height="18" fill="url(#pm-hatch)" stroke="#10213B" stroke-width="2"></rect><text x="679" y="493" font-size="10" fill="#10213B" text-anchor="middle">PC07</text><text x="710" y="474" font-size="12" fill="#10213B">2 empirical, 1 definition</text></svg></div>
+      <figcaption class="stack-8">
+        <p class="small measure"><strong>What the figure shows.</strong> For
+        each class, the number of terms as a length, and the sources behind it
+        as marks: a filled mark for an empirical paper, an open mark for the
+        shared definition. Length encodes the term count and nothing else does.
+        Colour encodes no quantity anywhere on this page.</p>
+        <p class="small"><strong>Source</strong> as above.
+        <strong>Unit</strong> one term; one cited source.
+        <strong>Denominator</strong> 76 terms, 8
+        source records. <strong>Status</strong> proposed, unreviewed.</p>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 4 · THE FOUR THINGS THE RESEARCH DECLINES -------------------------- -->
+<section class="section field-ink">
+  <div class="wrap stack-40">
+    <div class="stack">
+      <p class="eyebrow">04 &middot; In the library's own words</p>
+      <h2 class="h2 measure">The research declines what a metric most wants.</h2>
+      <p class="body measure">
+        These are quotations from the limitation column of the source records,
+        not our paraphrase of them. Each one rules out a move this kind of
+        build naturally makes.
+      </p>
+    </div>
+    <div class="rows"><div class="row"><p class="row__key">Event weights</p><p class="body"><span class="data">PC02</span>, 2000: &ldquo;No validation of entrapment trigger or event weights; no personality profiling.&rdquo; Seven of the eight classes carry “No default weight” as an explicit column. Any weight in this system is a guess and is labelled one.</p></div><div class="row"><p class="row__key">Dispatch classification</p><p class="body"><span class="data">PC05</span>, 2013: &ldquo;Does not validate a fixed half-life, automatic dispatch classification or symptom inference.&rdquo; So a dispatch code does not classify an experience, and a decaying count with a fixed half life is not supported either.</p></div><div class="row"><p class="row__key">A dose curve</p><p class="body"><span class="data">PC01</span>, 1999: &ldquo;Supports event and context documentation, not a universal event-to-symptom dose curve.&rdquo; It is also the one source in the set whose finding is mixed rather than an association.</p></div><div class="row"><p class="row__key">A route from an incident flag</p><p class="body"><span class="data">PC07</span>, official agency guidance: &ldquo;Incident flags alone cannot establish a personal Criterion A route or PTSD.&rdquo; That sentence is the whole argument of this page, written by somebody other than us.</p></div></div>
+    <div class="flag stack-8">
+      <p class="eyebrow">And the gap nobody has closed</p>
+      <p class="small measure">All 6 empirical
+      sources concern events, exposure routes and populations. None of them
+      concerns language in radio traffic or in a patient care record. A source
+      supporting &ldquo;being trapped is associated with posttraumatic
+      symptoms&rdquo; does not support &ldquo;the phrase
+      <span class="data">low on air</span> in a transcript indicates
+      it.&rdquo; That is the real evidential gap, it is the first thing a
+      clinical reviewer should press on, and it is why a matched term produces
+      a candidate rather than a count.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · THE TERMS ------------------------------------------------------- -->
+<section class="section">
+  <div class="wrap stack-40">
+    <div class="stack">
+      <p class="eyebrow">05 &middot; The list</p>
+      <h2 class="h2 measure">Every term, and how it is counted.</h2>
+      <p class="body measure">
+        Published in full. A member whose radio traffic could be read by this
+        system is entitled to see the whole list rather than a sample of it,
+        and a reviewer cannot rule on a list they have to ask for.
+      </p>
+      <div class="grid-2">
+        <div class="stack-8">
+          <p class="eyebrow">How terms count</p>
+          <p class="small">Terms stack. More terms matching means more things
+          were true about the call, so a specific term adds to a general one
+          rather than replacing it. The one exception is two words for a single
+          declaration: terms sharing a fact group describe one fact and are
+          counted once between them. 76 terms resolve to
+          21 fact groups plus the ungrouped singles.</p>
+        </div>
+        <div class="stack-8">
+          <p class="eyebrow">Radio dialect</p>
+          <p class="small">2 terms are signal codes rather than
+          plain English. A code means different things in different agencies, so
+          a single global code list would create facts the agency never said.
+          A dialect term matches only where its department has confirmed the
+          code, and no department has confirmed one, so these are off
+          everywhere today.</p>
+        </div>
+      </div>
+      <div class="legend">
+        <span class="mark mark--corroboration">On a corroboration route</span>
+        <span class="mark mark--boundary">On an exclusion boundary</span>
+        <span class="mark mark--insufficient">Named insufficient by the research</span>
+        <span class="mark mark--off">Off by default</span>
+      </div>
+    </div>
+
+    <div class="stack"><div class="stack-8"><h3 class="h3">A member killed or seriously hurt</h3><p class="data">member_casualty &middot; 10 terms &middot; empirical source PC01 &middot; definition PC07</p><p class="small measure"><strong>Requires</strong> A death or serious injury, plus evidence of who witnessed it. <strong>Not enough</strong> A Mayday opens a review. It does not establish that anything happened.</p></div><div class="scroller"><table><caption>A member killed or seriously hurt &middot; 10 terms</caption><thead><tr><th scope="col">Term</th><th scope="col">How it was drawn</th><th scope="col">Counting</th><th scope="col">Matched by default</th></tr></thead><tbody><tr><th scope="row">ff down</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">member_down</span></td><td class="small">On</td></tr><tr><th scope="row">firefighter down</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">member_down</span></td><td class="small">On</td></tr><tr><th scope="row">firefighter injured</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">member_injured</span></td><td class="small">On</td></tr><tr><th scope="row">injured firefighter</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">member_injured</span></td><td class="small">On</td></tr><tr><th scope="row">injured member</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">member_injured</span></td><td class="small">On</td></tr><tr><th scope="row">line of duty death</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">lodd</span></td><td class="small">On</td></tr><tr><th scope="row">lodd</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">lodd</span></td><td class="small">On</td></tr><tr><th scope="row">mayday</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as its own fact</td><td class="small">On</td></tr><tr><th scope="row">member down</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">member_down</span></td><td class="small">On</td></tr><tr><th scope="row">member injured</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">member_injured</span></td><td class="small">On</td></tr></tbody></table></div></div><div class="stack"><div class="stack-8"><h3 class="h3">A member trapped or out of air</h3><p class="data">member_entrapment &middot; 21 terms &middot; empirical source PC02 &middot; definition PC07</p><p class="small measure"><strong>Requires</strong> Entrapment, loss of air or an immediate life threat to the affected person. <strong>Not enough</strong> A collapse or a flashover somewhere on the fireground does not establish exposure for everyone who responded.</p></div><div class="scroller"><table><caption>A member trapped or out of air &middot; 21 terms</caption><thead><tr><th scope="col">Term</th><th scope="col">How it was drawn</th><th scope="col">Counting</th><th scope="col">Matched by default</th></tr></thead><tbody><tr><th scope="row">abandon the building</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">evacuation_ordered</span></td><td class="small">On</td></tr><tr><th scope="row">air emergency</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">air_emergency</span></td><td class="small">On</td></tr><tr><th scope="row">backdraft</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as one fact with the rest of <span class="data">sudden_fire_event</span></td><td class="small">On</td></tr><tr><th scope="row">ceiling collapse</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as one fact with the rest of <span class="data">structural_collapse</span></td><td class="small">On</td></tr><tr><th scope="row">collapse</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as one fact with the rest of <span class="data">structural_collapse</span></td><td class="small">On</td></tr><tr><th scope="row">collapsed</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as one fact with the rest of <span class="data">structural_collapse</span></td><td class="small">On</td></tr><tr><th scope="row">emergency evacuation</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">evacuation_ordered</span></td><td class="small">On</td></tr><tr><th scope="row">entrapment</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">entrapped</span></td><td class="small">On</td></tr><tr><th scope="row">entrapped</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">entrapped</span></td><td class="small">On</td></tr><tr><th scope="row">evacuate the building</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">evacuation_ordered</span></td><td class="small">On</td></tr><tr><th scope="row">flashover</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as one fact with the rest of <span class="data">sudden_fire_event</span></td><td class="small">On</td></tr><tr><th scope="row">low air</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">air_emergency</span></td><td class="small">On</td></tr><tr><th scope="row">low on air</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">air_emergency</span></td><td class="small">On</td></tr><tr><th scope="row">out of air</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">air_emergency</span></td><td class="small">On</td></tr><tr><th scope="row">partial collapse</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as one fact with the rest of <span class="data">structural_collapse</span></td><td class="small">On</td></tr><tr><th scope="row">pinned</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">entrapped</span></td><td class="small">On</td></tr><tr><th scope="row">rapid intervention</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">rit</span></td><td class="small">On</td></tr><tr><th scope="row">rit activated</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">rit</span></td><td class="small">On</td></tr><tr><th scope="row">rit deployed</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">rit</span></td><td class="small">On</td></tr><tr><th scope="row">roof collapse</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as one fact with the rest of <span class="data">structural_collapse</span></td><td class="small">On</td></tr><tr><th scope="row">trapped</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">entrapped</span></td><td class="small">On</td></tr></tbody></table></div></div><div class="stack"><div class="stack-8"><h3 class="h3">A child killed or critically hurt</h3><p class="data">pediatric_casualty &middot; 13 terms &middot; empirical source PC03 &middot; definition PC07</p><p class="small measure"><strong>Requires</strong> A corroborated event, and relevant in person witnessing. <strong>Not enough</strong> A pediatric dispatch, a transport priority or an age on its own is not enough.</p></div><div class="scroller"><table><caption>A child killed or critically hurt &middot; 13 terms</caption><thead><tr><th scope="col">Term</th><th scope="col">How it was drawn</th><th scope="col">Counting</th><th scope="col">Matched by default</th></tr></thead><tbody><tr><th scope="row">child not breathing</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">pediatric_arrest</span></td><td class="small">On</td></tr><tr><th scope="row">child unresponsive</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">pediatric_unresponsive</span></td><td class="small">On</td></tr><tr><th scope="row">infant</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as one fact with the rest of <span class="data">pediatric_patient</span></td><td class="small">On</td></tr><tr><th scope="row">infant arrest</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">pediatric_arrest</span></td><td class="small">On</td></tr><tr><th scope="row">infant not breathing</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">pediatric_arrest</span></td><td class="small">On</td></tr><tr><th scope="row">infant unresponsive</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">pediatric_unresponsive</span></td><td class="small">On</td></tr><tr><th scope="row">juvenile</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as one fact with the rest of <span class="data">pediatric_patient</span></td><td class="small">On</td></tr><tr><th scope="row">pediatric</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as one fact with the rest of <span class="data">pediatric_patient</span></td><td class="small">On</td></tr><tr><th scope="row">pediatric arrest</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">pediatric_arrest</span></td><td class="small">On</td></tr><tr><th scope="row">pediatric cardiac arrest</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">pediatric_arrest</span></td><td class="small">On</td></tr><tr><th scope="row">peds</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as one fact with the rest of <span class="data">pediatric_patient</span></td><td class="small">On</td></tr><tr><th scope="row">peds arrest</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">pediatric_arrest</span></td><td class="small">On</td></tr><tr><th scope="row">toddler</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as one fact with the rest of <span class="data">pediatric_patient</span></td><td class="small">On</td></tr></tbody></table></div></div><div class="stack"><div class="stack-8"><h3 class="h3">A civilian death</h3><p class="data">civilian_death &middot; 14 terms &middot; empirical source PC04, PC05 &middot; definition PC07</p><p class="small measure"><strong>Requires</strong> Corroborated traumatic circumstances, and an actual witnessing route reviewed. <strong>Not enough</strong> A death, an unsuccessful resuscitation or an expected natural death does not on its own establish the exposure route.</p></div><div class="scroller"><table><caption>A civilian death &middot; 14 terms</caption><thead><tr><th scope="col">Term</th><th scope="col">How it was drawn</th><th scope="col">Counting</th><th scope="col">Matched by default</th></tr></thead><tbody><tr><th scope="row">cardiac arrest</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as one fact with the rest of <span class="data">cardiac_arrest</span></td><td class="small">On</td></tr><tr><th scope="row">cpr</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as one fact with the rest of <span class="data">resuscitation_attempt</span></td><td class="small">On</td></tr><tr><th scope="row">dead on arrival</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">death_confirmed</span></td><td class="small">On</td></tr><tr><th scope="row">deceased</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">death_confirmed</span></td><td class="small">On</td></tr><tr><th scope="row">doa</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">death_confirmed</span></td><td class="small">On</td></tr><tr><th scope="row">expired</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">death_confirmed</span></td><td class="small">On</td></tr><tr><th scope="row">fatality</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">death_confirmed</span></td><td class="small">On</td></tr><tr><th scope="row">full arrest</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as one fact with the rest of <span class="data">cardiac_arrest</span></td><td class="small">On</td></tr><tr><th scope="row">obvious death</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">death_confirmed</span></td><td class="small">On</td></tr><tr><th scope="row">pronounced</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">death_confirmed</span></td><td class="small">On</td></tr><tr><th scope="row">resuscitation in progress</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as one fact with the rest of <span class="data">resuscitation_attempt</span></td><td class="small">On</td></tr><tr><th scope="row">signal 7</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">death_confirmed</span></td><td class="small"><span class="mark mark--off">Off</span> <span class="small">fl_signal_codes</span></td></tr><tr><th scope="row">signal seven</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">death_confirmed</span></td><td class="small"><span class="mark mark--off">Off</span> <span class="small">fl_signal_codes</span></td></tr><tr><th scope="row">unsuccessful resuscitation</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as one fact with the rest of <span class="data">resuscitation_attempt</span></td><td class="small">On</td></tr></tbody></table></div></div><div class="stack"><div class="stack-8"><h3 class="h3">Multiple casualties at one incident</h3><p class="data">mass_casualty &middot; 9 terms &middot; empirical source PC04, PC05 &middot; definition PC07</p><p class="small measure"><strong>Requires</strong> Confirmed casualties and responder contact, with the count uncertainty preserved. <strong>Not enough</strong> A mass casualty dispatch or a staging assignment on its own is not enough.</p></div><div class="scroller"><table><caption>Multiple casualties at one incident &middot; 9 terms</caption><thead><tr><th scope="col">Term</th><th scope="col">How it was drawn</th><th scope="col">Counting</th><th scope="col">Matched by default</th></tr></thead><tbody><tr><th scope="row">mass casualty</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as one fact with the rest of <span class="data">mci_declaration</span></td><td class="small">On</td></tr><tr><th scope="row">mass casualty incident</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as one fact with the rest of <span class="data">mci_declaration</span></td><td class="small">On</td></tr><tr><th scope="row">mci</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as one fact with the rest of <span class="data">mci_declaration</span></td><td class="small">On</td></tr><tr><th scope="row">multiple casualties</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">multiple_casualties</span></td><td class="small">On</td></tr><tr><th scope="row">multiple patients</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">multiple_casualties</span></td><td class="small">On</td></tr><tr><th scope="row">multiple victims</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">multiple_casualties</span></td><td class="small">On</td></tr><tr><th scope="row">staging</th><td><span class="mark mark--boundary">Exclusion boundary</span> <span class="mark mark--insufficient">Named insufficient</span></td><td class="small">Counted as its own fact</td><td class="small">On</td></tr><tr><th scope="row">triage</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">triage_performed</span></td><td class="small">On</td></tr><tr><th scope="row">triaged</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">triage_performed</span></td><td class="small">On</td></tr></tbody></table></div></div><div class="stack"><div class="stack-8"><h3 class="h3">Handling human remains</h3><p class="data">human_remains &middot; 9 terms &middot; empirical source PC06 &middot; definition PC07</p><p class="small measure"><strong>Requires</strong> Documented recovery or handling, or repeated and extreme duty related contact. <strong>Not enough</strong> Being assigned to the incident is not qualifying contact.</p></div><div class="scroller"><table><caption>Handling human remains &middot; 9 terms</caption><thead><tr><th scope="col">Term</th><th scope="col">How it was drawn</th><th scope="col">Counting</th><th scope="col">Matched by default</th></tr></thead><tbody><tr><th scope="row">body recovery</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">remains_handling</span></td><td class="small">On</td></tr><tr><th scope="row">coroner</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">death_investigator</span></td><td class="small">On</td></tr><tr><th scope="row">decedent</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">remains_handling</span></td><td class="small">On</td></tr><tr><th scope="row">decomp</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">decomposition</span></td><td class="small">On</td></tr><tr><th scope="row">decomposed</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">decomposition</span></td><td class="small">On</td></tr><tr><th scope="row">decomposition</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">decomposition</span></td><td class="small">On</td></tr><tr><th scope="row">medical examiner</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">death_investigator</span></td><td class="small">On</td></tr><tr><th scope="row">recovery of remains</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">remains_handling</span></td><td class="small">On</td></tr><tr><th scope="row">remains</th><td><span class="mark mark--corroboration">Corroboration route</span></td><td class="small">Counted as one fact with the rest of <span class="data">remains_handling</span></td><td class="small">On</td></tr></tbody></table></div></div><p class="small measure note">A dialect term carries the department whose code list it belongs to. The meaning was supplied internally and is not confirmed against any department published signal list, so every dialect term is off until the department that uses it confirms the code.</p>
+  </div>
+</section>
+
+<!-- 6 · CONSIDERED AND LEFT OUT ---------------------------------------- -->
+<section class="section field-white">
+  <div class="wrap stack-40">
+    <div class="stack">
+      <p class="eyebrow">06 &middot; Rejected</p>
+      <h2 class="h2 measure">What was considered and left out.</h2>
+      <p class="body measure">
+        A list of what matches is a weaker disclosure than a list of what was
+        considered and rejected, and why. These are the terms that were
+        proposed and are not in the list.
+      </p>
+    </div>
+    <div class="scroller">
+      <table>
+        <caption>Terms proposed and not included</caption>
+        <thead><tr><th scope="col">Term</th><th scope="col">Why not</th></tr></thead>
+        <tbody><tr><th scope="row">child</th><td>Matches &quot;child safety seat&quot; and &quot;children present&quot;.</td></tr><tr><th scope="row">man down</th><td>Used for civilians as often as members, so it would attribute a civilian event to a member one.</td></tr><tr><th scope="row">arrest</th><td>Matches &quot;under arrest&quot;.</td></tr><tr><th scope="row">rit</th><td>Too short to be safe on its own. The deployment phrases are in the list instead.</td></tr><tr><th scope="row">not living</th><td>Matches &quot;not living at this address&quot;, and is not radio prose.</td></tr><tr><th scope="row">ten codes</th><td>Agency specific. A single global code list would create facts that the agency never said.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 7 · THE SOURCES ----------------------------------------------------- -->
+<section class="section">
+  <div class="wrap stack-40">
+    <div class="stack">
+      <p class="eyebrow">07 &middot; The sources</p>
+      <h2 class="h2 measure">Every identifier resolves, and every one is linked.</h2>
+      <p class="body measure">
+        Each record below carries the population it studied, its design, what
+        the library says it supports, and verbatim what it says it does not.
+        The author list, title, journal and locus of each publication were
+        retrieved by identifier from Europe PMC on 2026-10-09, and every
+        digital object identifier the library records matched the one returned.
+      </p>
+      <p class="body measure">
+        <strong>No paper in this set has been read in full.</strong> Review
+        depth on all 6 publications is metadata and
+        abstract only, with full text and formal bias appraisal pending.
+        Resolving an identifier is not appraising a source, and this page does
+        not claim it is.
+      </p>
+    </div>
+    <div class="panel panel--white stack-8"><p class="eyebrow">PC01 &middot; mixed &middot; seed</p><p class="body measure">Corneil W, Beaton R, Murphy S, Johnson C, Pike K. Exposure to traumatic incidents and prevalence of posttraumatic stress symptomatology in urban firefighters in two countries. Journal of Occupational Health Psychology. 1999;4(2):131-141.</p><div class="rows"><div class="row"><p class="row__key">Population</p><p class="body">Firefighters, US and Canada &middot; Comparative observational</p></div><div class="row"><p class="row__key">Finding</p><p class="body">Trauma exposures differed between countries; reported PTSD prevalence did not differ significantly.</p></div><div class="row"><p class="row__key">Supports</p><p class="body">Supports event and context documentation, not a universal event-to-symptom dose curve.</p></div><div class="row"><p class="row__key">Does not support</p><p class="body">&ldquo;Cross-sectional, self-report; contextual and individual differences.&rdquo;</p></div><div class="row"><p class="row__key">Review depth</p><p class="body">Metadata and abstract reviewed. Full text and formal bias appraisal pending</p></div><div class="row"><p class="row__key">Locus</p><p class="data"><a href="https://pubmed.ncbi.nlm.nih.gov/10212865/">PMID 10212865</a> &middot; <a href="https://doi.org/10.1037//1076-8998.4.2.131">doi 10.1037//1076-8998.4.2.131</a></p></div><div class="row"><p class="row__key">Carried by</p><p class="data">member_casualty &middot; cumulative_aversive_detail</p></div></div></div><div class="panel panel--white stack-8"><p class="eyebrow">PC02 &middot; association &middot; seed</p><p class="body measure">Regehr C, Hill J, Glancy GD. Individual predictors of traumatic reactions in firefighters. The Journal of Nervous and Mental Disease. 2000;188(6):333-339.</p><div class="rows"><div class="row"><p class="row__key">Population</p><p class="body">164 Australian firefighters &middot; Questionnaire study</p></div><div class="row"><p class="row__key">Finding</p><p class="body">Individual factors and social support were associated with differences in posttraumatic and depressive symptoms.</p></div><div class="row"><p class="row__key">Supports</p><p class="body">Supports keeping incident facts separate from individual response.</p></div><div class="row"><p class="row__key">Does not support</p><p class="body">&ldquo;No validation of entrapment trigger or event weights; no personality profiling.&rdquo;</p></div><div class="row"><p class="row__key">Review depth</p><p class="body">Metadata and abstract reviewed. Full text and formal bias appraisal pending</p></div><div class="row"><p class="row__key">Locus</p><p class="data"><a href="https://pubmed.ncbi.nlm.nih.gov/10890341/">PMID 10890341</a> &middot; <a href="https://doi.org/10.1097/00005053-200006000-00003">doi 10.1097/00005053-200006000-00003</a></p></div><div class="row"><p class="row__key">Carried by</p><p class="data">member_entrapment</p></div></div></div><div class="panel panel--white stack-8"><p class="eyebrow">PC03 &middot; association &middot; seed</p><p class="body measure">Regehr C, Goldberg G, Hughes J. Exposure to human tragedy, empathy, and trauma in ambulance paramedics. The American Journal of Orthopsychiatry. 2002;72(4):505-513.</p><div class="rows"><div class="row"><p class="row__key">Population</p><p class="body">Ambulance paramedics &middot; Mixed methods</p></div><div class="row"><p class="row__key">Finding</p><p class="body">Emotional connection with patients or families was associated with greater reported traumatic stress.</p></div><div class="row"><p class="row__key">Supports</p><p class="body">Context for pediatric and close-person review flags.</p></div><div class="row"><p class="row__key">Does not support</p><p class="body">&ldquo;Does not establish that every pediatric emergency meets Criterion A or diagnose a responder.&rdquo;</p></div><div class="row"><p class="row__key">Review depth</p><p class="body">Metadata and abstract reviewed. Full text and formal bias appraisal pending</p></div><div class="row"><p class="row__key">Locus</p><p class="data"><a href="https://pubmed.ncbi.nlm.nih.gov/15792036/">PMID 15792036</a> &middot; <a href="https://doi.org/10.1037/0002-9432.72.4.505">doi 10.1037/0002-9432.72.4.505</a></p></div><div class="row"><p class="row__key">Carried by</p><p class="data">pediatric_casualty &middot; known_victim</p></div></div></div><div class="panel panel--white stack-8"><p class="eyebrow">PC04 &middot; association &middot; seed</p><p class="body measure">Berger W, Coutinho ES, Figueira I, Marques-Portella C, Luz MP, Neylan TC, Marmar CR, Mendlowicz MV. Rescuers at risk: a systematic review and meta-regression analysis of the worldwide current prevalence and correlates of PTSD in rescue workers. Social Psychiatry and Psychiatric Epidemiology. 2012;47(6):1001-1011.</p><div class="rows"><div class="row"><p class="row__key">Population</p><p class="body">20,424 rescuers; 40 samples &middot; Systematic review and meta-regression</p></div><div class="row"><p class="row__key">Finding</p><p class="body">Pooled current PTSD prevalence was 10%; estimates varied across populations.</p></div><div class="row"><p class="row__key">Supports</p><p class="body">Background rationale for research and support access.</p></div><div class="row"><p class="row__key">Does not support</p><p class="body">&ldquo;Current prevalence is not individual probability; overlapping studies with later reviews.&rdquo;</p></div><div class="row"><p class="row__key">Review depth</p><p class="body">Metadata and abstract reviewed. Full text and formal bias appraisal pending</p></div><div class="row"><p class="row__key">Locus</p><p class="data"><a href="https://pubmed.ncbi.nlm.nih.gov/21681455/">PMID 21681455</a> &middot; <a href="https://doi.org/10.1007/s00127-011-0408-2">doi 10.1007/s00127-011-0408-2</a></p></div><div class="row"><p class="row__key">Carried by</p><p class="data">civilian_death &middot; mass_casualty</p></div></div></div><div class="panel panel--white stack-8"><p class="eyebrow">PC05 &middot; association &middot; seed</p><p class="body measure">Skogstad M, Skorstad M, Lie A, Conradi HS, Heir T, Weisaeth L. Work-related post-traumatic stress disorder. Occupational Medicine (Oxford, England). 2013;63(3):175-182.</p><div class="rows"><div class="row"><p class="row__key">Population</p><p class="body">Multiple occupations &middot; Occupational review</p></div><div class="row"><p class="row__key">Finding</p><p class="body">Reviewed work-related PTSD and contextual factors including social support and prior mental health.</p></div><div class="row"><p class="row__key">Supports</p><p class="body">Occupational context; supports separate clinical and event layers.</p></div><div class="row"><p class="row__key">Does not support</p><p class="body">&ldquo;Does not validate a fixed half-life, automatic dispatch classification or symptom inference.&rdquo;</p></div><div class="row"><p class="row__key">Review depth</p><p class="body">Metadata and abstract reviewed. Full text and formal bias appraisal pending</p></div><div class="row"><p class="row__key">Locus</p><p class="data"><a href="https://pubmed.ncbi.nlm.nih.gov/23564090/">PMID 23564090</a> &middot; <a href="https://doi.org/10.1093/occmed/kqt003">doi 10.1093/occmed/kqt003</a></p></div><div class="row"><p class="row__key">Carried by</p><p class="data">civilian_death &middot; mass_casualty &middot; cumulative_aversive_detail</p></div></div></div><div class="panel panel--white stack-8"><p class="eyebrow">PC06 &middot; association &middot; seed</p><p class="body measure">McCarroll JE, Ursano RJ, Fullerton CS. Symptoms of posttraumatic stress disorder following recovery of war dead. The American Journal of Psychiatry. 1993;150(12):1875-1877.</p><div class="rows"><div class="row"><p class="row__key">Population</p><p class="body">116 military remains handlers; 118 comparison participants &middot; Comparative observational</p></div><div class="row"><p class="row__key">Finding</p><p class="body">Remains handlers reported more intrusive and avoidant symptoms; experience modified findings.</p></div><div class="row"><p class="row__key">Supports</p><p class="body">Context for documenting occupational contact with human remains.</p></div><div class="row"><p class="row__key">Does not support</p><p class="body">&ldquo;Military war-dead setting; not a validated civilian firefighter coefficient.&rdquo;</p></div><div class="row"><p class="row__key">Review depth</p><p class="body">Metadata and abstract reviewed. Full text and formal bias appraisal pending</p></div><div class="row"><p class="row__key">Locus</p><p class="data"><a href="https://pubmed.ncbi.nlm.nih.gov/8238646/">PMID 8238646</a> &middot; <a href="https://doi.org/10.1176/ajp.150.12.1875">doi 10.1176/ajp.150.12.1875</a></p></div><div class="row"><p class="row__key">Carried by</p><p class="data">human_remains</p></div></div></div><div class="panel panel--white stack-8"><p class="eyebrow">PC07 &middot; definition &middot; seed clarification</p><p class="body measure">US Department of Veterans Affairs, National Center for PTSD. PTSD and DSM-5.</p><div class="rows"><div class="row"><p class="row__key">Population</p><p class="body">Clinical assessment guidance &middot; Official agency guidance</p></div><div class="row"><p class="row__key">Finding</p><p class="body">Describes exposure routes and the additional symptom, duration, impairment and exclusion criteria.</p></div><div class="row"><p class="row__key">Supports</p><p class="body">Diagnostic boundary</p></div><div class="row"><p class="row__key">Does not support</p><p class="body">&ldquo;Incident flags alone cannot establish a personal Criterion A route or PTSD.&rdquo;</p></div><div class="row"><p class="row__key">Review depth</p><p class="body">Official guidance page reviewed. No independent clinical approval implied</p></div><div class="row"><p class="row__key">Locus</p><p class="data"><a href="https://www.ptsd.va.gov/professional/treat/essentials/dsm5_ptsd.asp">https://www.ptsd.va.gov/professional/treat/essentials/dsm5_ptsd.asp</a></p></div><div class="row"><p class="row__key">Carried by</p><p class="data">member_casualty &middot; member_entrapment &middot; pediatric_casualty &middot; civilian_death &middot; mass_casualty &middot; human_remains &middot; known_victim &middot; cumulative_aversive_detail</p></div></div></div>
+    <div class="panel panel--white stack-8">
+      <p class="eyebrow">The source that is in the library and cited by nothing</p>
+      <p class="body measure"><span class="data">PC08</span> is in the library and no class cites it. US Department of Veterans Affairs, National Center for PTSD. PTSD Checklist for DSM-5 (PCL-5). Describes a 20-item self-report assessment and clinician interpretation; screening is not a dispatch-derived diagnosis.</p><p class="small measure">The rolling count of events has no threshold and no instrument behind it, and an outside instrument is the intended route to validating a figure. This is a candidate for that role and not part of the measure. Its own limitation sets the shape of any such use: &ldquo;No questionnaire values, cutoff flags or inferred symptoms in shared incident or unit records.&rdquo; It may validate a figure. It may never feed one.</p>
+    </div>
+    <p class="small measure note">PC09 through PC21 exist in the library and are not recorded here. No event class cites any of them. Read them before relying on the library beyond the keyword chain.</p>
+  </div>
+</section>
+
+<!-- 8 · THE SCOPE ------------------------------------------------------- -->
+<section class="section field-white">
+  <div class="wrap stack-40">
+    <div class="stack">
+      <p class="eyebrow">08 &middot; The scope</p>
+      <h2 class="h2 measure">Five phases, and four of them are gates.</h2>
+      <p class="body measure">
+        The work is staged so that each phase has to be approved before the
+        next one can begin. Any automated alert, clinical interpretation or
+        referral trigger stays disabled until its method, validation,
+        authority, consent, access controls and response workflow are each
+        separately approved. No phase beyond the first assumes it will proceed.
+      </p>
+    </div>
+    <div class="rows">
+      <div class="row">
+        <p class="row__key">Phase 0 &middot; Authority</p>
+        <p class="body">Confirm who owns each data source and who may decide.
+        Inventory what is available and what restricts it. Resolve the research
+        and ethics pathway before any retrospective analysis. Define roles,
+        access and purpose. Ends in a go or no go record.</p>
+      </div>
+      <div class="row">
+        <p class="row__key">Phase 1 &middot; Specification</p>
+        <p class="body">Inspect sample data under approved access. Document
+        quality, time zone, coverage, duplicates and roster timing. Freeze
+        versioned definitions with their numerator, denominator, grain, window
+        and missingness rules. Build simulated fixtures.</p>
+      </div>
+      <div class="row">
+        <p class="row__key">Phase 2 &middot; Feasibility</p>
+        <p class="body">Only after approval, run a bounded retrospective
+        sample. Compare how the same call is represented across each source.
+        Adjudicate event facts independently. Test repeatability, disagreement
+        and coverage. Assess whether the available cohort can calibrate
+        anything, without treating it as clinical validation.</p>
+      </div>
+      <div class="row">
+        <p class="row__key">Phase 3 &middot; Proof of concept</p>
+        <p class="body">If approved, process a narrow feed in research mode and
+        show descriptive and event review views to authorised reviewers. No
+        automated individual alerts and no workplace decisions.</p>
+      </div>
+      <div class="row">
+        <p class="row__key">Phase 4 &middot; Decision</p>
+        <p class="body">Convene every party with authority, review the evidence
+        and the safeguards, and decide whether any expanded or person level
+        function is permissible. This is a decision gate and not an assumed
+        launch.</p>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="panel stack-8">
+        <p class="eyebrow">What counts as success</p>
+        <p class="small">Traceable lineage from source to output, reproducible
+        calculations, documented missingness and conflicts, passing role and
+        access tests, reviewed comprehension, and written approval at each
+        gate.</p>
+      </div>
+      <div class="panel stack-8">
+        <p class="eyebrow">What does not</p>
+        <p class="small">No clinical benefit, no prediction of self harm and no
+        validated risk classification is a success claim in this scope. The
+        measure describes exposure already carried. It does not forecast
+        anything.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 · LIMITS ---------------------------------------------------------- -->
+<section class="section field-ink">
+  <div class="wrap stack-40">
+    <div class="stack">
+      <p class="eyebrow">09 &middot; Limits and open questions</p>
+      <h2 class="h2 measure">What we cannot yet answer.</h2>
+    </div>
+    <div class="rows">
+      <div class="row">
+        <p class="row__key">Who reviews the list</p>
+        <p class="body">Unassigned. The list stays marked unreviewed until a
+        clinical reviewer reads every term against its class, and no figure is
+        produced from it in the meantime.</p>
+      </div>
+      <div class="row">
+        <p class="row__key">Whether a published list changes the radio</p>
+        <p class="body">Open, and it matters more than it looks. Several terms
+        are safety critical transmissions. If publishing the list made anyone
+        hesitate before saying one of them on the air, that would be a harm
+        this project caused, and it would outweigh the measure. The list is
+        published because a member is owed sight of what could be read about
+        them, and because a measure built on a hidden vocabulary is worse. The
+        question stays open and is addressed to the people who run the calls.</p>
+      </div>
+      <div class="row">
+        <p class="row__key">Whether a transcript can support any of this</p>
+        <p class="body">Unestablished. No source in the set concerns language
+        in radio traffic. Until that gap is closed by evidence rather than by
+        argument, a match is a candidate for a person to review.</p>
+      </div>
+      <div class="row">
+        <p class="row__key">Any threshold at all</p>
+        <p class="body">There is none. A rolling count of events has no
+        validated cutoff and no instrument behind it, and no band, colour or
+        status is assigned to a person anywhere in this system today.</p>
+      </div>
+      <div class="row">
+        <p class="row__key">Which codes a department uses</p>
+        <p class="body">Unconfirmed. Until a department publishes its own
+        signal list, every dialect term stays off.</p>
+      </div>
+      <div class="row">
+        <p class="row__key">Who may read a member's figure</p>
+        <p class="body">Settled, and it is not this site. A member's own figure
+        is read by the member and the body that represents them. An employer
+        sees aggregates. This page holds no member figure, no incident and no
+        record of any kind, and the public site has no login on any page for
+        one to sit behind.</p>
+      </div>
+    </div>
+    <div class="flag stack-8">
+      <p class="eyebrow">Correction path</p>
+      <p class="small measure">If a term on this page is wrong for your
+      department, if a source is misread, or if a limitation is stated too
+      weakly, write to
+      <a href="mailto:michael.harvey@emr-inc.net">michael.harvey@emr-inc.net</a>
+      and it will be corrected here with the date of the change. The term list
+      and this page both carry a version and a hash so that a correction is
+      visible rather than silent.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap stack">
+    <p class="eyebrow">EMR Inc. &middot; Emergency Medical Resolutions</p>
+    <p class="body measure">We build with the bodies that represent
+    firefighters and the members they represent. An employer can support
+    implementation and read appropriate aggregate reporting. An individual
+    member's record stays controlled by the member.</p>
+    <div class="footer__links">
+      <a href="/">Home</a>
+      <a href="research.html">Research</a>
+      <a href="open-data.html">Open data</a>
+      <a href="member-research.html">Member research</a>
+      <a href="dispatch-views.html">Dispatch views</a>
+      <a href="call-sign.html">CALL/SIGN: Dashboard</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <p class="data">Method source <a href="data/pel-method.json">pel-method.json</a>
+      &middot; list pel-keywords-v3-proposed &middot; hash 6c1c0c12329bfe10 &middot; built 2026-10-10</p>
+    <p class="data">EMR Inc. &middot; emr-inc.net &middot; Delaware C corp &middot; File No. 10300393</p>
+  </div>
+</footer>
+
+<script id="pel_method_data" type="application/json">{"citations":[{"design":"Comparative observational","direction":"mixed","doi":"10.1037//1076-8998.4.2.131","finding":"Trauma exposures differed between countries; reported PTSD prevalence did not differ significantly.","fullCitation":"Corneil W, Beaton R, Murphy S, Johnson C, Pike K. Exposure to traumatic incidents and prevalence of posttraumatic stress symptomatology in urban firefighters in two countries. Journal of Occupational Health Psychology. 1999;4(2):131-141.","id":"PC01","limitations":"Cross-sectional, self-report; contextual and individual differences.","origin":"seed","pendingReview":"Full text and formal bias appraisal pending","pmid":"10212865","population":"Firefighters, US and Canada","primaryUrl":"https://pubmed.ncbi.nlm.nih.gov/10212865/","reviewDepth":"Metadata and abstract reviewed","supportedUse":"Supports event and context documentation, not a universal event-to-symptom dose curve.","year":"1999"},{"design":"Questionnaire study","direction":"association","doi":"10.1097/00005053-200006000-00003","finding":"Individual factors and social support were associated with differences in posttraumatic and depressive symptoms.","fullCitation":"Regehr C, Hill J, Glancy GD. Individual predictors of traumatic reactions in firefighters. The Journal of Nervous and Mental Disease. 2000;188(6):333-339.","id":"PC02","limitations":"No validation of entrapment trigger or event weights; no personality profiling.","origin":"seed","pendingReview":"Full text and formal bias appraisal pending","pmid":"10890341","population":"164 Australian firefighters","primaryUrl":"https://pubmed.ncbi.nlm.nih.gov/10890341/","reviewDepth":"Metadata and abstract reviewed","supportedUse":"Supports keeping incident facts separate from individual response.","year":"2000"},{"design":"Mixed methods","direction":"association","doi":"10.1037/0002-9432.72.4.505","finding":"Emotional connection with patients or families was associated with greater reported traumatic stress.","fullCitation":"Regehr C, Goldberg G, Hughes J. Exposure to human tragedy, empathy, and trauma in ambulance paramedics. The American Journal of Orthopsychiatry. 2002;72(4):505-513.","id":"PC03","limitations":"Does not establish that every pediatric emergency meets Criterion A or diagnose a responder.","origin":"seed","pendingReview":"Full text and formal bias appraisal pending","pmid":"15792036","population":"Ambulance paramedics","primaryUrl":"https://pubmed.ncbi.nlm.nih.gov/15792036/","reviewDepth":"Metadata and abstract reviewed","supportedUse":"Context for pediatric and close-person review flags.","year":"2002"},{"design":"Systematic review and meta-regression","direction":"association","doi":"10.1007/s00127-011-0408-2","finding":"Pooled current PTSD prevalence was 10%; estimates varied across populations.","fullCitation":"Berger W, Coutinho ES, Figueira I, Marques-Portella C, Luz MP, Neylan TC, Marmar CR, Mendlowicz MV. Rescuers at risk: a systematic review and meta-regression analysis of the worldwide current prevalence and correlates of PTSD in rescue workers. Social Psychiatry and Psychiatric Epidemiology. 2012;47(6):1001-1011.","id":"PC04","limitations":"Current prevalence is not individual probability; overlapping studies with later reviews.","origin":"seed","pendingReview":"Full text and formal bias appraisal pending","pmid":"21681455","population":"20,424 rescuers; 40 samples","primaryUrl":"https://pubmed.ncbi.nlm.nih.gov/21681455/","reviewDepth":"Metadata and abstract reviewed","supportedUse":"Background rationale for research and support access.","year":"2012"},{"design":"Occupational review","direction":"association","doi":"10.1093/occmed/kqt003","finding":"Reviewed work-related PTSD and contextual factors including social support and prior mental health.","fullCitation":"Skogstad M, Skorstad M, Lie A, Conradi HS, Heir T, Weisaeth L. Work-related post-traumatic stress disorder. Occupational Medicine (Oxford, England). 2013;63(3):175-182.","id":"PC05","limitations":"Does not validate a fixed half-life, automatic dispatch classification or symptom inference.","origin":"seed","pendingReview":"Full text and formal bias appraisal pending","pmid":"23564090","population":"Multiple occupations","primaryUrl":"https://pubmed.ncbi.nlm.nih.gov/23564090/","reviewDepth":"Metadata and abstract reviewed","supportedUse":"Occupational context; supports separate clinical and event layers.","year":"2013"},{"design":"Comparative observational","direction":"association","doi":"10.1176/ajp.150.12.1875","finding":"Remains handlers reported more intrusive and avoidant symptoms; experience modified findings.","fullCitation":"McCarroll JE, Ursano RJ, Fullerton CS. Symptoms of posttraumatic stress disorder following recovery of war dead. The American Journal of Psychiatry. 1993;150(12):1875-1877.","id":"PC06","limitations":"Military war-dead setting; not a validated civilian firefighter coefficient.","origin":"seed","pendingReview":"Full text and formal bias appraisal pending","pmid":"8238646","population":"116 military remains handlers; 118 comparison participants","primaryUrl":"https://pubmed.ncbi.nlm.nih.gov/8238646/","reviewDepth":"Metadata and abstract reviewed","supportedUse":"Context for documenting occupational contact with human remains.","year":"1993"},{"design":"Official agency guidance","direction":"definition","doi":null,"finding":"Describes exposure routes and the additional symptom, duration, impairment and exclusion criteria.","fullCitation":"US Department of Veterans Affairs, National Center for PTSD. PTSD and DSM-5.","id":"PC07","limitations":"Incident flags alone cannot establish a personal Criterion A route or PTSD.","origin":"seed_clarification","pendingReview":"No independent clinical approval implied","pmid":null,"population":"Clinical assessment guidance","primaryUrl":"https://www.ptsd.va.gov/professional/treat/essentials/dsm5_ptsd.asp","reviewDepth":"Official guidance page reviewed","supportedUse":"Diagnostic boundary","year":"Current page"},{"design":"Official agency guidance","direction":"definition","doi":null,"finding":"Describes a 20-item self-report assessment and clinician interpretation; screening is not a dispatch-derived diagnosis.","fullCitation":"US Department of Veterans Affairs, National Center for PTSD. PTSD Checklist for DSM-5 (PCL-5).","id":"PC08","limitations":"No questionnaire values, cutoff flags or inferred symptoms in shared incident or unit records.","origin":"addition","pendingReview":"No independent clinical approval implied","pmid":null,"population":"Clinical assessment guidance","primaryUrl":"https://www.ptsd.va.gov/professional/assessment/adult-sr/ptsd-checklist.asp","reviewDepth":"Official guidance page reviewed","supportedUse":"Private assessment context","year":"Current page"}],"citationsNotRead":"PC09 through PC21 exist in the library and are not recorded here. No event class cites any of them. Read them before relying on the library beyond the keyword chain.","citationsVerifiedOn":"2026-10-09","citedByNoClass":["PC08"],"classes":[{"citations":["PC01","PC07"],"empiricalCitations":["PC01"],"exclusionBoundary":"A Mayday opens a review. It does not establish that anything happened.","id":"member_casualty","label":"A member killed or seriously hurt","requiredCorroboration":"A death or serious injury, plus evidence of who witnessed it.","termCount":10,"terms":[{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"member_down","matchedByDefault":true,"namedInsufficient":false,"term":"ff down"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"member_down","matchedByDefault":true,"namedInsufficient":false,"term":"firefighter down"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"member_injured","matchedByDefault":true,"namedInsufficient":false,"term":"firefighter injured"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"member_injured","matchedByDefault":true,"namedInsufficient":false,"term":"injured firefighter"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"member_injured","matchedByDefault":true,"namedInsufficient":false,"term":"injured member"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"lodd","matchedByDefault":true,"namedInsufficient":false,"term":"line of duty death"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"lodd","matchedByDefault":true,"namedInsufficient":false,"term":"lodd"},{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":null,"matchedByDefault":true,"namedInsufficient":true,"term":"mayday"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"member_down","matchedByDefault":true,"namedInsufficient":false,"term":"member down"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"member_injured","matchedByDefault":true,"namedInsufficient":false,"term":"member injured"}],"withoutTermsBecause":null},{"citations":["PC02","PC07"],"empiricalCitations":["PC02"],"exclusionBoundary":"A collapse or a flashover somewhere on the fireground does not establish exposure for everyone who responded.","id":"member_entrapment","label":"A member trapped or out of air","requiredCorroboration":"Entrapment, loss of air or an immediate life threat to the affected person.","termCount":21,"terms":[{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"evacuation_ordered","matchedByDefault":true,"namedInsufficient":false,"term":"abandon the building"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"air_emergency","matchedByDefault":true,"namedInsufficient":false,"term":"air emergency"},{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":"sudden_fire_event","matchedByDefault":true,"namedInsufficient":true,"term":"backdraft"},{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":"structural_collapse","matchedByDefault":true,"namedInsufficient":true,"term":"ceiling collapse"},{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":"structural_collapse","matchedByDefault":true,"namedInsufficient":true,"term":"collapse"},{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":"structural_collapse","matchedByDefault":true,"namedInsufficient":true,"term":"collapsed"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"evacuation_ordered","matchedByDefault":true,"namedInsufficient":false,"term":"emergency evacuation"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"entrapped","matchedByDefault":true,"namedInsufficient":false,"term":"entrapment"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"entrapped","matchedByDefault":true,"namedInsufficient":false,"term":"entrapped"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"evacuation_ordered","matchedByDefault":true,"namedInsufficient":false,"term":"evacuate the building"},{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":"sudden_fire_event","matchedByDefault":true,"namedInsufficient":true,"term":"flashover"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"air_emergency","matchedByDefault":true,"namedInsufficient":false,"term":"low air"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"air_emergency","matchedByDefault":true,"namedInsufficient":false,"term":"low on air"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"air_emergency","matchedByDefault":true,"namedInsufficient":false,"term":"out of air"},{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":"structural_collapse","matchedByDefault":true,"namedInsufficient":true,"term":"partial collapse"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"entrapped","matchedByDefault":true,"namedInsufficient":false,"term":"pinned"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"rit","matchedByDefault":true,"namedInsufficient":false,"term":"rapid intervention"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"rit","matchedByDefault":true,"namedInsufficient":false,"term":"rit activated"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"rit","matchedByDefault":true,"namedInsufficient":false,"term":"rit deployed"},{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":"structural_collapse","matchedByDefault":true,"namedInsufficient":true,"term":"roof collapse"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"entrapped","matchedByDefault":true,"namedInsufficient":false,"term":"trapped"}],"withoutTermsBecause":null},{"citations":["PC03","PC07"],"empiricalCitations":["PC03"],"exclusionBoundary":"A pediatric dispatch, a transport priority or an age on its own is not enough.","id":"pediatric_casualty","label":"A child killed or critically hurt","requiredCorroboration":"A corroborated event, and relevant in person witnessing.","termCount":13,"terms":[{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"pediatric_arrest","matchedByDefault":true,"namedInsufficient":false,"term":"child not breathing"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"pediatric_unresponsive","matchedByDefault":true,"namedInsufficient":false,"term":"child unresponsive"},{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":"pediatric_patient","matchedByDefault":true,"namedInsufficient":true,"term":"infant"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"pediatric_arrest","matchedByDefault":true,"namedInsufficient":false,"term":"infant arrest"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"pediatric_arrest","matchedByDefault":true,"namedInsufficient":false,"term":"infant not breathing"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"pediatric_unresponsive","matchedByDefault":true,"namedInsufficient":false,"term":"infant unresponsive"},{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":"pediatric_patient","matchedByDefault":true,"namedInsufficient":true,"term":"juvenile"},{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":"pediatric_patient","matchedByDefault":true,"namedInsufficient":true,"term":"pediatric"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"pediatric_arrest","matchedByDefault":true,"namedInsufficient":false,"term":"pediatric arrest"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"pediatric_arrest","matchedByDefault":true,"namedInsufficient":false,"term":"pediatric cardiac arrest"},{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":"pediatric_patient","matchedByDefault":true,"namedInsufficient":true,"term":"peds"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"pediatric_arrest","matchedByDefault":true,"namedInsufficient":false,"term":"peds arrest"},{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":"pediatric_patient","matchedByDefault":true,"namedInsufficient":true,"term":"toddler"}],"withoutTermsBecause":null},{"citations":["PC04","PC05","PC07"],"empiricalCitations":["PC04","PC05"],"exclusionBoundary":"A death, an unsuccessful resuscitation or an expected natural death does not on its own establish the exposure route.","id":"civilian_death","label":"A civilian death","requiredCorroboration":"Corroborated traumatic circumstances, and an actual witnessing route reviewed.","termCount":14,"terms":[{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":"cardiac_arrest","matchedByDefault":true,"namedInsufficient":true,"term":"cardiac arrest"},{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":"resuscitation_attempt","matchedByDefault":true,"namedInsufficient":true,"term":"cpr"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"death_confirmed","matchedByDefault":true,"namedInsufficient":false,"term":"dead on arrival"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"death_confirmed","matchedByDefault":true,"namedInsufficient":false,"term":"deceased"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"death_confirmed","matchedByDefault":true,"namedInsufficient":false,"term":"doa"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"death_confirmed","matchedByDefault":true,"namedInsufficient":false,"term":"expired"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"death_confirmed","matchedByDefault":true,"namedInsufficient":false,"term":"fatality"},{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":"cardiac_arrest","matchedByDefault":true,"namedInsufficient":true,"term":"full arrest"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"death_confirmed","matchedByDefault":true,"namedInsufficient":false,"term":"obvious death"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"death_confirmed","matchedByDefault":true,"namedInsufficient":false,"term":"pronounced"},{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":"resuscitation_attempt","matchedByDefault":true,"namedInsufficient":true,"term":"resuscitation in progress"},{"dialect":"fl_signal_codes","drawnFrom":"required_corroboration","factGroup":"death_confirmed","matchedByDefault":false,"namedInsufficient":false,"term":"signal 7"},{"dialect":"fl_signal_codes","drawnFrom":"required_corroboration","factGroup":"death_confirmed","matchedByDefault":false,"namedInsufficient":false,"term":"signal seven"},{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":"resuscitation_attempt","matchedByDefault":true,"namedInsufficient":true,"term":"unsuccessful resuscitation"}],"withoutTermsBecause":null},{"citations":["PC04","PC05","PC07"],"empiricalCitations":["PC04","PC05"],"exclusionBoundary":"A mass casualty dispatch or a staging assignment on its own is not enough.","id":"mass_casualty","label":"Multiple casualties at one incident","requiredCorroboration":"Confirmed casualties and responder contact, with the count uncertainty preserved.","termCount":9,"terms":[{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":"mci_declaration","matchedByDefault":true,"namedInsufficient":true,"term":"mass casualty"},{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":"mci_declaration","matchedByDefault":true,"namedInsufficient":true,"term":"mass casualty incident"},{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":"mci_declaration","matchedByDefault":true,"namedInsufficient":true,"term":"mci"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"multiple_casualties","matchedByDefault":true,"namedInsufficient":false,"term":"multiple casualties"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"multiple_casualties","matchedByDefault":true,"namedInsufficient":false,"term":"multiple patients"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"multiple_casualties","matchedByDefault":true,"namedInsufficient":false,"term":"multiple victims"},{"dialect":null,"drawnFrom":"exclusion_boundary","factGroup":null,"matchedByDefault":true,"namedInsufficient":true,"term":"staging"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"triage_performed","matchedByDefault":true,"namedInsufficient":false,"term":"triage"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"triage_performed","matchedByDefault":true,"namedInsufficient":false,"term":"triaged"}],"withoutTermsBecause":null},{"citations":["PC06","PC07"],"empiricalCitations":["PC06"],"exclusionBoundary":"Being assigned to the incident is not qualifying contact.","id":"human_remains","label":"Handling human remains","requiredCorroboration":"Documented recovery or handling, or repeated and extreme duty related contact.","termCount":9,"terms":[{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"remains_handling","matchedByDefault":true,"namedInsufficient":false,"term":"body recovery"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"death_investigator","matchedByDefault":true,"namedInsufficient":false,"term":"coroner"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"remains_handling","matchedByDefault":true,"namedInsufficient":false,"term":"decedent"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"decomposition","matchedByDefault":true,"namedInsufficient":false,"term":"decomp"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"decomposition","matchedByDefault":true,"namedInsufficient":false,"term":"decomposed"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"decomposition","matchedByDefault":true,"namedInsufficient":false,"term":"decomposition"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"death_investigator","matchedByDefault":true,"namedInsufficient":false,"term":"medical examiner"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"remains_handling","matchedByDefault":true,"namedInsufficient":false,"term":"recovery of remains"},{"dialect":null,"drawnFrom":"required_corroboration","factGroup":"remains_handling","matchedByDefault":true,"namedInsufficient":false,"term":"remains"}],"withoutTermsBecause":null},{"citations":["PC03","PC07"],"empiricalCitations":["PC03"],"exclusionBoundary":"Never infer a relationship, and never put a victim or member name or relationship in a shared record.","id":"known_victim","label":"A victim the member knew","requiredCorroboration":"A voluntary private confirmation by the member, and nothing else.","termCount":0,"terms":[],"withoutTermsBecause":"Private only. Searching for relationship language would infer the relationship the library forbids inferring. Reaches a record only by voluntary private confirmation."},{"citations":["PC01","PC05","PC07"],"empiricalCitations":["PC01","PC05"],"exclusionBoundary":"No validated threshold exists, and no synthetic incident is created to stand for a pattern.","id":"cumulative_aversive_detail","label":"Repeated exposure across many incidents","requiredCorroboration":"A pattern across incidents, which no single incident can show.","termCount":0,"terms":[],"withoutTermsBecause":"Repetition across incidents, which one narrative cannot show. The library carries no validated threshold and forbids creating a synthetic incident to represent a pattern."}],"data_class":0,"keywordList":{"authoredOn":"2026-10-06","factGroupCount":21,"hash":"6c1c0c12329bfe10","reviewed":false,"termCount":76,"version":"pel-keywords-v3-proposed"},"rejectedTerms":[{"reason":"Matches \"child safety seat\" and \"children present\".","term":"child"},{"reason":"Used for civilians as often as members, so it would attribute a civilian event to a member one.","term":"man down"},{"reason":"Matches \"under arrest\".","term":"arrest"},{"reason":"Too short to be safe on its own. The deployment phrases are in the list instead.","term":"rit"},{"reason":"Matches \"not living at this address\", and is not radio prose.","term":"not living"},{"reason":"Agency specific. A single global code list would create facts that the agency never said.","term":"ten codes"}],"releaseStatus":"Internal research reference; not clinical validation","surface":"Public method surface, emr-inc.net"}</script>
+</body></html>

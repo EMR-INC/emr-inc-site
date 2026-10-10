@@ -1,0 +1,655 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Event load &middot; Method &middot; EMR Inc.</title>
+<meta name="description" content="The method behind the EMR Inc. event load measure: eight event classes, the radio terms that open a candidate, the published sources behind each class, and what those sources say they do not support.">
+<link rel="canonical" href="https://emr-inc.net/pel-method">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700&family=Archivo+Black&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   EMR INC. · Event load method file
+   design_system.md v3.0 · diagrammatic modernism. Self contained, because
+   styles.css still implements v1.1 and this is a new surface.
+   Three chromatic inks only: red traces one route, blue is the record layer,
+   yellow is the crossed band. Nothing encodes a quantity in colour.
+   ========================================================================== */
+:root {
+  --stock: #F1EBDD;
+  --ink: #10213B;
+  --red: #D5222A;
+  --blue: #2363A0;
+  --yellow: #E5C500;
+  --dark: #161A20;
+  --white: #FFFFFF;
+  --s-4: 4px; --s-8: 8px; --s-16: 16px; --s-24: 24px;
+  --s-40: 40px; --s-64: 64px; --s-96: 96px;
+}
+* { box-sizing: border-box; }
+html { background: var(--stock); -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--stock);
+  color: var(--ink);
+  font: 400 17px/26px Archivo, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+
+/* TYPE ------------------------------------------------------------------- */
+.display, .h2, .h3 { margin: 0; font-family: "Archivo Black", "Arial Black", Archivo, sans-serif; }
+.display {
+  font-size: clamp(52px, 11vw, 112px); line-height: .88;
+  letter-spacing: -.035em; text-transform: uppercase;
+}
+.h2 { font-size: clamp(30px, 4.4vw, 48px); line-height: 1.06; letter-spacing: -.02em; }
+.h3 { font-size: clamp(21px, 2.4vw, 26px); line-height: 1.18; letter-spacing: -.01em; }
+.eyebrow, .data, .num {
+  font-family: "Courier Prime", "Courier New", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}
+.eyebrow { font-weight: 700; font-size: 12px; line-height: 16px; letter-spacing: .24em; text-transform: uppercase; }
+/* A locus is a full URL and a hash is one unbreakable token. Both have to wrap
+   rather than widen the page, which is the only way they fit a phone. */
+.data { font-size: 15px; line-height: 21px; overflow-wrap: anywhere; }
+.num { font-weight: 700; font-size: clamp(34px, 5vw, 56px); line-height: 1; letter-spacing: -.02em; }
+.body { margin: 0; }
+.small { margin: 0; font-size: 15px; line-height: 23px; }
+.measure { max-width: 65ch; }
+.hand { font: italic 400 19px/1.35 Georgia, "Times New Roman", serif; margin: 0; }
+.display + .script { margin-top: var(--s-16); }
+.script { font: italic 400 clamp(24px, 4vw, 44px)/.98 Georgia, serif; color: var(--red); margin: 0; }
+
+/* STRUCTURE -------------------------------------------------------------- */
+.wrap { max-width: 1200px; margin: 0 auto; padding-inline: clamp(24px, 5vw, 72px); }
+.section { padding-block: clamp(var(--s-40), 7vw, var(--s-96)); border-top: 2px solid var(--ink); }
+.section--open { border-top: 0; }
+.field-ink { background: var(--ink); color: var(--stock); }
+.field-white { background: var(--white); }
+.stack > * + * { margin-top: var(--s-24); }
+.stack-8 > * + * { margin-top: var(--s-8); }
+.stack-40 > * + * { margin-top: var(--s-40); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-40); }
+@media (max-width: 860px) { .grid-2 { grid-template-columns: 1fr; } }
+
+.mast {
+  display: flex; flex-wrap: wrap; gap: var(--s-16) var(--s-24);
+  justify-content: space-between; align-items: baseline;
+  padding: var(--s-16) clamp(24px, 5vw, 72px);
+  border-bottom: 2px solid var(--ink);
+  font-family: "Courier Prime", "Courier New", monospace;
+  font-weight: 700; font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+}
+.mast nav { display: flex; flex-wrap: wrap; gap: var(--s-16); }
+
+/* The first thing a reader is told, before any term or figure. */
+.flag {
+  border: 2px solid var(--ink);
+  border-left-width: 12px;
+  border-left-color: var(--yellow);
+  padding: var(--s-16) var(--s-24);
+  background: var(--white);
+}
+.field-ink .flag { background: transparent; border-color: var(--stock); border-left-color: var(--yellow); }
+
+/* ROWS · key on the left, in Courier Prime, as the data column ----------- */
+.rows { border-top: 1px solid currentColor; }
+.row {
+  display: grid; grid-template-columns: 220px 1fr; gap: var(--s-24);
+  padding: var(--s-16) 0; border-bottom: 1px solid currentColor;
+  min-height: 44px; align-items: start;
+}
+.row > * { min-width: 0; }
+@media (max-width: 720px) { .row { grid-template-columns: 1fr; gap: var(--s-8); } }
+.row__key {
+  font-family: "Courier Prime", "Courier New", monospace;
+  font-size: 13px; line-height: 20px; letter-spacing: .08em; text-transform: uppercase;
+}
+
+/* PANELS ----------------------------------------------------------------- */
+.panel { border: 2px solid var(--ink); padding: var(--s-24); background: var(--stock); }
+.panel--white { background: var(--white); }
+.panel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--s-16); }
+.note { border-left: 2px solid currentColor; padding-left: var(--s-16); }
+
+/* TABLES ----------------------------------------------------------------- */
+.scroller { overflow-x: auto; border: 2px solid currentColor; }
+table { width: 100%; border-collapse: collapse; background: var(--white); }
+.field-ink table { background: transparent; }
+caption { text-align: left; padding: var(--s-16); font: 700 12px/16px "Courier Prime", monospace; letter-spacing: .24em; text-transform: uppercase; border-bottom: 1px solid var(--ink); }
+th, td { padding: 12px var(--s-16); border-bottom: 1px solid var(--ink); text-align: left; vertical-align: top; min-height: 44px; }
+thead th { font: 700 12px/16px "Courier Prime", monospace; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
+tbody th { font: 400 15px/21px "Courier Prime", "Courier New", monospace; white-space: nowrap; }
+td.n { text-align: right; font-family: "Courier Prime", "Courier New", monospace; font-variant-numeric: tabular-nums; }
+tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
+
+/* STATUS MARKS · text plus shape, valid in monochrome -------------------- */
+.mark {
+  display: inline-flex; align-items: center; gap: 6px;
+  font: 700 12px/16px "Courier Prime", monospace; letter-spacing: .08em; text-transform: uppercase;
+  white-space: nowrap;
+}
+.mark::before {
+  content: ""; width: 12px; height: 12px; flex: none;
+  border: 2px solid currentColor;
+}
+.mark--insufficient::before { background: var(--yellow); border-radius: 50%; }
+.mark--corroboration::before { background: var(--blue); }
+.mark--boundary::before { background: transparent; }
+.mark--off::before { background: repeating-linear-gradient(45deg, currentColor 0 2px, transparent 2px 4px); }
+
+.legend { display: flex; flex-wrap: wrap; gap: var(--s-16) var(--s-24); padding: var(--s-16) 0; }
+
+/* FIGURES ---------------------------------------------------------------- */
+figure { margin: 0; }
+figcaption { margin-top: var(--s-16); }
+.fig-svg { width: 100%; min-width: 820px; height: auto; }
+.fig-svg text { font-family: "Courier Prime", "Courier New", monospace; }
+
+/* FOOTER ----------------------------------------------------------------- */
+.footer { background: var(--ink); color: var(--stock); padding-block: clamp(var(--s-40), 6vw, var(--s-64)); }
+.footer a { color: inherit; }
+.footer__links { display: flex; flex-wrap: wrap; gap: var(--s-16) var(--s-24); }
+</style>
+<!-- Vercel Web Analytics, as on every other page of this site. Aggregate page
+     views only. No script on this page does anything else: the figures and the
+     tables are rendered at build time, so the page is complete with JavaScript
+     switched off. -->
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     EVENT LOAD · METHOD FILE
+
+     ⚠️ GENERATED. Edit templates/pel-method.html, never pel-method.html.
+     data/build-pel-method.py renders this template against data/pel-method.json
+     and fails closed if a marker is unfilled, a count does not reconcile, a
+     class cites an identifier the file cannot resolve, or the payload is not
+     class 0.
+
+     ⚠️ NO FIGURE ON THIS PAGE IS TYPED BY HAND. Every count, term, class
+     route and citation comes out of data/pel-method.json, which
+     the-lab/tools/export-pel-method.mjs writes from
+     packages/scoring/src/publication.ts. That is the only place the term list
+     exists. If you find yourself typing a number into this template, the
+     chain is broken and the page has started lying.
+
+     ⚠️ THE LIST IS UNREVIEWED AND THE PAGE SAYS SO BEFORE IT SHOWS A TERM.
+     No clinical reviewer has read it, nothing is scored from it, and no
+     threshold exists. If the unreviewed flag is ever removed from the hero,
+     the page starts claiming something nobody has signed.
+
+     ⚠️ NO ORGANISATION IS NAMED. Not the pilot department, not the state
+     agency, not the data provider, not the union affiliate. None of them has
+     approved being named in public, and the export asserts that none of their
+     names is in the payload. Do not add one here to make the page sound more
+     advanced.
+
+     ⚠️ NO MEMBER GRAIN EVER REACHES THIS SITE. emr-inc.net has no login on
+     any public page. A member's own figure is read inside the union portal and
+     nowhere else. This page describes a method; it carries no result of
+     running one.
+     ════════════════════════════════════════════════════════════════════ -->
+
+<header class="mast">
+  <span>EMR Inc. &middot; Method file &middot; Event load</span>
+  <nav aria-label="Site">
+    <a href="/">Home</a>
+    <a href="research.html">Research</a>
+    <a href="open-data.html">Open data</a>
+    <a href="member-research.html">Member research</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+</header>
+
+<section class="section section--open">
+  <div class="wrap stack-40">
+    <div class="stack">
+      <p class="eyebrow">Event load &middot; how a class is decided</p>
+      <h1 class="display">A word is<br>not a finding.</h1>
+      <p class="script">So what is it?</p>
+      <p class="body measure">
+        EMR Inc. is building a measure of the events a firefighter has actually
+        been at: not a prediction, not a diagnosis and not a wellness score.
+        This page is the method behind it. It shows the __CLASS_COUNT__ event
+        classes, the __TERM_COUNT__ radio terms that can open a candidate for
+        review, the published sources behind each class, and, at length, what
+        those sources say they do not support.
+      </p>
+      <div class="flag stack-8">
+        <p class="eyebrow">Read this first</p>
+        <p class="small measure">
+          <strong>Nothing on this page is scored, and nothing here is
+          validated.</strong> The term list is version
+          <span class="data">__LIST_VERSION__</span>, authored
+          __LIST_AUTHORED__, and no clinical reviewer has read it. A matched
+          word opens a candidate for a person to review. It does not establish
+          that an event happened, it does not reach a member's record, and
+          there is no threshold for it to cross.
+          __SINGLE_PAPER_CLASSES__ of the __CLASS_COUNT__ classes rest on a
+          single empirical paper each once the definition they all share is set
+          aside.
+        </p>
+      </div>
+    </div>
+
+    <div class="rows">
+      <div class="row"><p class="row__key">Term list</p><p class="data">__LIST_VERSION__ &middot; authored __LIST_AUTHORED__ &middot; reviewed: no</p></div>
+      <div class="row"><p class="row__key">List hash</p><p class="data">__LIST_HASH__</p></div>
+      <div class="row"><p class="row__key">Terms</p><p class="data">__TERM_COUNT__ across __CLASSES_WITH_TERMS__ of __CLASS_COUNT__ classes, counted as __FACT_GROUP_COUNT__ fact groups</p></div>
+      <div class="row"><p class="row__key">Sources</p><p class="data">__CITATION_COUNT__ records, __EMPIRICAL_CITATION_COUNT__ of them empirical. Research cutoff 2026-09-30</p></div>
+      <div class="row"><p class="row__key">Release status</p><p class="data">__RELEASE_STATUS__</p></div>
+      <div class="row"><p class="row__key">Page built</p><p class="data">__GENERATED__ from data/pel-method.json</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 1 · THE ROUTE ------------------------------------------------------- -->
+<section class="section field-white">
+  <div class="wrap stack-40">
+    <div class="stack">
+      <p class="eyebrow">01 &middot; The route</p>
+      <h2 class="h2 measure">Every path ends where the evidence stops.</h2>
+      <p class="body measure">
+        A term matching in a radio transcript is the weakest thing in this
+        system, and the drawing says so. Follow any line to its end and it
+        terminates at a stated fact, at a refusal, or at a gate that is closed
+        because nobody has been appointed to open it. There is no line from a
+        word to a score, because there is no score.
+      </p>
+      <p class="body measure">
+        __NAMED_INSUFFICIENT_COUNT__ of the __TERM_COUNT__ terms are words the
+        research itself names as insufficient on their own: a Mayday, a mass
+        casualty declaration, a pediatric dispatch, a resuscitation in
+        progress. They are in the list so that a reviewer sees what was said.
+        They carry no weight.
+      </p>
+    </div>
+
+    <figure class="stack-8">
+      <div class="scroller">__ROUTE_FIGURE__</div>
+      <figcaption class="stack-8">
+        <p class="small measure"><strong>What the figure shows.</strong> The
+        route from a radio transmission to the only three places it can end:
+        a corroborated event fact, a refusal, or a candidate waiting on a
+        review that has no reviewer. The private class at the bottom has no
+        term route at all and is reachable only when a member volunteers it.</p>
+        <div class="legend">
+          <span class="mark mark--corroboration">On a corroboration route</span>
+          <span class="mark mark--boundary">On an exclusion boundary</span>
+          <span class="mark mark--insufficient">Named insufficient</span>
+        </div>
+        <p class="small"><strong>Source</strong> PEL Evidence and Class Library
+        v1, EMR Inc. internal research reference, research cutoff 2026-09-30.
+        <strong>Unit</strong> one term, one class. <strong>Coverage</strong>
+        __CLASSES_WITH_TERMS__ of __CLASS_COUNT__ classes carry terms.
+        <strong>Missing</strong> two classes carry none, by decision, and the
+        reason is stated below. <strong>Status</strong> proposed, unreviewed.</p>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 2 · THE CLASSES ---------------------------------------------------- -->
+<section class="section">
+  <div class="wrap stack-40">
+    <div class="stack">
+      <p class="eyebrow">02 &middot; The classes</p>
+      <h2 class="h2 measure">Eight classes, each with a boundary written before the terms.</h2>
+      <p class="body measure">
+        Each class states what it requires before it can attach to anything,
+        and what is explicitly not enough. The second column is the one that
+        does the work: it is where the research declines to let a dispatch code
+        stand in for an experience.
+      </p>
+    </div>
+
+    <div class="scroller">
+      <table>
+        <caption>The eight event classes, their routes and their sources</caption>
+        <colgroup>
+          <col style="width:25%"><col style="width:22%"><col style="width:33%">
+          <col style="width:7%"><col style="width:13%">
+        </colgroup>
+        <thead>
+          <tr>
+            <th scope="col">Class</th>
+            <th scope="col">Requires</th>
+            <th scope="col">Not enough on its own</th>
+            <th scope="col">Terms</th>
+            <th scope="col">Sources</th>
+          </tr>
+        </thead>
+        <tbody>__CLASS_ROWS__</tbody>
+      </table>
+    </div>
+
+    <div class="panel stack-8">
+      <p class="eyebrow">Two classes have no terms, on purpose</p>
+      __CLASSES_WITHOUT_TERMS__
+    </div>
+  </div>
+</section>
+
+<!-- 3 · WHAT STANDS BEHIND EACH CLASS ---------------------------------- -->
+<section class="section field-white">
+  <div class="wrap stack-40">
+    <div class="stack">
+      <p class="eyebrow">03 &middot; The evidence, drawn</p>
+      <h2 class="h2 measure">One source is on all eight classes, and it is a definition.</h2>
+      <p class="body measure">
+        Every class cites the same official guidance page on what a traumatic
+        stressor is. That page is a definition, not a finding. Set it aside and
+        the picture changes: __SINGLE_PAPER_CLASSES__ of the __CLASS_COUNT__
+        classes rest on one empirical paper each. __ENTRAPMENT_SENTENCE__
+      </p>
+      <p class="body measure">
+        That is not a reason to stop. It is the reason the page exists: a
+        reader can see the width of the evidence before anybody quotes a
+        number off it.
+      </p>
+    </div>
+
+    <figure class="stack-8">
+      <div class="scroller">__EVIDENCE_FIGURE__</div>
+      <figcaption class="stack-8">
+        <p class="small measure"><strong>What the figure shows.</strong> For
+        each class, the number of terms as a length, and the sources behind it
+        as marks: a filled mark for an empirical paper, an open mark for the
+        shared definition. Length encodes the term count and nothing else does.
+        Colour encodes no quantity anywhere on this page.</p>
+        <p class="small"><strong>Source</strong> as above.
+        <strong>Unit</strong> one term; one cited source.
+        <strong>Denominator</strong> __TERM_COUNT__ terms, __CITATION_COUNT__
+        source records. <strong>Status</strong> proposed, unreviewed.</p>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 4 · THE FOUR THINGS THE RESEARCH DECLINES -------------------------- -->
+<section class="section field-ink">
+  <div class="wrap stack-40">
+    <div class="stack">
+      <p class="eyebrow">04 &middot; In the library's own words</p>
+      <h2 class="h2 measure">The research declines what a metric most wants.</h2>
+      <p class="body measure">
+        These are quotations from the limitation column of the source records,
+        not our paraphrase of them. Each one rules out a move this kind of
+        build naturally makes.
+      </p>
+    </div>
+    <div class="rows">__DECLINED_ROWS__</div>
+    <div class="flag stack-8">
+      <p class="eyebrow">And the gap nobody has closed</p>
+      <p class="small measure">All __EMPIRICAL_CITATION_COUNT__ empirical
+      sources concern events, exposure routes and populations. None of them
+      concerns language in radio traffic or in a patient care record. A source
+      supporting &ldquo;being trapped is associated with posttraumatic
+      symptoms&rdquo; does not support &ldquo;the phrase
+      <span class="data">low on air</span> in a transcript indicates
+      it.&rdquo; That is the real evidential gap, it is the first thing a
+      clinical reviewer should press on, and it is why a matched term produces
+      a candidate rather than a count.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · THE TERMS ------------------------------------------------------- -->
+<section class="section">
+  <div class="wrap stack-40">
+    <div class="stack">
+      <p class="eyebrow">05 &middot; The list</p>
+      <h2 class="h2 measure">Every term, and how it is counted.</h2>
+      <p class="body measure">
+        Published in full. A member whose radio traffic could be read by this
+        system is entitled to see the whole list rather than a sample of it,
+        and a reviewer cannot rule on a list they have to ask for.
+      </p>
+      <div class="grid-2">
+        <div class="stack-8">
+          <p class="eyebrow">How terms count</p>
+          <p class="small">Terms stack. More terms matching means more things
+          were true about the call, so a specific term adds to a general one
+          rather than replacing it. The one exception is two words for a single
+          declaration: terms sharing a fact group describe one fact and are
+          counted once between them. __TERM_COUNT__ terms resolve to
+          __FACT_GROUP_COUNT__ fact groups plus the ungrouped singles.</p>
+        </div>
+        <div class="stack-8">
+          <p class="eyebrow">Radio dialect</p>
+          <p class="small">__DIALECT_COUNT__ terms are signal codes rather than
+          plain English. A code means different things in different agencies, so
+          a single global code list would create facts the agency never said.
+          A dialect term matches only where its department has confirmed the
+          code, and no department has confirmed one, so these are off
+          everywhere today.</p>
+        </div>
+      </div>
+      <div class="legend">
+        <span class="mark mark--corroboration">On a corroboration route</span>
+        <span class="mark mark--boundary">On an exclusion boundary</span>
+        <span class="mark mark--insufficient">Named insufficient by the research</span>
+        <span class="mark mark--off">Off by default</span>
+      </div>
+    </div>
+
+    __TERM_SECTIONS__
+  </div>
+</section>
+
+<!-- 6 · CONSIDERED AND LEFT OUT ---------------------------------------- -->
+<section class="section field-white">
+  <div class="wrap stack-40">
+    <div class="stack">
+      <p class="eyebrow">06 &middot; Rejected</p>
+      <h2 class="h2 measure">What was considered and left out.</h2>
+      <p class="body measure">
+        A list of what matches is a weaker disclosure than a list of what was
+        considered and rejected, and why. These are the terms that were
+        proposed and are not in the list.
+      </p>
+    </div>
+    <div class="scroller">
+      <table>
+        <caption>Terms proposed and not included</caption>
+        <thead><tr><th scope="col">Term</th><th scope="col">Why not</th></tr></thead>
+        <tbody>__REJECTED_ROWS__</tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 7 · THE SOURCES ----------------------------------------------------- -->
+<section class="section">
+  <div class="wrap stack-40">
+    <div class="stack">
+      <p class="eyebrow">07 &middot; The sources</p>
+      <h2 class="h2 measure">Every identifier resolves, and every one is linked.</h2>
+      <p class="body measure">
+        Each record below carries the population it studied, its design, what
+        the library says it supports, and verbatim what it says it does not.
+        The author list, title, journal and locus of each publication were
+        retrieved by identifier from Europe PMC on __VERIFIED_ON__, and every
+        digital object identifier the library records matched the one returned.
+      </p>
+      <p class="body measure">
+        <strong>No paper in this set has been read in full.</strong> Review
+        depth on all __PUBLICATION_COUNT__ publications is metadata and
+        abstract only, with full text and formal bias appraisal pending.
+        Resolving an identifier is not appraising a source, and this page does
+        not claim it is.
+      </p>
+    </div>
+    __CITATION_BLOCKS__
+    <div class="panel panel--white stack-8">
+      <p class="eyebrow">The source that is in the library and cited by nothing</p>
+      __UNUSED_INSTRUMENT__
+    </div>
+    <p class="small measure note">__CITATIONS_NOT_READ__</p>
+  </div>
+</section>
+
+<!-- 8 · THE SCOPE ------------------------------------------------------- -->
+<section class="section field-white">
+  <div class="wrap stack-40">
+    <div class="stack">
+      <p class="eyebrow">08 &middot; The scope</p>
+      <h2 class="h2 measure">Five phases, and four of them are gates.</h2>
+      <p class="body measure">
+        The work is staged so that each phase has to be approved before the
+        next one can begin. Any automated alert, clinical interpretation or
+        referral trigger stays disabled until its method, validation,
+        authority, consent, access controls and response workflow are each
+        separately approved. No phase beyond the first assumes it will proceed.
+      </p>
+    </div>
+    <div class="rows">
+      <div class="row">
+        <p class="row__key">Phase 0 &middot; Authority</p>
+        <p class="body">Confirm who owns each data source and who may decide.
+        Inventory what is available and what restricts it. Resolve the research
+        and ethics pathway before any retrospective analysis. Define roles,
+        access and purpose. Ends in a go or no go record.</p>
+      </div>
+      <div class="row">
+        <p class="row__key">Phase 1 &middot; Specification</p>
+        <p class="body">Inspect sample data under approved access. Document
+        quality, time zone, coverage, duplicates and roster timing. Freeze
+        versioned definitions with their numerator, denominator, grain, window
+        and missingness rules. Build simulated fixtures.</p>
+      </div>
+      <div class="row">
+        <p class="row__key">Phase 2 &middot; Feasibility</p>
+        <p class="body">Only after approval, run a bounded retrospective
+        sample. Compare how the same call is represented across each source.
+        Adjudicate event facts independently. Test repeatability, disagreement
+        and coverage. Assess whether the available cohort can calibrate
+        anything, without treating it as clinical validation.</p>
+      </div>
+      <div class="row">
+        <p class="row__key">Phase 3 &middot; Proof of concept</p>
+        <p class="body">If approved, process a narrow feed in research mode and
+        show descriptive and event review views to authorised reviewers. No
+        automated individual alerts and no workplace decisions.</p>
+      </div>
+      <div class="row">
+        <p class="row__key">Phase 4 &middot; Decision</p>
+        <p class="body">Convene every party with authority, review the evidence
+        and the safeguards, and decide whether any expanded or person level
+        function is permissible. This is a decision gate and not an assumed
+        launch.</p>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="panel stack-8">
+        <p class="eyebrow">What counts as success</p>
+        <p class="small">Traceable lineage from source to output, reproducible
+        calculations, documented missingness and conflicts, passing role and
+        access tests, reviewed comprehension, and written approval at each
+        gate.</p>
+      </div>
+      <div class="panel stack-8">
+        <p class="eyebrow">What does not</p>
+        <p class="small">No clinical benefit, no prediction of self harm and no
+        validated risk classification is a success claim in this scope. The
+        measure describes exposure already carried. It does not forecast
+        anything.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 · LIMITS ---------------------------------------------------------- -->
+<section class="section field-ink">
+  <div class="wrap stack-40">
+    <div class="stack">
+      <p class="eyebrow">09 &middot; Limits and open questions</p>
+      <h2 class="h2 measure">What we cannot yet answer.</h2>
+    </div>
+    <div class="rows">
+      <div class="row">
+        <p class="row__key">Who reviews the list</p>
+        <p class="body">Unassigned. The list stays marked unreviewed until a
+        clinical reviewer reads every term against its class, and no figure is
+        produced from it in the meantime.</p>
+      </div>
+      <div class="row">
+        <p class="row__key">Whether a published list changes the radio</p>
+        <p class="body">Open, and it matters more than it looks. Several terms
+        are safety critical transmissions. If publishing the list made anyone
+        hesitate before saying one of them on the air, that would be a harm
+        this project caused, and it would outweigh the measure. The list is
+        published because a member is owed sight of what could be read about
+        them, and because a measure built on a hidden vocabulary is worse. The
+        question stays open and is addressed to the people who run the calls.</p>
+      </div>
+      <div class="row">
+        <p class="row__key">Whether a transcript can support any of this</p>
+        <p class="body">Unestablished. No source in the set concerns language
+        in radio traffic. Until that gap is closed by evidence rather than by
+        argument, a match is a candidate for a person to review.</p>
+      </div>
+      <div class="row">
+        <p class="row__key">Any threshold at all</p>
+        <p class="body">There is none. A rolling count of events has no
+        validated cutoff and no instrument behind it, and no band, colour or
+        status is assigned to a person anywhere in this system today.</p>
+      </div>
+      <div class="row">
+        <p class="row__key">Which codes a department uses</p>
+        <p class="body">Unconfirmed. Until a department publishes its own
+        signal list, every dialect term stays off.</p>
+      </div>
+      <div class="row">
+        <p class="row__key">Who may read a member's figure</p>
+        <p class="body">Settled, and it is not this site. A member's own figure
+        is read by the member and the body that represents them. An employer
+        sees aggregates. This page holds no member figure, no incident and no
+        record of any kind, and the public site has no login on any page for
+        one to sit behind.</p>
+      </div>
+    </div>
+    <div class="flag stack-8">
+      <p class="eyebrow">Correction path</p>
+      <p class="small measure">If a term on this page is wrong for your
+      department, if a source is misread, or if a limitation is stated too
+      weakly, write to
+      <a href="mailto:michael.harvey@emr-inc.net">michael.harvey@emr-inc.net</a>
+      and it will be corrected here with the date of the change. The term list
+      and this page both carry a version and a hash so that a correction is
+      visible rather than silent.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap stack">
+    <p class="eyebrow">EMR Inc. &middot; Emergency Medical Resolutions</p>
+    <p class="body measure">We build with the bodies that represent
+    firefighters and the members they represent. An employer can support
+    implementation and read appropriate aggregate reporting. An individual
+    member's record stays controlled by the member.</p>
+    <div class="footer__links">
+      <a href="/">Home</a>
+      <a href="research.html">Research</a>
+      <a href="open-data.html">Open data</a>
+      <a href="member-research.html">Member research</a>
+      <a href="dispatch-views.html">Dispatch views</a>
+      <a href="call-sign.html">CALL/SIGN: Dashboard</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <p class="data">Method source <a href="data/pel-method.json">pel-method.json</a>
+      &middot; list __LIST_VERSION__ &middot; hash __LIST_HASH__ &middot; built __GENERATED__</p>
+    <p class="data">EMR Inc. &middot; emr-inc.net &middot; Delaware C corp &middot; File No. 10300393</p>
+  </div>
+</footer>
+
+<script id="pel_method_data" type="application/json">__PAYLOAD_JSON__</script>
+</body></html>

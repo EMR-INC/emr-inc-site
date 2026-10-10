@@ -66,8 +66,9 @@ yet; `main` had carried it since `2fe9078`.
 
 ### Where that leaves the link graph
 
-`open-data.html` is the only broken link left, on all six pages. Everything else
-resolves. Before the merge each branch was missing what the other had.
+`open-data.html` was the only broken link left, on all six pages. It was built
+after this survey and the link graph now resolves end to end: see section 5,
+which was rechecked on 2026-10-10.
 
 ## 3. Hosting
 
@@ -164,27 +165,52 @@ outbound mail asks union officers to trust a link.
 Files on `main` after the merge: `index.html`, `research.html`,
 `call-sign.html`, `member-research.html`, `contact.html` and
 `internal/research.html`, plus `styles.css` (30 KB, the whole design system) and
-`reveal.js`.
+`reveal.js`. Since the survey, four more: `open-data.html`, `dispatch-views.html`,
+`pel-method.html` and their data and template files.
 
-### Broken internal links
+### Internal links, rechecked 2026-10-10
 
-`open-data.html` is linked from the nav or footer of **all six pages** and does
-not exist. It is the only broken link left; the PR #1 merge resolved the rest.
+**Every internal link on every page now resolves.** `open-data.html` was built
+after this survey was written and the finding below is closed. The record is
+kept because the shape of the failure is the interesting part.
 
-Before the merge each branch was missing exactly what the other had, which is why
-whichever one you looked at had dead nav links:
-
-| Link target | `main` before | Deployed branch before | `main` now |
+| Link target | `main` before the merge | Deployed branch before | Now |
 |---|---|---|---|
-| `open-data.html` | missing | missing | **still missing** |
+| `open-data.html` | missing | missing | **present, generated daily** |
 | `contact.html` | missing | present | present |
 | `call-sign.html` | present | missing | present |
 | `member-research.html` | present | not linked | present |
 
-Every page carries a hand-copied nav and footer. `internal/research.html` says so
-in a comment: there is no template step, so a nav change is a four-to-six file
-edit and drift between pages is the expected failure. The nav link sets already
-differ between branches.
+### Two kinds of page now live here
+
+The site has split into hand written pages and generated ones, and they do not
+look alike because they are not built alike.
+
+| | Hand written | Generated |
+|---|---|---|
+| Pages | `index.html`, `call-sign.html`, `member-research.html`, `contact.html`, `dispatch-views.html` | `research.html`, `open-data.html`, `pel-method.html` |
+| Styling | `styles.css`, which implements OHPAH-DESIGN `design_system.md` **v1.1**, the retired navy, ivory, steel and beam palette | self contained CSS implementing **v3.0**, the stock and ink diagrammatic modernism palette |
+| Figures | written into the markup | read from a committed JSON file at build time |
+| Edit | the `.html` | the template plus the builder, never the output |
+
+The two generated pages have pipeline documents of their own:
+`docs/OPEN_DATA_PIPELINE.md` and `docs/PEL_METHOD_PIPELINE.md`. The second one
+crosses repositories: the term list and the citation records live in
+`EMR-INC/the-lab` and reach this repo as a committed `data/pel-method.json`,
+because a static site with no build step cannot import a TypeScript package.
+
+The design system's own rule is that a legacy surface may stay as it is until
+it is touched, and moves to v3.0 once it is. That is why a new page is in the
+new system and the old pages are not, and it is also a live inconsistency a
+reader will notice. Restyling the five hand written pages is the outstanding
+work.
+
+Every hand written page carries a hand-copied nav and footer.
+`internal/research.html` says so in a comment: there is no template step, so a
+nav change is a four-to-six file edit and drift between pages is the expected
+failure. **It has already drifted again:** `dispatch-views.html` is in its own
+footer and in no other page's. `pel-method.html` was added to all five hand
+written footers at once, which is the only reason it is consistent.
 
 ### The `/internal` gate
 
@@ -383,9 +409,15 @@ repo is downstream of both by hand-copy, with no sync and no check.
    that order.
 3. **No DKIM, no DMARC.** SPF alone. Add both in whichever DNS is authoritative
    at the time.
-4. **`open-data.html` is linked everywhere and exists nowhere.** All six pages
-   ship a 404 in the nav, and it is the one link the merge did not fix. Either
-   build it or drop the link.
+4. ~~**`open-data.html` is linked everywhere and exists nowhere.**~~ Closed.
+   The page was built and is regenerated daily by `.github/workflows/open_data_daily.yml`.
+   What replaces it on this list: **`build-standalone.py` no longer runs.** It
+   asserts every `src="assets/..."` resolves on disk, and `index.html` now
+   carries `assets/emr-hidden-data-disguise.png?v=2`, so the query string is
+   treated as part of the filename and the build stops. The fix is to strip the
+   query before resolving the path; the script is `.vercelignore`d so nothing
+   served is affected, but the standalone export cannot be produced until it is
+   fixed.
 5. **Confirm Vercel's production branch is `main`.** Every deployment so far came
    off the old PR #1 branch, so this was never exercised. If it is not `main`, a
    merge still does not reach the site and the repo goes back to disagreeing with
