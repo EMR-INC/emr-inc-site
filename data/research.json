@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "edition": "rolling seven days",
-  "generated_at_utc": "2026-10-19T18:32:33Z",
+  "generated_at_utc": "2026-10-20T16:35:41Z",
   "source": {
     "title": "OHPAH Research dispatch corpus",
     "kind": "aggregate-only public endpoint",
