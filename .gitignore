@@ -8,7 +8,12 @@ emr-inc-research-standalone.html
 # deploy uploads a staged copy of 13 named files, so ignoring these costs the
 # site nothing.
 .wrangler/
-.claude/
+.claude/*
+
+# Exception to the line above: vendored agent skills are public source under
+# a permissive licence, so being readable at a guessable address costs nothing.
+# Everything else under .claude/ stays ignored for the reason stated above.
+!.claude/skills/
 
 # The dispatch capture. Never commit it again: it left the repository and the
 # history on 2026-09-29 on purpose. Working copy lives outside the repo.
