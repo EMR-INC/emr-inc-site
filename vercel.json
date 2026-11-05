@@ -2,6 +2,16 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/rapid-truck",
+      "destination": "https://rapid-truck-shift.vercel.app/"
+    },
+    {
+      "source": "/rapid-truck/:path*",
+      "destination": "https://rapid-truck-shift.vercel.app/:path*"
+    }
+  ],
   "headers": [
     {
       "source": "/internal/(.*)",
