@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     concurrency:
-      group: emr-inc-site-integrated-production
+      group: emr-inc-site-integrated-${{ inputs.publish && 'production' || 'readonly' }}
       cancel-in-progress: false
     env:
       CI: '1'
