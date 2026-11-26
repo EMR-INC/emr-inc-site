@@ -1,0 +1,105 @@
+name: Publish integrated EMR site
+on:
+  workflow_dispatch:
+    inputs:
+      verify_deployment:
+        description: Ready protected deployment ID for a read-only release check
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      publish:
+        required: true
+        type: boolean
+    secrets:
+      deploy_token:
+        required: true
+permissions:
+  contents: read
+jobs:
+  publish:
+    if: github.repository == 'EMR-INC/emr-inc-site' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: emr-inc-site-integrated-${{ inputs.publish && 'production' || 'readonly' }}
+      cancel-in-progress: false
+    env:
+      CI: '1'
+      VERCEL_TELEMETRY_DISABLED: '1'
+      NO_UPDATE_NOTIFIER: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Build current public revision locally
+        run: |
+          set -euo pipefail
+          python3 .github/publisher/verify_public.py
+          npm install --prefix "$RUNNER_TEMP/publisher-cli" --no-audit --no-fund vercel@60.1.3
+          export PATH="$RUNNER_TEMP/publisher-cli/node_modules/.bin:$PATH"
+          echo "$RUNNER_TEMP/publisher-cli/node_modules/.bin" >> "$GITHUB_PATH"
+          git rev-parse HEAD > "$RUNNER_TEMP/public-revision"
+          mkdir -p .vercel
+          echo '{"orgId":"team_rwxqo0kDlEjDlDdXAJv9y7e6","projectId":"prj_kiJjgBMbwd070fbCefZ3zz1Uv9E4","projectName":"emr-inc-site","settings":{"framework":null,"nodeVersion":"24.x"}}' > .vercel/project.json
+          vercel build --prod
+          python3 .github/publisher/verify_public.py .vercel/output/static
+      - name: Restore the approved private function from the current serving deployment
+        env:
+          VERCEL_TOKEN: ${{ secrets.deploy_token || secrets.VERCEL_TOKEN }}
+          VERIFY_DEPLOYMENT: ${{ inputs.verify_deployment }}
+        run: |
+          set -euo pipefail
+          umask 077
+          source=${VERIFY_DEPLOYMENT:-emr-inc.net}
+          python3 .github/publisher/restore.py .vercel/output --source "$source" > "$RUNNER_TEMP/publisher-source.json"
+      - name: Check private routes and prepare immutable output
+        run: |
+          set -euo pipefail
+          node .github/publisher/check.mjs .vercel/output
+          printf '%s\n' '{"cliVersion":"60.1.3","target":"production"}' > .vercel/output/builds.json
+      - name: Publish if the public revision and serving deployment still match
+        if: inputs.publish == true && inputs.verify_deployment == ''
+        env:
+          VERCEL_TOKEN: ${{ secrets.deploy_token }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          umask 077
+          main=$(cat "$RUNNER_TEMP/public-revision")
+          rollback=$(jq -er .source_deployment "$RUNNER_TEMP/publisher-source.json")
+          team=team_rwxqo0kDlEjDlDdXAJv9y7e6
+          project=prj_kiJjgBMbwd070fbCefZ3zz1Uv9E4
+          guard() {
+            test "$(gh api repos/EMR-INC/emr-inc-site/git/ref/heads/main --jq .object.sha)" = "$main"
+            test "$(vercel api "/v13/deployments/emr-inc.net?teamId=$team" | jq -er .id)" = "$rollback"
+          }
+          guard
+          vercel deploy --prebuilt --prod --skip-domain --yes --meta "publicRevision=$main" > "$RUNNER_TEMP/candidate-url"
+          candidate=$(cat "$RUNNER_TEMP/candidate-url")
+          [[ "$candidate" =~ ^https://[a-z0-9-]+\.vercel\.app$ ]]
+          info=$(vercel api "/v13/deployments/${candidate#https://}?teamId=$team" | jq -ce --arg team "$team" --arg project "$project" --arg sha "$main" 'select(.ownerId==$team and .projectId==$project and .readyState=="READY" and .target=="production" and .public==false and .meta.publicRevision==$sha) | {id}')
+          id=$(jq -er .id <<<"$info")
+          guard
+          echo "Public revision $main; ready deployment $id; previous serving deployment $rollback"
+          vercel promote "$candidate" --yes
+          test "$(vercel api "/v13/deployments/emr-inc.net?teamId=$team" | jq -er .id)" = "$id"
+          smoke() {
+            code=$(curl --silent --show-error --max-time 10 --output /dev/null --write-out '%{http_code}' "https://emr-inc.net$1")
+            test "$code" = "$2"
+          }
+          if ! (smoke / 200 && smoke /rapid-truck 200 && smoke /ohpah 303 && smoke /ohpah/api/workload 401 && smoke /ohpah/download 401); then
+            if test "$(vercel api "/v13/deployments/emr-inc.net?teamId=$team" | jq -er .id)" = "$id"; then
+              vercel rollback "$rollback" --yes
+              test "$(vercel api "/v13/deployments/emr-inc.net?teamId=$team" | jq -er .id)" = "$rollback"
+            fi
+            exit 1
+          fi
+      - name: Remove private build output
+        if: always()
+        run: rm -rf -- .vercel/output/functions/api/ohpah-gateway.func
