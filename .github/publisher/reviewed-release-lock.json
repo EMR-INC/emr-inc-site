@@ -1,0 +1,323 @@
+{
+  "members": {
+    ".vc-config.json": [
+      292,
+      "bc1a564d40e28ddd8a5ece46e92490af3b2335d46761348e5979a82d8c9586f7"
+    ],
+    "api/_lib/ohpah/entry.mjs": [
+      3525,
+      "8700a428438966559b3b3b9b45526aee8f2435ea9be89375cb74c171646b109f"
+    ],
+    "api/_lib/ohpah/fixed-operations.mjs": [
+      1603,
+      "9112d8734893d1a6a28a696039c770fa512910de9bb45d0998774f20a3d411a7"
+    ],
+    "api/_lib/ohpah/gateway.mjs": [
+      8439,
+      "20744d5f636ad14dd376d25e08844452da78560de91a29dbfb6d9aa7e3765c72"
+    ],
+    "api/_lib/ohpah/google.mjs": [
+      6940,
+      "86e30d63cdb48ee41fd6d5b5d85790fb5e64ec6af6a795533675c4e3a1dbbc6f"
+    ],
+    "api/_lib/ohpah/map-reference.mjs": [
+      750055,
+      "99d2b6d23d0720b9a586f71d986d5d5f92c50aeed7581156fe9ece501dcb248f"
+    ],
+    "api/_lib/ohpah/reviewed.mjs": [
+      7207,
+      "58a50aea851ce149d41e799428cda3e77098122e08b0e74828032884e513f283"
+    ],
+    "api/_lib/ohpah/session-store.mjs": [
+      1529,
+      "29b1919cde19f0c1b9f2404b11b969a28677b7be7bcb52719e32346f7f1c8078"
+    ],
+    "api/_lib/ohpah/style.mjs": [
+      1980,
+      "f34f6ecda9d88f87bfbbb66cec90a585f876c9f75960d69c2428a8a735ccfd3e"
+    ],
+    "api/_lib/ohpah/workload.mjs": [
+      3264,
+      "9ed4c0d924a249eb2d89ee95d296c436dbeffc167a13b4405a44675d3bfa32ae"
+    ],
+    "api/ohpah-gateway.mjs": [
+      103,
+      "46213b09136ea51a450be2d3dab3756c1f75d26a88b43bec496bdd83fc658fc4"
+    ],
+    "node_modules/jose/dist/webapi/index.js": [
+      2376,
+      "f198638529597ab18dc3d2799f362106121f90cf0b0c43e75c3dffa5cc6b8590"
+    ],
+    "node_modules/jose/dist/webapi/jwe/compact/decrypt.js": [
+      217,
+      "c08202f5114caee270bcaa0ed3e119acb241f88d51c6d65a34a1fd6a3353cd2a"
+    ],
+    "node_modules/jose/dist/webapi/jwe/compact/encrypt.js": [
+      978,
+      "8db8eb9fa34a0187c0ff26e04c37024af421f2f265255d60a01c0edf416f2f85"
+    ],
+    "node_modules/jose/dist/webapi/jwe/flattened/decrypt.js": [
+      659,
+      "4964d31fafb143a8f15cf4820214b268706dbbd569bdedaa9b24a11520f6c6b2"
+    ],
+    "node_modules/jose/dist/webapi/jwe/flattened/encrypt.js": [
+      1369,
+      "e1fe288a34aae4938dbdd13b86e33e54fef9ff3f3c55a2354ab9d7b5665d1e92"
+    ],
+    "node_modules/jose/dist/webapi/jwe/general/decrypt.js": [
+      1811,
+      "47933e04705964b3b20b17bf29bf466adbd16741e81a987caf24047489001f0f"
+    ],
+    "node_modules/jose/dist/webapi/jwe/general/encrypt.js": [
+      4412,
+      "539cecb9802acbc298b9f8cfe1f558d9f11a8674cbbd95b4ec662cbf94613414"
+    ],
+    "node_modules/jose/dist/webapi/jwk/embedded.js": [
+      1134,
+      "449f2b08f47d006a4b937201692b7a830c9e9ac785e82073c1f6f9792642f91d"
+    ],
+    "node_modules/jose/dist/webapi/jwk/thumbprint.js": [
+      2739,
+      "c63aa916d733cee3a3c21932cd0b207e3623214c4bfe3e5a6662ed9ea6ec4b78"
+    ],
+    "node_modules/jose/dist/webapi/jwks/local.js": [
+      2855,
+      "539d24547c9131739064b17c21b20d299428238127ea5c9d741ac1f6e724a64d"
+    ],
+    "node_modules/jose/dist/webapi/jwks/remote.js": [
+      4446,
+      "78549b3d23a35eb9ef3474cfe923c0a2794311de3e4ae9212aa26cc306a5d91b"
+    ],
+    "node_modules/jose/dist/webapi/jws/compact/sign.js": [
+      702,
+      "09450f2b3763b531d28bec9796d2f3ff0064c7b07dde15f7d1e1e7693e2ec12a"
+    ],
+    "node_modules/jose/dist/webapi/jws/compact/verify.js": [
+      243,
+      "6d1109739b895858c7006d02ef91f8b13ce5ae8c91996d1f1c0b57c1ab33c398"
+    ],
+    "node_modules/jose/dist/webapi/jws/flattened/sign.js": [
+      757,
+      "01cb90bcf39d8aa9bcf6d3efd36f5b80c112e547ef5448d7512b7aafa72bb6dd"
+    ],
+    "node_modules/jose/dist/webapi/jws/flattened/verify.js": [
+      538,
+      "ff23003a7b0a4d8a7add2cd8b13b72393b863f6f251ddd814f08d69b35be3b2e"
+    ],
+    "node_modules/jose/dist/webapi/jws/general/sign.js": [
+      1943,
+      "11a7de8f3359584c0c283cdedb14fb841461675b37d1ed1de810c9efc3469561"
+    ],
+    "node_modules/jose/dist/webapi/jws/general/verify.js": [
+      1953,
+      "97a9800863fd8702875e14a51ef0669c6acd7f40efe8916336c452c91e4b875b"
+    ],
+    "node_modules/jose/dist/webapi/jwt/decrypt.js": [
+      841,
+      "233bb797f9239582ada83fac5723c818dfa0f24e9a864680759df5f2bb5b260c"
+    ],
+    "node_modules/jose/dist/webapi/jwt/encrypt.js": [
+      1833,
+      "383146288cf146fb51afb21a533732f0ac650db4e3482cc44e685a17fbbc64df"
+    ],
+    "node_modules/jose/dist/webapi/jwt/sign.js": [
+      739,
+      "31a499b2b08c4143c1747fa101936fa58ed21da6b147056ce2fce5870cb460ca"
+    ],
+    "node_modules/jose/dist/webapi/jwt/unsecured.js": [
+      1646,
+      "33695f71e704e945d5897a227c01d5d8f45210722650c03bf111b24ba86b6e16"
+    ],
+    "node_modules/jose/dist/webapi/jwt/verify.js": [
+      534,
+      "e015a18744717762a1f138d0f0a88a40d3b660bc46f76ddf8309b32987175bef"
+    ],
+    "node_modules/jose/dist/webapi/key/export.js": [
+      1120,
+      "634aee75fbdabbffb73d439ae63305ad043a268354ecf53426b827ba3f81cfb7"
+    ],
+    "node_modules/jose/dist/webapi/key/generate_key_pair.js": [
+      1645,
+      "97e4e5b66af75700da10fc5807471636b633d7c72c65a7fe50980c4a3a2c6c74"
+    ],
+    "node_modules/jose/dist/webapi/key/generate_secret.js": [
+      1313,
+      "eadcae7108774b03a6a9b5bb2ed22f25496dcda2e491c2fd3f8e71781f1bc260"
+    ],
+    "node_modules/jose/dist/webapi/key/import.js": [
+      2279,
+      "ab2f57a9db99e8d48451a8d0a8adf75379381f65b0e3e28ba6c02aa5bb3ee5fa"
+    ],
+    "node_modules/jose/dist/webapi/lib/asn1.js": [
+      5872,
+      "b67f65067322baf007226faf96ddba521d19558d4ec946a8d0e3399740e754ca"
+    ],
+    "node_modules/jose/dist/webapi/lib/buffer_utils.js": [
+      2751,
+      "3bfbd2a1323e8456ad87fb0479831e69a0d957b9208fb8de76d82ac56cdf42fc"
+    ],
+    "node_modules/jose/dist/webapi/lib/content_encryption.js": [
+      4308,
+      "542c666b0d9fa8f8efd3e03fe5f71c7abf74ee11e8db35a517de51353e7e317e"
+    ],
+    "node_modules/jose/dist/webapi/lib/deflate.js": [
+      1644,
+      "d7da65e5db6a9f236d3a77d2d413e3c105f5e5fd5f4c91c7ce50b575ffa0a245"
+    ],
+    "node_modules/jose/dist/webapi/lib/jwe_algorithms.js": [
+      3326,
+      "d41562ff2ccc3599f7189384653fbcd1ff68babd475fe99e31eccb61706abd47"
+    ],
+    "node_modules/jose/dist/webapi/lib/jwe_decrypt.js": [
+      9386,
+      "badfd053315cd865510c56d51a7f7e0d36f552e53d8fd7c52bd931f4d2b48e6a"
+    ],
+    "node_modules/jose/dist/webapi/lib/jwe_encrypt.js": [
+      6029,
+      "82553744c97743eab641001977d77b45c6a276b665ab6e00636dff522d0a53b9"
+    ],
+    "node_modules/jose/dist/webapi/lib/jws_algorithms.js": [
+      1762,
+      "51fda5def135c451b291193518157c842555c2c37a8f20c598e5cc27436ba544"
+    ],
+    "node_modules/jose/dist/webapi/lib/jws_sign.js": [
+      2904,
+      "d4daec77131ba4abacd0207377bc5de7007025028004ce5879d90162337795c0"
+    ],
+    "node_modules/jose/dist/webapi/lib/jws_verify.js": [
+      5685,
+      "8b2e83cce30134f660a1ea96cbaba78f1877477f331ff6d71518e930a2e35842"
+    ],
+    "node_modules/jose/dist/webapi/lib/jwt_claims_set.js": [
+      7708,
+      "aa6007b93c6aaeea874cac78c5daaedddb9d91871b2aaaa6fbde9a1a8252b09d"
+    ],
+    "node_modules/jose/dist/webapi/lib/key.js": [
+      7973,
+      "8153e55e71acf46276745e5e2c66fd577ca7db3229cbdeb51e3ec150389c7f22"
+    ],
+    "node_modules/jose/dist/webapi/lib/key_algorithm.js": [
+      517,
+      "4ef0b80292076659b054313f70eeef81cd7df01e2ec9988c24552206bc42cc07"
+    ],
+    "node_modules/jose/dist/webapi/lib/key_descriptor.js": [
+      167,
+      "80ae05a1fc41271a29dbd5ab717255a1255ee0ac43b6820853d2f338d9e74b46"
+    ],
+    "node_modules/jose/dist/webapi/lib/key_management.js": [
+      11027,
+      "252ca69bf1079a66b3c7e89b6029e6162bf50cb5aaa869b3cddfc0d66dad0663"
+    ],
+    "node_modules/jose/dist/webapi/lib/validate.js": [
+      4777,
+      "2bfc6cf900868bd5e53582d1ffc979959d4f73a0f0e15a91109b86d393572003"
+    ],
+    "node_modules/jose/dist/webapi/util/base64url.js": [
+      490,
+      "9c9c168e24c5be2db20956262065b94556de959e5dcc62430e31a0f57f821691"
+    ],
+    "node_modules/jose/dist/webapi/util/decode_jwt.js": [
+      1145,
+      "c1698d7e962f9e1c182e98241e02bce8d0b186fa5e1e3f12a80ecb9681e7125d"
+    ],
+    "node_modules/jose/dist/webapi/util/decode_protected_header.js": [
+      771,
+      "7f17b35289f4837b646edd06096edb15d1ef6ac56d300aff63a6f40a934764f5"
+    ],
+    "node_modules/jose/dist/webapi/util/errors.js": [
+      3305,
+      "9bb7503fd84d5387677f1b917969cdf7c20482c3d86e92e64972bc83938b95f8"
+    ],
+    "node_modules/jose/package.json": [
+      3201,
+      "b513306bd125bc8ffbc519d68a59bfdbc7e03d4e9a360c04cec132799669e3bf"
+    ]
+  },
+  "public_routes_sha256": "4d29bc940471463800a3d41b2dbb9818b46ff33517c17213ef6b2e98f0eb8030",
+  "integrated_routes": [
+    {
+      "src": "^/ohpah$",
+      "dest": "/api/ohpah-gateway?__ohpah_path=%2Fohpah",
+      "check": true
+    },
+    {
+      "src": "^/ohpah/login$",
+      "dest": "/api/ohpah-gateway?__ohpah_path=%2Fohpah%2Flogin",
+      "check": true
+    },
+    {
+      "src": "^/ohpah/auth/callback$",
+      "dest": "/api/ohpah-gateway?__ohpah_path=%2Fohpah%2Fauth%2Fcallback",
+      "check": true
+    },
+    {
+      "src": "^/ohpah/logout$",
+      "dest": "/api/ohpah-gateway?__ohpah_path=%2Fohpah%2Flogout",
+      "check": true
+    },
+    {
+      "src": "^/ohpah/workload$",
+      "dest": "/api/ohpah-gateway?__ohpah_path=%2Fohpah%2Fworkload",
+      "check": true
+    },
+    {
+      "src": "^/ohpah/hub$",
+      "dest": "/api/ohpah-gateway?__ohpah_path=%2Fohpah%2Fhub",
+      "check": true
+    },
+    {
+      "src": "^/ohpah/download$",
+      "dest": "/api/ohpah-gateway?__ohpah_path=%2Fohpah%2Fdownload",
+      "check": true
+    },
+    {
+      "src": "^/ohpah/api/workload$",
+      "dest": "/api/ohpah-gateway?__ohpah_path=%2Fohpah%2Fapi%2Fworkload",
+      "check": true
+    },
+    {
+      "src": "^/ohpah/api/snapshot$",
+      "dest": "/api/ohpah-gateway?__ohpah_path=%2Fohpah%2Fapi%2Fsnapshot",
+      "check": true
+    },
+    {
+      "src": "^/api/ohpah/workload$",
+      "dest": "/api/ohpah-gateway?__ohpah_path=%2Fapi%2Fohpah%2Fworkload",
+      "check": true
+    },
+    {
+      "src": "^/api/ohpah/snapshot$",
+      "dest": "/api/ohpah-gateway?__ohpah_path=%2Fapi%2Fohpah%2Fsnapshot",
+      "check": true
+    },
+    {
+      "src": "^/ohpah/calls$",
+      "dest": "/api/ohpah-gateway?__ohpah_path=%2Fohpah%2Fcalls",
+      "check": true
+    },
+    {
+      "src": "^/ohpah/api/calls$",
+      "dest": "/api/ohpah-gateway?__ohpah_path=%2Fohpah%2Fapi%2Fcalls",
+      "check": true
+    },
+    {
+      "src": "^/ohpah/map$",
+      "dest": "/api/ohpah-gateway?__ohpah_path=%2Fohpah%2Fmap",
+      "check": true
+    },
+    {
+      "src": "^/ohpah/cei$",
+      "dest": "/api/ohpah-gateway?__ohpah_path=%2Fohpah%2Fcei",
+      "check": true
+    },
+    {
+      "src": "^/ohpah/working-fires$",
+      "dest": "/api/ohpah-gateway?__ohpah_path=%2Fohpah%2Fworking-fires",
+      "check": true
+    }
+  ],
+  "insert_before": {
+    "src": "^/api(/.*)?$",
+    "status": 404
+  }
+}

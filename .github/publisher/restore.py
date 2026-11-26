@@ -63,7 +63,7 @@ def validate_static(output):
 def restore(output, source, get=api):
     if source!='emr-inc.net' and not re.fullmatch('dpl_[A-Za-z0-9]+', source):
         raise ValueError('Invalid deployment identifier')
-    lock=json.loads(LOCK.read_bytes())
+    locks=[json.loads(p.read_bytes()) for p in (LOCK,LOCK.with_name('reviewed-release-lock.json'))]
     metadata=get('/v13/deployments/'+source)
     identifier=metadata['id']
     if (not re.fullmatch('dpl_[A-Za-z0-9]+',identifier) or metadata.get('projectId')!=PROJECT
@@ -73,8 +73,10 @@ def restore(output, source, get=api):
         raise ValueError('Source must be a private-source ready production deployment in this project')
     rows=list(members(get('/v6/deployments/'+identifier+'/files')))
     files=dict(rows)
-    if len(files)!=len(rows) or files.keys()!=lock['members'].keys():
+    candidates=[lock for lock in locks if files.keys()==lock['members'].keys()]
+    if len(files)!=len(rows) or len(candidates)!=1:
         raise ValueError('Deployment lacks the approved workload function inventory')
+    lock=candidates[0]
     validate_static(output)
     config=json.loads((output/'config.json').read_bytes())
     canonical=json.dumps(config['routes'],sort_keys=True,separators=(',',':')).encode()
@@ -108,9 +110,30 @@ def restore(output, source, get=api):
     return {'source_deployment':identifier,'verified_files':len(files),'verified_bytes':sum(x[0] for x in lock['members'].values())}
 
 
+REVIEWED_SEED = 'dpl_5a6cc8pNacMNsUegFULtrdsVCc28'
+
+def first_reviewed_release(output, get=api):
+    serving=get('/v13/deployments/emr-inc.net')
+    rollback=serving.get('id','')
+    if (not re.fullmatch('dpl_[A-Za-z0-9]+',rollback) or serving.get('ownerId')!=TEAM
+            or serving.get('projectId')!=PROJECT or serving.get('target')!='production'
+            or serving.get('readyState')!='READY' or serving.get('public') is not False):
+        raise ValueError('Unexpected rollback deployment')
+    previous=list(members(get('/v6/deployments/'+rollback+'/files')))
+    original=json.loads(LOCK.read_bytes())['members']
+    if len(previous)!=len(original) or dict(previous).keys()!=original.keys():
+        raise ValueError('First activation is only valid from the original workload release')
+    result=restore(output, REVIEWED_SEED, get)
+    if result['verified_files']!=len(json.loads(LOCK.with_name('reviewed-release-lock.json').read_bytes())['members']):
+        raise ValueError('Reviewed release did not match')
+    result['rollback_deployment']=rollback
+    return result
+
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output',type=Path)
     parser.add_argument('--source',default='emr-inc.net')
+    parser.add_argument('--activate-reviewed',action='store_true')
     args=parser.parse_args()
-    print(json.dumps(restore(args.output,args.source)))
+    if args.activate_reviewed and args.source!='emr-inc.net':parser.error('Activation uses the pinned seed only')
+    print(json.dumps(first_reviewed_release(args.output) if args.activate_reviewed else restore(args.output,args.source)))
