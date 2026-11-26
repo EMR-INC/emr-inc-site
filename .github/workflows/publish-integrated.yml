@@ -1,5 +1,11 @@
 name: Publish integrated EMR site
 on:
+  workflow_dispatch:
+    inputs:
+      verify_deployment:
+        description: Ready protected deployment ID for a read-only release check
+        required: true
+        type: string
   workflow_call:
     secrets:
       deploy_token:
@@ -27,7 +33,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-          package-manager-cache: false
       - name: Build current public revision locally
         run: |
           set -euo pipefail
@@ -42,17 +47,20 @@ jobs:
           python3 .github/publisher/verify_public.py .vercel/output/static
       - name: Restore the approved private function from the current serving deployment
         env:
-          VERCEL_TOKEN: ${{ secrets.deploy_token }}
+          VERCEL_TOKEN: ${{ secrets.deploy_token || secrets.VERCEL_TOKEN }}
+          VERIFY_DEPLOYMENT: ${{ inputs.verify_deployment }}
         run: |
           set -euo pipefail
           umask 077
-          python3 .github/publisher/restore.py .vercel/output > "$RUNNER_TEMP/publisher-source.json"
+          source=${VERIFY_DEPLOYMENT:-emr-inc.net}
+          python3 .github/publisher/restore.py .vercel/output --source "$source" > "$RUNNER_TEMP/publisher-source.json"
       - name: Check private routes and prepare immutable output
         run: |
           set -euo pipefail
           node .github/publisher/check.mjs .vercel/output
           printf '%s\n' '{"cliVersion":"60.1.3","target":"production"}' > .vercel/output/builds.json
       - name: Publish if the public revision and serving deployment still match
+        if: inputs.verify_deployment == '' && github.workflow != 'Publish integrated EMR site'
         env:
           VERCEL_TOKEN: ${{ secrets.deploy_token }}
           GH_TOKEN: ${{ github.token }}
