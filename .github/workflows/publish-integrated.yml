@@ -7,6 +7,10 @@ on:
         required: true
         type: string
   workflow_call:
+    inputs:
+      publish:
+        required: true
+        type: boolean
     secrets:
       deploy_token:
         required: true
@@ -60,7 +64,7 @@ jobs:
           node .github/publisher/check.mjs .vercel/output
           printf '%s\n' '{"cliVersion":"60.1.3","target":"production"}' > .vercel/output/builds.json
       - name: Publish if the public revision and serving deployment still match
-        if: inputs.verify_deployment == '' && github.workflow != 'Publish integrated EMR site'
+        if: inputs.publish == true && inputs.verify_deployment == ''
         env:
           VERCEL_TOKEN: ${{ secrets.deploy_token }}
           GH_TOKEN: ${{ github.token }}

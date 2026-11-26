@@ -93,5 +93,7 @@ jobs:
     permissions:
       contents: read
     uses: ./.github/workflows/publish-integrated.yml
+    with:
+      publish: true
     secrets:
       deploy_token: ${{ secrets.VERCEL_TOKEN }}
