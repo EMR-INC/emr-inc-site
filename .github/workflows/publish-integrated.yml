@@ -4,8 +4,13 @@ on:
     inputs:
       verify_deployment:
         description: Ready protected deployment ID for a read-only release check
-        required: true
+        required: false
         type: string
+      activate_reviewed:
+        description: Adopt the pinned verified gateway while building current public main
+        required: false
+        type: boolean
+        default: false
   workflow_call:
     inputs:
       publish:
@@ -22,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     concurrency:
-      group: emr-inc-site-integrated-${{ inputs.publish && 'production' || 'readonly' }}
+      group: emr-inc-site-integrated-${{ (inputs.publish || inputs.activate_reviewed) && 'production' || 'readonly' }}
       cancel-in-progress: false
     env:
       CI: '1'
@@ -53,26 +58,32 @@ jobs:
         env:
           VERCEL_TOKEN: ${{ secrets.deploy_token || secrets.VERCEL_TOKEN }}
           VERIFY_DEPLOYMENT: ${{ inputs.verify_deployment }}
+          ACTIVATE: ${{ inputs.activate_reviewed }}
         run: |
           set -euo pipefail
           umask 077
           source=${VERIFY_DEPLOYMENT:-emr-inc.net}
-          python3 .github/publisher/restore.py .vercel/output --source "$source" > "$RUNNER_TEMP/publisher-source.json"
+          if [[ "$ACTIVATE" == "true" ]]; then
+            test -z "$VERIFY_DEPLOYMENT"
+            python3 .github/publisher/restore.py .vercel/output --activate-reviewed > "$RUNNER_TEMP/publisher-source.json"
+          else
+            python3 .github/publisher/restore.py .vercel/output --source "$source" > "$RUNNER_TEMP/publisher-source.json"
+          fi
       - name: Check private routes and prepare immutable output
         run: |
           set -euo pipefail
           node .github/publisher/check.mjs .vercel/output
           printf '%s\n' '{"cliVersion":"60.1.3","target":"production"}' > .vercel/output/builds.json
       - name: Publish if the public revision and serving deployment still match
-        if: inputs.publish == true && inputs.verify_deployment == ''
+        if: (inputs.publish == true || inputs.activate_reviewed == true) && inputs.verify_deployment == ''
         env:
-          VERCEL_TOKEN: ${{ secrets.deploy_token }}
+          VERCEL_TOKEN: ${{ secrets.deploy_token || secrets.VERCEL_TOKEN }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           umask 077
           main=$(cat "$RUNNER_TEMP/public-revision")
-          rollback=$(jq -er .source_deployment "$RUNNER_TEMP/publisher-source.json")
+          rollback=$(jq -er '.rollback_deployment // .source_deployment' "$RUNNER_TEMP/publisher-source.json")
           team=team_rwxqo0kDlEjDlDdXAJv9y7e6
           project=prj_kiJjgBMbwd070fbCefZ3zz1Uv9E4
           guard() {
@@ -93,7 +104,16 @@ jobs:
             code=$(curl --silent --show-error --max-time 10 --output /dev/null --write-out '%{http_code}' "https://emr-inc.net$1")
             test "$code" = "$2"
           }
-          if ! (smoke / 200 && smoke /rapid-truck 200 && smoke /ohpah 303 && smoke /ohpah/api/workload 401 && smoke /ohpah/download 401); then
+          check_routes() {
+            smoke / 200 && smoke /rapid-truck 200 && smoke /ohpah 303 && smoke /ohpah/login 200 &&
+              smoke /ohpah/api/workload 401 && smoke /ohpah/download 401 || return 1
+            if jq -e 'any(.routes[]; .src=="^/ohpah/calls$")' .vercel/output/config.json >/dev/null; then
+              smoke /ohpah/calls 303 && smoke /ohpah/map 303 && smoke /ohpah/working-fires 303 &&
+                smoke /ohpah/cei 303 && smoke /ohpah/api/calls 401 &&
+                smoke /ohpah/working-fires/audio 404
+            fi
+          }
+          if ! check_routes; then
             if test "$(vercel api "/v13/deployments/emr-inc.net?teamId=$team" | jq -er .id)" = "$id"; then
               vercel rollback "$rollback" --yes
               test "$(vercel api "/v13/deployments/emr-inc.net?teamId=$team" | jq -er .id)" = "$rollback"
