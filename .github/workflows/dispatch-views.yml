@@ -52,6 +52,8 @@ permissions:
 jobs:
   redraw:
     runs-on: ubuntu-latest
+    outputs:
+      publish_site: ${{ steps.commit.outputs.pushed == 'true' || github.event_name == 'workflow_dispatch' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -85,4 +87,11 @@ jobs:
           git push
           echo "pushed=true" >> "$GITHUB_OUTPUT"
 
-      # The private EMR website publisher packages reviewed public main commits.
+  integrated_site:
+    needs: redraw
+    if: github.ref == 'refs/heads/main' && needs.redraw.outputs.publish_site == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/publish-integrated.yml
+    secrets:
+      deploy_token: ${{ secrets.VERCEL_TOKEN }}

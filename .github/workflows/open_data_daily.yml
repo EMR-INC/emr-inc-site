@@ -23,6 +23,8 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    outputs:
+      publish_site: ${{ steps.window.outputs.run == 'true' && (steps.commit.outputs.pushed == 'true' || github.event_name != 'schedule') }}
     steps:
       - uses: actions/checkout@v4
 
@@ -84,4 +86,11 @@ jobs:
           git push
           echo "pushed=true" >> "$GITHUB_OUTPUT"
 
-      # The private EMR website publisher packages reviewed public main commits.
+  integrated_site:
+    needs: publish
+    if: github.ref == 'refs/heads/main' && needs.publish.outputs.publish_site == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/publish-integrated.yml
+    secrets:
+      deploy_token: ${{ secrets.VERCEL_TOKEN }}
