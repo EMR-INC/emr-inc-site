@@ -10,7 +10,7 @@ PAGES={'index.html','contact.html','lab.html','play.html','dispatch-views.html',
        'data/dispatch-views.json','data/research.json','open-data.html','research.html'}
 PUBLISHER={'.github/workflows/dispatch-views.yml','.github/workflows/open_data_daily.yml',
            '.github/workflows/publish-integrated.yml','.github/publisher/restore.py',
-           '.github/publisher/check.mjs','.github/publisher/verify_public.py','.github/publisher/release-lock.json'}
+           '.github/publisher/check.mjs','.github/publisher/verify_public.py','.github/publisher/reviewed-release-lock.json','.github/publisher/release-lock.json'}
 
 def git(*args):
     return subprocess.check_output(['git',*args])

@@ -63,7 +63,7 @@ def validate_static(output):
 def restore(output, source, get=api):
     if source!='emr-inc.net' and not re.fullmatch('dpl_[A-Za-z0-9]+', source):
         raise ValueError('Invalid deployment identifier')
-    lock=json.loads(LOCK.read_bytes())
+    locks=[json.loads(p.read_bytes()) for p in (LOCK,LOCK.with_name('reviewed-release-lock.json'))]
     metadata=get('/v13/deployments/'+source)
     identifier=metadata['id']
     if (not re.fullmatch('dpl_[A-Za-z0-9]+',identifier) or metadata.get('projectId')!=PROJECT
@@ -73,8 +73,10 @@ def restore(output, source, get=api):
         raise ValueError('Source must be a private-source ready production deployment in this project')
     rows=list(members(get('/v6/deployments/'+identifier+'/files')))
     files=dict(rows)
-    if len(files)!=len(rows) or files.keys()!=lock['members'].keys():
+    candidates=[lock for lock in locks if files.keys()==lock['members'].keys()]
+    if len(files)!=len(rows) or len(candidates)!=1:
         raise ValueError('Deployment lacks the approved workload function inventory')
+    lock=candidates[0]
     validate_static(output)
     config=json.loads((output/'config.json').read_bytes())
     canonical=json.dumps(config['routes'],sort_keys=True,separators=(',',':')).encode()
