@@ -12,6 +12,26 @@ PUBLISHER={'.github/workflows/dispatch-views.yml','.github/workflows/open_data_d
            '.github/workflows/publish-integrated.yml','.github/publisher/restore.py',
            '.github/publisher/check.mjs','.github/publisher/verify_public.py','.github/publisher/reviewed-release-lock.json','.github/publisher/release-lock.json'}
 
+PUBLISHER.add('.github/publisher/test_static.py')
+# Only the site itself belongs in the static output. Verification still checks each
+# included file against the reviewed Git revision, before restoring private functions.
+SITE_FILES = PAGES | {
+    'dispatch-views.js', 'reveal.js', 'member-research.html', 'open-data/index.html',
+    'research/index.html', 'internal/research.html',
+    'data/nfirs-hour-of-day.json', 'data/nfirs-incident-composition.json',
+}
+MEDIA_SUFFIXES = {
+    'assets': {'.jpg', '.jpeg', '.png', '.svg', '.pdf', '.webp', '.json', '.css', '.js',
+               '.mp4', '.avif', '.ico', '.gif'},
+    'play': {'.png', '.txt', '.js', '.css', '.mp3', '.jpeg', '.html'},
+}
+
+def site_file(path):
+    if any(part.startswith('.') for part in path.parts):
+        return False
+    return (path.as_posix() in SITE_FILES or
+            len(path.parts) > 1 and path.suffix.lower() in MEDIA_SUFFIXES.get(path.parts[0], set()))
+
 def git(*args):
     return subprocess.check_output(['git',*args])
 
@@ -28,20 +48,38 @@ def verify():
             raise ValueError('Unexpected tracked file type')
 
 def static(output):
+    root = Path.cwd().resolve()
+    if output.resolve() != root / '.vercel/output/static' or any(
+            (root / part).is_symlink() for part in ('.vercel', '.vercel/output', '.vercel/output/static')):
+        raise ValueError('Unexpected static build directory')
     tree={}
     for row in git('ls-tree','-r','-z','HEAD').split(b'\0'):
         if row:
             meta,name=row.split(b'\t',1)
             tree[name.decode()]=meta.split()[-1]
-    for p in output.rglob('*'):
-        if p.is_symlink():raise ValueError('Linked output')
+    paths = list(output.rglob('*'))
+    if any(p.is_symlink() for p in paths):
+        raise ValueError('Linked output')
+    included = set()
+    discarded = []
+    for p in paths:
         if p.is_file():
+            if not site_file(p.relative_to(output)):
+                discarded.append(p)
+                continue
+            included.add(p.relative_to(output).as_posix())
             b=p.read_bytes()
             blob=hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest().encode()
             if tree.get(p.relative_to(output).as_posix())!=blob:
                 raise ValueError('Public output outside reviewed Git content')
-    if not all((output/n).is_file() for n in ('index.html','open-data.html','data/dispatch-views.json','research.html')):
+    expected = {name for name in tree if site_file(Path(name))}
+    if included != expected or not {'index.html', 'open-data.html', 'data/dispatch-views.json', 'research.html'} <= included:
         raise ValueError('Public edition incomplete')
+    for p in discarded:
+        p.unlink()
+    for p in sorted((p for p in paths if p.is_dir()), key=lambda p: len(p.parts), reverse=True):
+        if not any(p.iterdir()):
+            p.rmdir()
 
 if __name__=='__main__':
     verify()
