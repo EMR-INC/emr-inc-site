@@ -12,7 +12,7 @@ PUBLISHER={'.github/workflows/dispatch-views.yml','.github/workflows/open_data_d
            '.github/workflows/publish-integrated.yml','.github/publisher/restore.py',
            '.github/publisher/check.mjs','.github/publisher/verify_public.py','.github/publisher/reviewed-release-lock.json','.github/publisher/release-lock.json'}
 
-PUBLISHER.add('.github/publisher/test_static.py')
+PUBLISHER.update({'.github/publisher/test_static.py', '.github/workflows/verify-ohpah-seed.yml'})
 # Only the site itself belongs in the static output. Verification still checks each
 # included file against the reviewed Git revision, before restoring private functions.
 SITE_FILES = PAGES | {
