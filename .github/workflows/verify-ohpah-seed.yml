@@ -1,0 +1,61 @@
+name: Verify protected reviewed gateway
+on: workflow_dispatch
+permissions: {}
+jobs:
+  verify:
+    if: github.repository == 'EMR-INC/emr-inc-site' && github.ref == 'refs/heads/main' && github.run_attempt == '1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Verify three management reads without checkout or publication
+        shell: python
+        env:
+          DEPLOY_IDENTITY: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          import base64, datetime, hashlib, json, os, sys
+          from urllib import request
+          token = os.environ.pop('DEPLOY_IDENTITY', '')
+          if not token or datetime.datetime.now(datetime.timezone.utc).date().isoformat() != '2026-11-26':
+              sys.exit('Missing deployment identity or expired verification window')
+          team = 'team_rwxqo0kDlEjDlDdXAJv9y7e6'
+          project = 'prj_kiJjgBMbwd070fbCefZ3zz1Uv9E4'
+          deployment = 'dpl_5a6cc8pNacMNsUegFULtrdsVCc28'
+          prefix = 'src/.vercel/output/functions/api/ohpah-gateway.func/'
+          class NoRedirect(request.HTTPRedirectHandler):
+              def redirect_request(self, *args):
+                  return None
+          def get(path):
+              req = request.Request('https://api.vercel.com' + path + '?teamId=' + team,
+                                    headers={'Authorization':'Bearer ' + token})
+              with request.build_opener(NoRedirect()).open(req, timeout=15) as response:
+                  body = response.read(4000001)
+                  if len(body)>4000000: raise ValueError('response limit')
+                  return json.loads(body)
+          def walk(nodes, parent=''):
+              for node in nodes:
+                  name = node['name']
+                  if name in ('.','..') or '/' in name or not name: raise ValueError('invalid path')
+                  path = parent + name
+                  if node['type']=='directory':
+                      yield from walk(node['children'],path+'/')
+                  elif path.startswith(prefix):
+                      if node['type']!='file': raise ValueError('unexpected member')
+                      yield path[len(prefix):],node['uid']
+          try:
+              d = get('/v13/deployments/' + deployment)
+              assert (d['id'],d['projectId'],d['ownerId'],d['readyState'],d['target'],d['public']) == (
+                  deployment,project,team,'READY','production',False)
+              assert d['meta']['publicRevision']=='902c05fc857d1340ce413b7f85624034a5d12193' and not d['alias']
+              print('CHECK 1: correct protected, unaliased, ready seed and public revision',flush=True)
+              rows = list(walk(get('/v6/deployments/'+deployment+'/files')))
+              files = dict(rows)
+              assert len(rows)==len(files)==58
+              assert hashlib.sha256(json.dumps(files,sort_keys=True,separators=(',',':')).encode()).hexdigest()=='ef3932dd7efce2e93cbd0bb750cffc7452fe97139de597a69058ee42e3f6f1b5'
+              print('CHECK 2: all 58 filenames and provider content identifiers match the sealed function',flush=True)
+              uid = files['api/_lib/ohpah/style.mjs']
+              assert len(uid)==40 and all(c in '0123456789abcdef' for c in uid)
+              raw = base64.b64decode(get('/v8/deployments/'+deployment+'/files/'+uid)['data'],validate=True)
+              assert len(raw)==1980 and hashlib.sha256(raw).hexdigest()=='f34f6ecda9d88f87bfbbb66cec90a585f876c9f75960d69c2428a8a735ccfd3e'
+              print('CHECK 3: pinned 1,980-byte style file retrieved and digest verified',flush=True)
+          except Exception as e:
+              sys.exit('Verification stopped: '+type(e).__name__+' status '+str(getattr(e,'code','unavailable')))
