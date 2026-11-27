@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 BASE='32c5d713011b4ab0178961dbde481d80a85a1ebd'
-PAGES={'index.html','contact.html','lab.html','play.html','dispatch-views.html','styles.css',
+PAGES={'index.html','contact.html','lab.html','play.html','dispatch-views.html','styles.css','canary.html',
        'data/dispatch-views.json','data/research.json','open-data.html','research.html'}
 PUBLISHER={'.github/workflows/dispatch-views.yml','.github/workflows/open_data_daily.yml',
            '.github/workflows/publish-integrated.yml','.github/publisher/restore.py',
