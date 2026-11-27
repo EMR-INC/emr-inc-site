@@ -1,0 +1,255 @@
+# Field Notes sender
+
+Google Apps Script, bound to the **EMR Contact CRM** sheet
+(`1AXD1l_d2LNnsSjDNyqcvgb8-0scMnQT6jbSIe7UVSRs`).
+
+## Why Apps Script and not the Gmail API
+
+The Gmail API path strips every `<img>` tag out of the HTML it sends. Three test
+sends confirmed it: reading each message back showed the element absent from the
+stored body, not merely unloaded, with a CID attachment, with a GitHub raw URL,
+and with the figure served from emr-inc.net. The same sanitizer drops
+`role="presentation"` and `opacity:0`, and rewrites `href="#"` to
+`javascript:void(0)`.
+
+`MailApp` does not sanitize. The email arrives as built.
+
+## It is weekly, and nothing about an issue lives in the code
+
+An issue is **one row on a sheet plus two files in a Drive folder**. There is no
+issue id in `Code.gs`, no pasted Drive file ids, and no code edit between weeks.
+
+The `Field Notes Issues` sheet:
+
+| Issue | Subject | Send on | Status | Sent | Last run |
+| --- | --- | --- | --- | --- | --- |
+| `issue-01` | Your engine has a better file than your firefighters | 2026-10-06 | | | |
+| `issue-02` | The 3.84 false alarms you run for every fire | 2026-10-13 | | | |
+
+The files, in the **Field Notes issues** Drive folder
+(`1uctXc8UgDpEZLHOUkf285UWeIWTAlpZf`), named by convention:
+
+    field-notes-issue-01.html
+    field-notes-issue-01.txt
+    field-notes-issue-01.png             the figure, optional
+    field-notes-issue-01-header.jpg      the masthead, optional (.jpg .jpeg .png)
+
+## The figure rides inside the message
+
+`<img src="cid:figure">`, attached per message, not linked to a hosted file.
+Two things went wrong with the hosted version and both are invisible from the
+sending end.
+
+The url was never published. `assets/` pushed to `main` does not reach
+emr-inc.net: the site deploys only from the `open_data_daily` workflow, which
+fires on a schedule or on pushes touching three unrelated paths. The figure sat
+on `main`, 404ing, while the email pointed at it.
+
+And a working url would still be blocked by default in Gmail and Outlook for a
+large share of recipients. An inline image carries no tracking risk, so clients
+show it without asking.
+
+`importFigure()` pulls the png into the folder so nobody has to find the file
+and drag it in. No argument means the newest issue, since the editor's Run button
+cannot pass one. The source url per issue is `CONFIG.FIGURE_SOURCE`.
+
+It fetches from raw.githubusercontent.com, which sends
+`content-security-policy: default-src 'none'; sandbox`. That header is why the
+raw url cannot be an `<img>` src: it stops a browser rendering it. `UrlFetchApp`
+is a server side fetch, so the header does not apply and the bytes come back
+fine. The png then lives in Drive, and nothing at send time depends on GitHub.
+
+It verifies what came back rather than trusting a 200, because a redirect to a
+login or error page is also a 200 with a body, and saved as a .png it would be a
+broken image in 127 inboxes with nothing downstream to catch it. Non 200, empty,
+or anything whose first eight bytes are not the PNG magic number is refused and
+nothing is written. An existing copy is trashed first, since two files of one
+name is a refusal at send time.
+
+The masthead works the same way and is found under any of `.jpg`, `.jpeg` or
+`.png`, because a header comes out of an image tool rather than a build script
+and insisting on one extension would mean renaming a file every week.
+
+It sits above the wordmark rather than replacing it. The publication name and
+issue number stay as live text, so a recipient with images off still knows what
+this is and which issue, and a screen reader reads a name rather than a filename.
+
+A header is refused above `HEADER_MAX_BYTES`, 1,200,000. That is not a client
+limit, since Gmail's clip is on the HTML part and does not count attachments. It
+is because the thing ships 127 times: the first header uploaded was a 7,253,033
+byte full resolution render, which is 921 MB of outbound mail and over the 25 MB
+MailApp allows per message. Keep the full resolution file if you want it, named
+so it cannot match the convention.
+
+The sender refuses if the two disagree: a `cid:` reference with no png is a
+broken image in every inbox, and a png nothing references is dead weight on 127
+messages. A figure is optional, so an issue with no png and no `cid:` reference
+is fine.
+
+Shipping next week is: build it, drop two files in the folder, type one row.
+
+`Status` is the control. Blank means ready. `hold` or `skip` means leave it
+alone. `sending` means a run was cut short by the mail quota and a catch up is
+booked. `sent` is written by the script when the issue is complete, and is what
+stops it going out twice. `Sent` and `Last run` are written by the script.
+
+Lookup is by filename rather than by a pasted file id on purpose. A hardcoded id
+is one more thing to edit every week, and getting it wrong sends last week's
+email to the whole list.
+
+## Setup
+
+1. Open the CRM sheet, Extensions, Apps Script. Paste `Code.gs`.
+2. Run `setup()` once. It creates the log, unsubscribe and issues sheets and
+   generates the HMAC secret used to sign unsubscribe links.
+3. Already done, deployed 2026-10-05. `WEBAPP_URL` holds the live endpoint.
+   Access must be **anyone**, not "anyone with a Google account": recipients
+   clicking unsubscribe from a work address are not signed in to Google.
+
+   To change the code behind that url later, update the deployment **in place**:
+   Deploy, Manage deployments, pencil, Version: **New version**. A second *New
+   deployment* mints a different url, and every unsubscribe link in an already
+   sent issue would point at the old one.
+4. Nothing left to fill. `POSTAL_ADDRESS` is the registered agent address on the
+   Delaware filing, and `REPLY_TO`, `SITE_URL`, `ISSUES_FOLDER_ID` and
+   `WEBAPP_URL` are all set.
+5. Run `listIssues()`. It prints the schedule and, for each row, whether both
+   parts are actually in the folder yet. Run it before a send date, not after.
+6. Run `sendTestToSelf()`. Confirm the figure renders and the unsubscribe link
+   works.
+
+   The editor's Run button cannot pass arguments, so every function meant to be
+   run from it takes none. `sendTestToSelf()` with no argument tests the newest
+   row on the issues sheet, whatever its date or status, which is the state an
+   issue is actually in when you want to test it: on hold, no date set.
+
+   `sendIssueNow('issue-02')` is the deliberate exception. It still requires an
+   argument, so that a real send to the whole list is not one misclick away in
+   the editor.
+7. Run `dryRunNextIssue()` and read the log sheet. It runs every gate and every
+   selection decision, writes nothing to the issues sheet and sends nothing.
+8. Set `DRY_RUN: false`, then run `installWeeklyTrigger()`.
+
+Day and hour come from `SEND_WEEKDAY` and `SEND_HOUR`. Apps Script time triggers
+are not to the minute: `atHour(9)` means some time in the 9am hour, in the
+script's timezone. `installWeeklyTrigger()` clears the old trigger first, so it
+is safe to run again after changing either. `uninstallTriggers()` stops the
+weekly send without touching anything else.
+
+### What happens on a firing
+
+`sendScheduledIssue()` takes the **oldest** issue whose send date has passed and
+whose status is not `sent`, `hold` or `skip`, and sends it. When nothing is due
+it logs that and returns. That matters: an unconditional throw would mail a
+Google error report every single week.
+
+A missed week is not skipped. The date is a "not before", so an issue whose date
+passed while the trigger was off goes out on the next firing.
+
+`sendIssueNow('issue-02')` sends a named issue immediately, ignoring its date.
+
+## What it refuses to do
+
+`assertSendable_()` throws rather than send when any of these is missing:
+
+- `POSTAL_ADDRESS`. CAN-SPAM, 15 USC 7704(a)(5), requires a valid physical
+  postal address in every commercial message.
+- `WEBAPP_URL`, or the `{{UNSUBSCRIBE_URL}}` placeholder in either part. Without
+  both, recipients have no way out. The token on the link is an HMAC of the
+  address, so it is per recipient, not guessable, and stays valid across issues:
+  an unsubscribe link in a year old email still works.
+- `REPLY_TO`. A bulk send needs a monitored reply address.
+- The scope guard. If "Florida only" and "not a national record" are not both in
+  the HTML, the email states a Florida finding with nothing marking it as one.
+  This check lives in the sender rather than in one issue's build script because
+  it has to hold for every issue drawing on that table, including ones written
+  months from now.
+- A `Subject` on the issue's row, and both parts present in the Drive folder. A
+  duplicate filename in the folder is also a refusal: there is no way to tell
+  which of two `field-notes-issue-02.html` files was the one you meant.
+- A complete header row on the issues sheet. Headers are read by name and checked
+  before the empty check, so a renamed column fails loudly instead of reading as
+  "nothing due" and quietly skipping a Tuesday.
+
+Each of those was checked by removing it and confirming the send is refused,
+rather than by reading the code: eight refusals plus the positive case.
+
+It also dedupes on lowercased email, skips malformed addresses, skips anyone on
+the unsubscribe sheet, and skips anyone already logged `sent` **for this issue**,
+so a re-run after a failure resumes rather than double sending.
+
+## Dry run against the real sheet, 2026-10-05
+
+127 deliverable contacts out of 128 rows. No blanks, no malformed addresses, no
+duplicates. One exclusion, covered below.
+
+| Source | Count | Line they get |
+| --- | --- | --- |
+| `Off-Road Transport Survey` | 105 | took part in the off road transport survey |
+| `MyLEADS Mobile` | 21 | we met at EMS World Expo |
+| `Contact form` | 1 | contacted EMR Inc. through our website |
+
+**The EMS World cohort carries Source `MyLEADS Mobile`**, the badge scanner used
+at the booth, not the string "EMS World". That is why the map is filled from a
+dry run rather than from a guess.
+
+Row 102 to 128 is close but not exact: that range holds 20 MyLEADS rows, 5 survey
+rows and 1 contact form row, and a 21st MyLEADS row sits at 129. Source is the
+reliable discriminator, not the row number.
+
+## The list is more than one cohort
+
+A single hardcoded "why you are getting this" sentence would be a false statement
+to one group or the other, so the line is per recipient: `{{WHY_YOU_GET_THIS}}` is filled from the CRM `Source`
+column through the `PROVENANCE` map in `CONFIG`.
+
+Matching is a case insensitive substring test, so `EMS World`, `EMS World Expo
+2026` and `ems world expo booth scan` all resolve to the same line. Anything
+unmatched falls back to `PROVENANCE_DEFAULT` rather than failing the send.
+
+The first dry run logs every distinct `Source` value it saw with a count, and
+names any that fell through to the default. Fill `PROVENANCE` from that output
+rather than from a guess about what the cells contain.
+
+## One contact is excluded outright
+
+Row 107 came through the contact form with Consent reading
+**"Not given (box not checked)"**. That is an explicit refusal, so
+`consentRefused_()` drops them before anything else is considered. "Not recorded"
+is treated differently: it means the question was never asked, which is not the
+same as a no.
+
+Of 128 rows, exactly **one** reads "Yes".
+
+## The consent problem, which is not a code problem
+
+Column Q of every row in `Contacts` reads **"Not recorded (survey did not ask)"**.
+
+The survey cohort gave an address to answer questions about stretchers in
+September 2025. None of them asked for a newsletter. The EMS World rows are a
+different and generally stronger basis, since handing over a badge at a booth is
+a deliberate act, but check how that consent was captured before leaning on it.
+
+US CAN-SPAM does not require prior consent, so a send with a working unsubscribe
+and a postal address is lawful. That is a floor, not a judgment. The footer says
+plainly why they are receiving it, which is the least that is owed and is also
+what keeps spam complaints down. Anyone on the list outside the US, or any future
+contact from a jurisdiction with an opt in rule, is a different question and this
+script does not answer it.
+
+`docs/limits.md` in the design repo requires a human who knows the category to
+approve anything external before it ships. This script does not clear anything.
+
+## Quota
+
+`MailApp` allows 1,500 recipients a day on Workspace and 100 on a consumer
+account. `MAX_PER_RUN` defaults to 90 so a consumer account cannot overrun, and
+the script also reads `MailApp.getRemainingDailyQuota()` and takes the lower of
+the two.
+
+On a consumer account the current list does not fit in one run, so the send is
+resumable. A run that cannot finish marks the issue `sending`, books a one shot
+catch up trigger about 25 hours out, and the catch up run picks up where it left
+off: anyone already logged `sent` for that issue is skipped. Simulated against
+the real 127 contact list with a 90 cap, it goes 90 then 37, 127 distinct
+addresses, no duplicates, and the week after that correctly finds nothing due.
