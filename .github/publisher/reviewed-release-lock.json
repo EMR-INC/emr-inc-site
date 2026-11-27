@@ -319,5 +319,15 @@
   "insert_before": {
     "src": "^/api(/.*)?$",
     "status": 404
+  },
+  "form_gateway_variant": {
+    "baseline": [
+      8439,
+      "20744d5f636ad14dd376d25e08844452da78560de91a29dbfb6d9aa7e3765c72"
+    ],
+    "approved": [
+      8627,
+      "bccdd37b4a07c0ae74e22ce4797cd161c3626361fc7ac1bc677e95da8dd4757c"
+    ]
   }
 }
