@@ -7,14 +7,12 @@ from pathlib import Path
 
 BASE='32c5d713011b4ab0178961dbde481d80a85a1ebd'
 PAGES={'index.html','contact.html','lab.html','play.html','dispatch-views.html','styles.css',
-       'data/dispatch-views.json','data/research.json','open-data.html','research.html',
-       'canary.html'}
+       'data/dispatch-views.json','data/research.json','open-data.html','research.html'}
 PUBLISHER={'.github/workflows/dispatch-views.yml','.github/workflows/open_data_daily.yml',
            '.github/workflows/publish-integrated.yml','.github/publisher/restore.py',
            '.github/publisher/check.mjs','.github/publisher/verify_public.py','.github/publisher/reviewed-release-lock.json','.github/publisher/release-lock.json'}
 
-PUBLISHER.update({'.github/publisher/test_static.py', '.github/workflows/verify-ohpah-seed.yml',
-                  '.github/publisher/test_restore_variant.py', '.github/publisher/test_canary_page.py'})
+PUBLISHER.update({'.github/publisher/test_static.py', '.github/workflows/verify-ohpah-seed.yml'})
 # Only the site itself belongs in the static output. Verification still checks each
 # included file against the reviewed Git revision, before restoring private functions.
 SITE_FILES = PAGES | {
@@ -37,16 +35,13 @@ def site_file(path):
 def git(*args):
     return subprocess.check_output(['git',*args])
 
-def reviewed_input(name):
-    return name in PUBLISHER|PAGES or bool(re.fullmatch(
-        r'assets/(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-][A-Za-z0-9_.-]*\.(?:png|jpe?g|webp|gif|avif|ico|css)',name))
-
 def verify():
     subprocess.run(['git','merge-base','--is-ancestor',BASE,'HEAD'],check=True)
     changed=git('diff','--no-renames','--name-only','-z',BASE,'HEAD').split(b'\0')
     for raw in filter(None,changed):
         name=raw.decode()
-        if not reviewed_input(name):
+        if name not in PUBLISHER|PAGES and not re.fullmatch(
+                r'assets/(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-][A-Za-z0-9_.-]*\.(?:png|jpe?g|webp|gif|avif|ico|css)',name):
             raise ValueError('A changed public build input needs release review')
         row=git('ls-tree','HEAD','--',name)
         if row and not row.startswith(b'100644 blob '):
